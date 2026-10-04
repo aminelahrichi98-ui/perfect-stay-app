@@ -1,0 +1,184 @@
+@import "tailwindcss";
+
+/*
+  Perfect Stay — design system
+  Direction : conciergerie haut de gamme. Aubergine très foncé pour la structure,
+  bordeaux pour l'action, fond crème légèrement teinté pour que les écrans restent
+  calmes en pleine journée sur téléphone comme sur ordinateur.
+*/
+@theme {
+  /* Aubergine : structure, menu, texte */
+  --color-aub-950: oklch(0.15 0.04 335);
+  --color-aub-900: oklch(0.2 0.05 335);
+  --color-aub-800: oklch(0.26 0.058 335);
+  --color-aub-700: oklch(0.34 0.07 335);
+  --color-aub-300: oklch(0.78 0.04 335);
+  --color-aub-200: oklch(0.87 0.025 335);
+
+  /* Bordeaux : actions principales */
+  --color-wine-800: oklch(0.34 0.12 12);
+  --color-wine-700: oklch(0.4 0.14 12);
+  --color-wine-600: oklch(0.46 0.155 12);
+  --color-wine-500: oklch(0.54 0.16 12);
+  --color-wine-100: oklch(0.94 0.03 12);
+  --color-wine-50: oklch(0.97 0.014 12);
+
+  /* Surfaces et texte */
+  --color-canvas: oklch(0.972 0.007 340);
+  --color-surface: oklch(0.995 0.003 340);
+  --color-sunken: oklch(0.945 0.01 340);
+  --color-line: oklch(0.9 0.012 340);
+  --color-line-strong: oklch(0.82 0.02 340);
+  --color-ink: oklch(0.22 0.035 335);
+  --color-ink-2: oklch(0.4 0.03 335);
+  --color-ink-3: oklch(0.5 0.025 335);
+
+  /* États */
+  --color-ok: oklch(0.45 0.12 155);
+  --color-ok-bg: oklch(0.95 0.045 155);
+  --color-warn: oklch(0.45 0.1 70);
+  --color-warn-bg: oklch(0.95 0.06 85);
+  --color-danger: oklch(0.45 0.17 27);
+  --color-danger-bg: oklch(0.95 0.035 27);
+
+  --font-sans: var(--font-corps), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-titre), ui-sans-serif, system-ui, sans-serif;
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --shadow-card: 0 1px 0 oklch(0.2 0.05 335 / 0.04), 0 1px 2px oklch(0.2 0.05 335 / 0.06);
+  --shadow-pop: 0 12px 32px -8px oklch(0.2 0.05 335 / 0.28), 0 2px 6px oklch(0.2 0.05 335 / 0.1);
+}
+
+html {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 5rem;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  min-height: 100dvh;
+}
+
+/* Chiffres alignés : montants et dates se lisent en colonne */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: var(--color-wine-100);
+  color: var(--color-wine-800);
+}
+
+/* Focus clavier toujours visible */
+:focus-visible {
+  outline: 2px solid var(--color-wine-500);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Retour tactile : tout élément cliquable réagit à la pression */
+.press {
+  transition: transform 160ms var(--ease-out), background-color 160ms ease, border-color 160ms ease,
+    color 160ms ease, box-shadow 160ms ease;
+}
+.press:active:not(:disabled):not([aria-disabled="true"]) {
+  transform: scale(0.97);
+}
+
+/* Apparition douce des pages et des blocs (jamais sur les actions clavier répétées) */
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.enter {
+  animation: enter 280ms var(--ease-out) both;
+  animation-delay: calc(var(--i, 0) * 45ms);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--color-sunken) 30%, var(--color-surface) 50%, var(--color-sunken) 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 8px;
+}
+
+/* Cases à cocher et boutons radio aux couleurs de la marque */
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--color-wine-600);
+}
+
+/* Survol uniquement sur les appareils qui en ont un (pas de faux survol au toucher) */
+@media (hover: none) {
+  .hover-only {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enter {
+    animation: none;
+  }
+  .press:active:not(:disabled) {
+    transform: none;
+  }
+  .skeleton {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Menu du téléphone : monte du bas de l'écran */
+@keyframes monte {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes fondu {
+  from {
+    opacity: 0;
+  }
+}
+dialog.feuille[open] {
+  animation: monte 300ms var(--ease-drawer);
+}
+dialog.feuille[open]::backdrop {
+  animation: fondu 200ms ease-out;
+}
