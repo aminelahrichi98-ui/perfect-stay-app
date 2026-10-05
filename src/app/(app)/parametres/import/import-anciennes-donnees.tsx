@@ -31,7 +31,7 @@ export function ImportAnciennesDonnees({ verifierEtat = etatImport }: Props) {
   const [deja, setDeja] = useState<Deja>({ logements: new Set(), transactions: new Set() });
   const [erreur, setErreur] = useState<string>();
   const [collage, setCollage] = useState("");
-  const [hypothese, setHypothese] = useState<Hypothese>("recu");
+  const [hypothese, setHypothese] = useState<Hypothese>("encaisse");
   const [tauxSaisis, setTauxSaisis] = useState<Record<string, string>>({});
   const [verifie, setVerifie] = useState(false);
   const [phase, setPhase] = useState<"attente" | "import" | "photos" | "fini">("attente");
@@ -61,7 +61,7 @@ export function ImportAnciennesDonnees({ verifierEtat = etatImport }: Props) {
       return;
     }
     setDeja({ logements: new Set(etat.logements), transactions: new Set(etat.transactions) });
-    setTauxSaisis(Object.fromEntries(sansPhotos.logements.map((l) => [l.id, String(TAUX_COMMISSION_DEFAUT)])));
+    setTauxSaisis(Object.fromEntries(sansPhotos.logements.map((l) => [l.id, String(l.tauxCommission ?? TAUX_COMMISSION_DEFAUT).replace(".", ",")])));
     setVerifie(false);
     setPhase("attente");
     setResultat(null);
@@ -73,7 +73,8 @@ export function ImportAnciennesDonnees({ verifierEtat = etatImport }: Props) {
     for (const [id, v] of Object.entries(tauxSaisis)) t[id] = versTaux(v);
     return t;
   }, [tauxSaisis]);
-  const tauxInvalide = Object.entries(taux).some(([id, t]) => !deja.logements.has(id) && !(t >= 0 && t <= 100));
+  const tauxMini = hypothese === "encaisse" ? 0.01 : 0; // pour retrouver le montant reçu, le taux ne peut pas être nul
+  const tauxInvalide = Object.entries(taux).some(([id, t]) => !deja.logements.has(id) && !(t >= tauxMini && t <= 100));
 
   const apercu = useMemo(() => {
     if (!donnees || tauxInvalide) return null;
@@ -168,7 +169,7 @@ export function ImportAnciennesDonnees({ verifierEtat = etatImport }: Props) {
               {[
                 { label: "Logements", valeur: String(apercu.nbLogements), note: nbDejaLogements ? `${nbDejaLogements} déjà importé(s)` : "" },
                 { label: "Versements", valeur: String(apercu.nbTransactions), note: nbDejaTransactions ? `${nbDejaTransactions} déjà importé(s)` : "" },
-                { label: "Total des montants reçus", valeur: formatMad(apercu.totalMontantRecu), note: "" },
+                { label: "Montants reçus reconstitués", valeur: formatMad(apercu.totalMontantRecu), note: "Ce que les plateformes ont versé, ménage compris" },
               ].map((c) => (
                 <div key={c.label} className="rounded-xl border border-line bg-sunken/50 p-4">
                   <dt className="text-sm text-ink-2">{c.label}</dt>
@@ -177,6 +178,26 @@ export function ImportAnciennesDonnees({ verifierEtat = etatImport }: Props) {
                 </div>
               ))}
             </dl>
+            <div
+              className={cn(
+                "rounded-xl border p-4",
+                apercu.totalEncaisseRecalcule === apercu.totalMontantAncien ? "border-ok/25 bg-ok-bg" : "border-line bg-sunken/50",
+              )}
+            >
+              <p className="text-sm font-medium">Contrôle : total encaissé par Perfect Stay</p>
+              <p className="num mt-1 text-sm text-ink-2">
+                Ancienne app : <strong className="text-ink">{formatMad(apercu.totalMontantAncien)}</strong>
+                {" · "}
+                Après recalcul : <strong className="text-ink">{formatMad(apercu.totalEncaisseRecalcule)}</strong>
+              </p>
+              <p className="mt-1 text-[0.82rem] text-ink-3">
+                {apercu.totalEncaisseRecalcule === apercu.totalMontantAncien
+                  ? "Les deux totaux sont identiques : le recalcul est cohérent avec l'ancienne app."
+                  : hypothese === "encaisse"
+                    ? "Ces deux totaux devraient être identiques. Vérifiez les taux saisis à l'étape 3."
+                    : "Avec cette réponse, les totaux diffèrent naturellement : vérifiez les exemples ci-dessous."}
+              </p>
+            </div>
             {apercu.avertissements.map((w) => (
               <Notice key={w} ton="info">
                 {w}
@@ -189,7 +210,7 @@ export function ImportAnciennesDonnees({ verifierEtat = etatImport }: Props) {
               <h3 className="font-display text-lg font-semibold tracking-tight">2. Que représentait le « montant » dans l&apos;ancienne app ?</h3>
               <p className="mt-0.5 text-sm text-ink-2">Choisissez la bonne réponse : les calculs ci-dessous changent sous vos yeux.</p>
             </div>
-            <div role="radiogroup" className="grid gap-3 sm:grid-cols-2">
+            <div role="radiogroup" className="grid gap-3 lg:grid-cols-3">
               {HYPOTHESES.map((h) => (
                 <label
                   key={h.value}
@@ -236,7 +257,7 @@ export function ImportAnciennesDonnees({ verifierEtat = etatImport }: Props) {
                         onChange={(e) => setTauxSaisis((s) => ({ ...s, [l.id]: e.target.value }))}
                         inputMode="decimal"
                         disabled={existant}
-                        aria-invalid={!existant && !(taux[l.id] >= 0 && taux[l.id] <= 100)}
+                        aria-invalid={!existant && !(taux[l.id] >= tauxMini && taux[l.id] <= 100)}
                         className="num h-10 text-right"
                       />
                     </Field>
