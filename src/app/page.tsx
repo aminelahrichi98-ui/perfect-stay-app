@@ -7,6 +7,6 @@ export default async function Accueil() {
   const u = await getUtilisateur();
   if (!u || !u.actif) redirect("/connexion");
   if (u.type === "proprietaire") redirect("/espace-proprietaire");
-  const premier = modulesVisibles(u)[0];
+  const premier = modulesVisibles(u).find((k) => !MODULE_BY_KEY[k].masque);
   redirect(premier ? MODULE_BY_KEY[premier].href : "/acces-refuse");
 }

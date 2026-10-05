@@ -35,6 +35,12 @@ function lireDroits(formData: FormData): Droits {
   return droits;
 }
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function lireLogements(formData: FormData) {
+  return formData.getAll("logements").map(String).filter((v) => UUID.test(v));
+}
+
 function lireIdentite(formData: FormData) {
   const prenom = String(formData.get("prenom") ?? "").trim();
   const nom = String(formData.get("nom") ?? "").trim();
@@ -99,7 +105,12 @@ export async function creerUtilisateur(_: EtatAction, formData: FormData): Promi
   }));
   const { error: erreurDroits } = lignes.length ? await admin.from("permissions").insert(lignes) : { error: null };
 
-  if (erreurProfil || erreurDroits) {
+  const rattaches = type === "proprietaire" && peutModifier(moi, "logements") ? lireLogements(formData) : [];
+  const { error: erreurLiens } = rattaches.length
+    ? await admin.from("logement_proprietaires").insert(rattaches.map((logement_id) => ({ logement_id, user_id: id })))
+    : { error: null };
+
+  if (erreurProfil || erreurDroits || erreurLiens) {
     await admin.auth.admin.deleteUser(id); // on annule tout : pas de compte à moitié créé
     return { erreur: "Le compte n'a pas pu être créé. Rien n'a été enregistré, vous pouvez réessayer." };
   }
@@ -148,6 +159,16 @@ export async function modifierUtilisateur(id: string, _: EtatAction, formData: F
   if (lignes.length) {
     const { error } = await admin.from("permissions").insert(lignes);
     if (error) return { erreur: "Les droits n'ont pas pu être enregistrés. Réessayez avant de quitter cette page." };
+  }
+
+  // Rattachement aux logements : seulement par quelqu'un qui a le droit de modifier les logements
+  if (peutModifier(moi, "logements")) {
+    await admin.from("logement_proprietaires").delete().eq("user_id", id);
+    const rattaches = type === "proprietaire" ? lireLogements(formData) : [];
+    if (rattaches.length) {
+      const { error } = await admin.from("logement_proprietaires").insert(rattaches.map((logement_id) => ({ logement_id, user_id: id })));
+      if (error) return { erreur: "Les logements rattachés n'ont pas pu être enregistrés. Réessayez." };
+    }
   }
 
   revalidatePath("/parametres");
