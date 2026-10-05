@@ -11,7 +11,7 @@ export default async function Dashboard() {
   const u = await exigerAcces("dashboard");
   const moment = momentDeLaJournee();
   const salut = moment === "soir" ? "Bonsoir" : "Bonjour";
-  const modules = modulesVisibles(u).filter((k) => k !== "dashboard");
+  const modules = modulesVisibles(u).filter((k) => k !== "dashboard" && !MODULE_BY_KEY[k].masque);
 
   return (
     <>

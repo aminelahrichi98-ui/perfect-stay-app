@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Badge, Card, Notice } from "@/components/ui";
-import { exigerAcces } from "@/lib/auth";
+import { exigerAcces, peutModifier } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { isModuleKey, type Droits } from "@/lib/modules";
 import { modifierUtilisateur } from "../../actions";
@@ -16,9 +16,11 @@ export default async function PageUtilisateur({ params }: { params: Promise<{ id
   const { id } = await params;
   const supabase = await createClient();
 
-  const [{ data: profil }, { data: lignes }] = await Promise.all([
+  const [{ data: profil }, { data: lignes }, { data: logements }, { data: liens }] = await Promise.all([
     supabase.from("profiles").select("id, prenom, nom, email, type, poles, is_admin, actif").eq("id", id).maybeSingle(),
     supabase.from("permissions").select("module, can_view, can_edit").eq("user_id", id),
+    supabase.from("logements").select("id, nom").order("nom"),
+    supabase.from("logement_proprietaires").select("logement_id").eq("user_id", id),
   ]);
   if (!profil) notFound();
 
@@ -53,6 +55,9 @@ export default async function PageUtilisateur({ params }: { params: Promise<{ id
             accordant={{ admin: moi.admin, droits: moi.droits }}
             edition
             libelleBouton="Enregistrer les modifications"
+            logements={logements ?? []}
+            logementsRattaches={(liens ?? []).map((l) => l.logement_id)}
+            peutRattacher={peutModifier(moi, "logements")}
             valeurs={{
               prenom: profil.prenom,
               nom: profil.nom,

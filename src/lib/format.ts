@@ -42,3 +42,10 @@ export function momentDeLaJournee(date: Date = new Date()) {
   if (heure < 18) return "après-midi";
   return "soir";
 }
+
+/** JJ/MM/AAAA à HH:MM (heure du Maroc) */
+export function formatDateHeure(date: Date | string) {
+  const d = typeof date === "string" ? new Date(date) : date;
+  const heure = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: FUSEAU }).format(d);
+  return `${formatDate(d)} à ${heure}`;
+}

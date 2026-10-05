@@ -31,19 +31,32 @@ type Props = {
   };
   edition?: boolean;
   libelleBouton: string;
+  /** Logements proposés au rattachement d'un compte Propriétaire */
+  logements?: { id: string; nom: string }[];
+  logementsRattaches?: string[];
+  peutRattacher?: boolean;
 };
 
 const GROUPES: { titre: string; modules: ModuleKey[] }[] = [
   { titre: "Pilotage", modules: ["dashboard", "taches", "strategie"] },
   { titre: "Croissance", modules: ["marketing", "crm"] },
-  { titre: "Logements", modules: ["onboarding", "logements", "calendrier"] },
+  { titre: "Logements", modules: ["onboarding", "logements", "documents_sensibles", "calendrier"] },
   { titre: "Opérations", modules: ["menage", "maintenance", "stock", "checklists"] },
   { titre: "Gestion", modules: ["comptabilite", "rh", "parametres"] },
 ];
 
 const VIDE = { voir: false, modifier: false };
 
-export function FormulaireUtilisateur({ action, accordant, valeurs, edition = false, libelleBouton }: Props) {
+export function FormulaireUtilisateur({
+  action,
+  accordant,
+  valeurs,
+  edition = false,
+  libelleBouton,
+  logements = [],
+  logementsRattaches = [],
+  peutRattacher = false,
+}: Props) {
   const [etat, formAction] = useActionState(action, undefined);
   const [type, setType] = useState<TypeUtilisateur>(valeurs?.type ?? "equipe");
   const [admin, setAdmin] = useState(valeurs?.admin ?? false);
@@ -159,10 +172,29 @@ export function FormulaireUtilisateur({ action, accordant, valeurs, edition = fa
       ) : null}
 
       {type === "proprietaire" ? (
-        <Notice ton="info">
-          Un propriétaire ne voit que l&apos;Espace propriétaire, limité à ses logements. Les logements à rattacher se choisissent à la phase 2, une
-          fois les logements créés.
-        </Notice>
+        <fieldset className="space-y-3">
+          <legend className="text-sm font-medium">Logement(s) rattaché(s)</legend>
+          <p className="text-[0.82rem] leading-snug text-ink-2">
+            Un propriétaire ne voit que l&apos;Espace propriétaire, limité aux logements cochés ici.
+          </p>
+          {!peutRattacher ? (
+            <Notice ton="info">Vous n&apos;avez pas le droit de modifier les logements : le rattachement doit être fait par un administrateur.</Notice>
+          ) : logements.length ? (
+            <div className="flex flex-wrap gap-2">
+              {logements.map((l) => (
+                <label
+                  key={l.id}
+                  className="press flex min-h-10 cursor-pointer items-center gap-2 rounded-full border border-line-strong bg-surface px-3.5 text-sm has-[:checked]:border-wine-500 has-[:checked]:bg-wine-50 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-wine-500/15"
+                >
+                  <input type="checkbox" name="logements" value={l.id} defaultChecked={logementsRattaches.includes(l.id)} className="h-4 w-4" />
+                  {l.nom}
+                </label>
+              ))}
+            </div>
+          ) : (
+            <Notice ton="info">Aucun logement pour le moment. Créez-les dans « Logements » : vous pourrez ensuite les rattacher ici, ou depuis la fiche du logement.</Notice>
+          )}
+        </fieldset>
       ) : null}
 
       {admin && type === "equipe" ? (

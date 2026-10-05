@@ -12,6 +12,7 @@ import {
   PackageOpen,
   Rocket,
   Settings,
+  ShieldCheck,
   Sparkles,
   Users,
   Wallet,
@@ -34,7 +35,8 @@ export type ModuleKey =
   | "checklists"
   | "comptabilite"
   | "rh"
-  | "parametres";
+  | "parametres"
+  | "documents_sensibles";
 
 export type ModuleDef = {
   key: ModuleKey;
@@ -47,6 +49,8 @@ export type ModuleDef = {
   description: string;
   /** Regroupe les sous-pages d'Opérations */
   groupe?: "operations";
+  /** Droit sans page propre : n'apparaît ni dans le menu ni sur le tableau de bord */
+  masque?: boolean;
 };
 
 export const MODULES: ModuleDef[] = [
@@ -65,6 +69,7 @@ export const MODULES: ModuleDef[] = [
   { key: "comptabilite", label: "Comptabilité", href: "/comptabilite", icon: Wallet, phase: 4, description: "Versements, commissions, rapports" },
   { key: "rh", label: "RH", href: "/rh", icon: Briefcase, phase: 8, description: "Équipe et recrutements" },
   { key: "parametres", label: "Paramètres", href: "/parametres", icon: Settings, phase: 1, description: "Utilisateurs, droits, informations de l'entreprise" },
+  { key: "documents_sensibles", label: "Fiches de police", href: "/logements", icon: ShieldCheck, phase: 2, description: "Pièces d'identité des voyageurs (données personnelles)", masque: true },
 ];
 
 export const MODULE_KEYS = MODULES.map((m) => m.key);
@@ -129,7 +134,7 @@ export const MODELES_DROITS: { id: string; label: string; droits: Droits }[] = [
   {
     id: "lecture",
     label: "Tout en lecture",
-    droits: Object.fromEntries(MODULE_KEYS.filter((k) => k !== "parametres").map((k) => [k, { voir: true, modifier: false }])),
+    droits: Object.fromEntries(MODULE_KEYS.filter((k) => k !== "parametres" && k !== "documents_sensibles").map((k) => [k, { voir: true, modifier: false }])),
   },
 ];
 

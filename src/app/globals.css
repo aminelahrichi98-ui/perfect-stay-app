@@ -182,3 +182,11 @@ dialog.feuille[open] {
 dialog.feuille[open]::backdrop {
   animation: fondu 200ms ease-out;
 }
+
+/* Visionneuse de photos */
+dialog.visionneuse[open] {
+  animation: fondu 180ms ease-out;
+}
+dialog.visionneuse::backdrop {
+  animation: fondu 180ms ease-out;
+}

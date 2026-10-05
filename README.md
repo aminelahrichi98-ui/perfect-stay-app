@@ -14,7 +14,8 @@ npm install        # installe les dépendances
 npm run dev        # lance l'app en local sur http://localhost:3000
 npm run lint       # vérifie la qualité du code
 npm run typecheck  # vérifie les types
-npm test           # lance les tests (formule de commission, règles de droits)
+npm test           # lance les tests (formule de commission, droits, import, photos)
+npm run test:sql   # teste les règles de sécurité de la base sur une vraie base PostgreSQL embarquée
 ```
 
 ## Base de données
