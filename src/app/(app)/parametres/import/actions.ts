@@ -15,7 +15,7 @@ async function administrateur() {
 
 const schemaDemande = z.object({
   donnees: schemaImport,
-  hypothese: z.enum(["recu", "net"]),
+  hypothese: z.enum(["recu", "net", "encaisse"]),
   taux: z.record(z.string(), z.number().min(0).max(100)),
 });
 
@@ -106,19 +106,36 @@ export async function importerDonnees(demande: unknown): Promise<ResultatImport>
   const deja = new Set((dejaLa ?? []).map((d) => d.ancien_id));
   const nouveaux = valides.filter((t) => !deja.has(t.id));
 
-  let crees = 0;
-  for (const lot of morceaux(nouveaux, 150)) {
-    const { error } = await supabase.from("versements").insert(
-      lot.map((t) => ({
+  // Chaque versement est recalculé avec le taux de son logement ; ceux qu'on ne peut pas recalculer sont écartés
+  const lignes: {
+    logement_id: string;
+    date_versement: string;
+    montant_recu: number;
+    frais_menage: number;
+    taux_commission: number;
+    note: string;
+    ancien_id: string;
+  }[] = [];
+  for (const t of nouveaux) {
+    const tauxLogement = tauxDe.get(t.logementId) ?? TAUX_COMMISSION_DEFAUT;
+    try {
+      lignes.push({
         logement_id: idDe.get(t.logementId)!,
         date_versement: t.date.slice(0, 10),
-        montant_recu: montantRecu(t, hypothese as Hypothese),
+        montant_recu: montantRecu(t, hypothese as Hypothese, tauxLogement),
         frais_menage: t.fraisMenage,
-        taux_commission: tauxDe.get(t.logementId) ?? TAUX_COMMISSION_DEFAUT,
+        taux_commission: tauxLogement,
         note: t.note,
         ancien_id: t.id,
-      })),
-    );
+      });
+    } catch {
+      /* écarté : le recalcul est impossible (taux nul, montant inférieur au ménage) */
+    }
+  }
+
+  let crees = 0;
+  for (const lot of morceaux(lignes, 150)) {
+    const { error } = await supabase.from("versements").insert(lot);
     if (error) {
       return { erreur: `Une partie des versements n'a pas pu être enregistrée (${crees} déjà importés). Relancez l'import : les versements déjà présents ne seront pas dupliqués.` };
     }

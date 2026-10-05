@@ -51,3 +51,21 @@ export function formatTaille(octets: number) {
   if (octets < 1024 * 1024) return `${Math.round(octets / 1024)} Ko`;
   return `${(octets / 1024 / 1024).toFixed(1).replace(".", ",")} Mo`;
 }
+
+/** Ce qui manque encore sur la fiche d'un logement (pour guider la saisie après un import par exemple). */
+export function elementsACompleter(l: {
+  ville: string;
+  adresse: string;
+  proprietaires: number;
+  proprietaire_nom: string;
+  nbIcal: number;
+  nbPhotos: number;
+}) {
+  const manque: { cle: string; texte: string }[] = [];
+  if (!l.ville.trim()) manque.push({ cle: "ville", texte: "la ville" });
+  if (!l.adresse.trim()) manque.push({ cle: "adresse", texte: "l'adresse" });
+  if (!l.proprietaires && !l.proprietaire_nom.trim()) manque.push({ cle: "proprietaire", texte: "le propriétaire" });
+  if (!l.nbIcal) manque.push({ cle: "ical", texte: "le lien de calendrier iCal" });
+  if (!l.nbPhotos) manque.push({ cle: "photos", texte: "les photos" });
+  return manque;
+}

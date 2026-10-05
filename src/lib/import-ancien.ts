@@ -19,6 +19,8 @@ export const schemaLogementAncien = z.object({
   fraisMenage: montant.pipe(z.number().min(0)),
   ical: texte,
   photo: texte,
+  /** Facultatif : taux de commission (%) du logement, pour pré-remplir l'écran d'import */
+  tauxCommission: z.preprocess((v) => (v === null || v === "" ? undefined : v), z.coerce.number().min(0).max(100).optional()),
 });
 
 export const schemaTransactionAncienne = z.object({
@@ -40,9 +42,15 @@ export type LogementAncien = z.infer<typeof schemaLogementAncien>;
 export type TransactionAncienne = z.infer<typeof schemaTransactionAncienne>;
 
 /** Ce que représente le champ « montant » de l'ancienne app. À confirmer par Amine sur des exemples. */
-export type Hypothese = "recu" | "net";
+export type Hypothese = "recu" | "net" | "encaisse";
 
 export const HYPOTHESES: { value: Hypothese; titre: string; detail: string }[] = [
+  {
+    value: "encaisse",
+    titre: "C'était la part de Perfect Stay (ménage + commission)",
+    detail:
+      "Le montant saisi est ce que Perfect Stay a encaissé. Le montant reçu de la plateforme est reconstitué à partir du ménage et du taux de commission de chaque logement.",
+  },
   {
     value: "recu",
     titre: "C'était le montant reçu, ménage inclus",
@@ -74,9 +82,27 @@ export function lireExport(contenu: string): { ok: true; donnees: DonneesAncienn
   return { ok: true, donnees: r.data };
 }
 
-/** Montant reçu à enregistrer, selon ce que représentait l'ancien « montant ». */
-export function montantRecu(t: Pick<TransactionAncienne, "montant" | "fraisMenage">, hypothese: Hypothese) {
-  return hypothese === "net" ? Math.round((t.montant + t.fraisMenage) * 100) / 100 : t.montant;
+/**
+ * Montant reçu à enregistrer, selon ce que représentait l'ancien « montant ».
+ * Pour « encaisse » (ménage + commission), on remonte au montant reçu avec le taux du logement.
+ * Le calcul se fait en centimes pour que la commission recalculée retombe exactement
+ * sur celle de l'ancienne app.
+ */
+export function montantRecu(
+  t: Pick<TransactionAncienne, "montant" | "fraisMenage">,
+  hypothese: Hypothese,
+  tauxPourcent: number,
+) {
+  if (hypothese === "net") return Math.round((t.montant + t.fraisMenage) * 100) / 100;
+  if (hypothese === "recu") return t.montant;
+
+  const menage = Math.round(t.fraisMenage * 100);
+  const commission = Math.round(t.montant * 100) - menage;
+  if (commission < 0) throw new Error("Le montant encaissé est inférieur au ménage.");
+  if (commission === 0) return menage / 100;
+  if (!(tauxPourcent > 0)) throw new Error("Le taux de commission doit être supérieur à 0 pour reconstituer le montant reçu.");
+  const loyerNet = Math.round((commission * 100) / tauxPourcent);
+  return (menage + loyerNet) / 100;
 }
 
 export type LigneApercu = {
@@ -90,13 +116,28 @@ export type LigneApercu = {
 export type Apercu = {
   nbLogements: number;
   nbTransactions: number;
+  /** Somme des montants reçus (reconstitués si besoin) */
   totalMontantRecu: number;
+  /** Somme de ce que Perfect Stay encaisse après recalcul avec la formule actuelle */
+  totalEncaisseRecalcule: number;
+  /** Somme des « montants » tels qu'ils figuraient dans l'ancienne app */
+  totalMontantAncien: number;
+  /** Versements impossibles à recalculer (taux manquant, montant < ménage…) */
+  nbImpossibles: number;
   parLogement: { id: string; nom: string; nbVersements: number; totalMontantRecu: number }[];
   echantillon: LigneApercu[];
   avertissements: string[];
 };
 
 /** Résumé et recalcul avec la formule actuelle, pour que le résultat soit vérifié avant d'importer. */
+const tenter = <T,>(f: () => T): T | null => {
+  try {
+    return f();
+  } catch {
+    return null;
+  }
+};
+
 export function construireApercu(
   donnees: DonneesAnciennes,
   hypothese: Hypothese,
@@ -129,13 +170,34 @@ export function construireApercu(
   if (doublons.size) avertissements.push(`Plusieurs logements portent le même nom : ${[...doublons].join(", ")}.`);
 
   const valides = donnees.transactions.filter((t) => noms.has(t.logementId));
+
+  // Recalcul complet : permet de comparer le total à celui de l'ancienne app
+  let totalEncaisseRecalcule = 0;
+  let nbImpossibles = 0;
+  for (const t of valides) {
+    const calcul = tenter(() =>
+      calculerVersement({
+        montantRecu: montantRecu(t, hypothese, tauxDe(t.logementId)),
+        fraisMenage: t.fraisMenage,
+        tauxCommission: tauxDe(t.logementId),
+      }),
+    );
+    if (calcul) totalEncaisseRecalcule += calcul.encaisseParPerfectStay;
+    else nbImpossibles++;
+  }
+  if (nbImpossibles) {
+    avertissements.push(
+      `${nbImpossibles} versement(s) ne peuvent pas être recalculés (montant inférieur au ménage, ou taux à 0 %). Ils ne seront pas importés.`,
+    );
+  }
+
   const parLogement = donnees.logements.map((l) => {
     const siens = valides.filter((t) => t.logementId === l.id);
     return {
       id: l.id,
       nom: l.nom,
       nbVersements: siens.length,
-      totalMontantRecu: siens.reduce((s, t) => s + montantRecu(t, hypothese), 0),
+      totalMontantRecu: siens.reduce((s, t) => s + (tenter(() => montantRecu(t, hypothese, tauxDe(t.logementId))) ?? 0), 0),
     };
   });
 
@@ -147,16 +209,15 @@ export function construireApercu(
     if (echantillon.length >= tailleEchantillon) break;
     if (dejaPris.has(t.logementId) && dejaPris.size < Math.min(noms.size, tailleEchantillon)) continue;
     dejaPris.add(t.logementId);
-    try {
-      echantillon.push({
-        transactionId: t.id,
-        logement: noms.get(t.logementId) ?? "",
-        date: t.date.slice(0, 10),
-        note: t.note,
-        calcul: calculerVersement({ montantRecu: montantRecu(t, hypothese), fraisMenage: t.fraisMenage, tauxCommission: tauxDe(t.logementId) }),
-      });
-    } catch {
-      /* ligne impossible à calculer : elle sera signalée à l'import */
+    const calcul = tenter(() =>
+      calculerVersement({
+        montantRecu: montantRecu(t, hypothese, tauxDe(t.logementId)),
+        fraisMenage: t.fraisMenage,
+        tauxCommission: tauxDe(t.logementId),
+      }),
+    );
+    if (calcul) {
+      echantillon.push({ transactionId: t.id, logement: noms.get(t.logementId) ?? "", date: t.date.slice(0, 10), note: t.note, calcul });
     }
   }
 
@@ -164,6 +225,9 @@ export function construireApercu(
     nbLogements: donnees.logements.length,
     nbTransactions: valides.length,
     totalMontantRecu: parLogement.reduce((s, l) => s + l.totalMontantRecu, 0),
+    totalEncaisseRecalcule: Math.round(totalEncaisseRecalcule * 100) / 100,
+    totalMontantAncien: Math.round(valides.reduce((s, t) => s + t.montant, 0) * 100) / 100,
+    nbImpossibles,
     parLogement,
     echantillon,
     avertissements,

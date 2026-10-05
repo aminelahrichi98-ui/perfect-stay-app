@@ -191,8 +191,9 @@ export async function supprimerLogement(id: string): Promise<EtatLogement> {
   const u = await getUtilisateur();
   if (!u?.admin) return { erreur: "Seul un administrateur peut supprimer un logement." };
   const supabase = await createClient();
-  const { count } = await supabase.from("versements").select("id", { count: "exact", head: true }).eq("logement_id", id);
-  if (count) return { erreur: `Ce logement a ${count} versement(s) enregistré(s) : il ne peut pas être supprimé. Passez-le plutôt « En pause ».` };
+  // L'administrateur a voulu supprimer le logement avec son historique (l'écran l'a averti du nombre de versements)
+  const { error: erreurVersements } = await supabase.from("versements").delete().eq("logement_id", id);
+  if (erreurVersements) return { erreur: "Les versements de ce logement n'ont pas pu être supprimés : le logement est conservé." };
 
   const { data: photos } = await supabase.from("logement_photos").select("chemin, chemin_vignette").eq("logement_id", id);
   const { data: docs } = await supabase.from("documents").select("chemin").eq("logement_id", id);

@@ -31,6 +31,9 @@ export default async function PageModifierLogement({
     proprietairesDisponibles(),
   ]);
   if (!l) notFound();
+  const { count: nbVersements } = u.admin
+    ? await supabase.from("versements").select("id", { count: "exact", head: true }).eq("logement_id", id)
+    : { count: 0 };
 
   const valeurs: ValeursLogement = {
     nom: l.nom,
@@ -68,7 +71,7 @@ export default async function PageModifierLogement({
           avertissement={avertissement}
         />
       </Card>
-      {u.admin ? <ZoneSuppression id={id} nom={l.nom} /> : null}
+      {u.admin ? <ZoneSuppression id={id} nom={l.nom} nbVersements={nbVersements ?? 0} /> : null}
     </div>
   );
 }

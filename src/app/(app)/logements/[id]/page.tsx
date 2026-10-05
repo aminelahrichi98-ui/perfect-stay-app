@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink, MapPin, Pencil, Phone } from "lucide-react";
+import { ArrowLeft, ExternalLink, ListChecks, MapPin, Pencil, Phone, Trash2 } from "lucide-react";
 import { SecretCopiable } from "@/components/secret-copiable";
 import { Badge, buttonClass, Card, Notice } from "@/components/ui";
 import { exigerAcces, peutModifier, peutVoir } from "@/lib/auth";
 import { calculerVersement } from "@/lib/compta";
 import { formatDateHeure, formatMad } from "@/lib/format";
-import { libelleStatut, libelleType, PLATEFORMES, ROLES_CONTACT } from "@/lib/logements";
+import { elementsACompleter, libelleStatut, libelleType, PLATEFORMES, ROLES_CONTACT } from "@/lib/logements";
 import { lienMaps, urlCarte } from "@/lib/maps";
 import { createClient } from "@/lib/supabase/server";
 import { BUCKET_PHOTOS, urlsLecture } from "@/lib/stockage";
@@ -75,6 +75,14 @@ export default async function PageLogement({
   const lien = lienMaps({ mapsUrl: l.maps_url, adresse: l.adresse, ville: l.ville });
   const exemple = calculerVersement({ montantRecu: 5000, fraisMenage: Number(l.frais_menage), tauxCommission: Number(l.taux_commission) });
   const tauxTexte = String(Number(l.taux_commission)).replace(".", ",");
+  const manque = elementsACompleter({
+    ville: l.ville,
+    adresse: l.adresse,
+    proprietaires: proprietaires.length,
+    proprietaire_nom: l.proprietaire_nom,
+    nbIcal: ical?.length ?? 0,
+    nbPhotos: photosVue.length,
+  });
   const aAcces = l.code_acces || l.wifi_nom || l.wifi_mot_de_passe || l.equipements || l.notes;
 
   return (
@@ -105,11 +113,33 @@ export default async function PageLogement({
           ) : null}
         </div>
         {modifiable ? (
-          <Link href={`/logements/${id}/modifier`} className={buttonClass("secondary")}>
-            <Pencil className="h-4 w-4" /> Modifier
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Link href={`/logements/${id}/modifier`} className={buttonClass("secondary")}>
+              <Pencil className="h-4 w-4" /> Modifier
+            </Link>
+            {u.admin ? (
+              <Link href={`/logements/${id}/modifier#suppression`} className={buttonClass("danger")}>
+                <Trash2 className="h-4 w-4" /> Supprimer
+              </Link>
+            ) : null}
+          </div>
         ) : null}
       </header>
+
+      {manque.length && modifiable ? (
+        <Card className="enter mb-4 flex flex-wrap items-center justify-between gap-3 border-warn/25 bg-warn-bg p-4" style={{ "--i": 1 } as React.CSSProperties}>
+          <div className="flex min-w-0 items-start gap-3">
+            <ListChecks className="mt-0.5 h-5 w-5 shrink-0 text-warn" />
+            <div>
+              <p className="font-medium text-warn">Fiche à compléter</p>
+              <p className="text-sm text-ink-2 text-pretty">Il manque encore : {manque.map((m) => m.texte).join(", ")}.</p>
+            </div>
+          </div>
+          <Link href={`/logements/${id}/modifier`} className={buttonClass("secondary", "sm")}>
+            Compléter la fiche
+          </Link>
+        </Card>
+      ) : null}
 
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="space-y-4 lg:col-span-2">

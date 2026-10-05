@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, Notice, Spinner } from "@/components/ui";
 import { supprimerLogement } from "../../actions";
 
-export function ZoneSuppression({ id, nom }: { id: string; nom: string }) {
+export function ZoneSuppression({ id, nom, nbVersements }: { id: string; nom: string; nbVersements: number }) {
   const [confirmation, setConfirmation] = useState(false);
   const [saisie, setSaisie] = useState("");
   const [occupe, setOccupe] = useState(false);
@@ -18,11 +18,16 @@ export function ZoneSuppression({ id, nom }: { id: string; nom: string }) {
   }
 
   return (
-    <Card className="space-y-3 border-danger/25 p-5 md:p-7">
+    <Card id="suppression" className="scroll-mt-24 space-y-3 border-danger/25 p-5 md:p-7">
       <h2 className="font-medium text-danger">Zone sensible</h2>
       <p className="text-sm text-ink-2 text-pretty">
-        Supprimer un logement efface aussi ses photos, ses documents et ses contacts. Cette action est définitive. Pour simplement arrêter de le gérer, passez-le en statut « En pause ».
+        Supprimer un logement efface aussi ses photos, ses documents et ses contacts. Cette action est définitive. Pour simplement arrêter de le gérer en gardant son historique, passez-le en statut « En pause ».
       </p>
+      {nbVersements > 0 ? (
+        <Notice ton="danger">
+          Attention : ce logement a <strong>{nbVersements} versement{nbVersements > 1 ? "s" : ""}</strong> enregistré{nbVersements > 1 ? "s" : ""}. {nbVersements > 1 ? "Ils seront supprimés" : "Il sera supprimé"} avec lui, et les totaux de la comptabilité changeront.
+        </Notice>
+      ) : null}
       {!confirmation ? (
         <button type="button" onClick={() => setConfirmation(true)} className="press h-10 rounded-xl border border-danger/30 px-4 text-sm font-medium text-danger hover:bg-danger-bg">
           Supprimer ce logement
