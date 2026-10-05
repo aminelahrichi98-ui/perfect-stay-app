@@ -208,6 +208,16 @@ export async function enregistrerEntreprise(_: EtatAction, formData: FormData): 
 
   const champ = (n: string) => String(formData.get(n) ?? "").trim();
   const supabase = await createClient(); // avec les droits de l'utilisateur : la base re-vérifie
+
+  // Responsable des ménages : un membre actif de l'équipe, ou personne
+  const demande = champ("responsable_menage");
+  let responsableMenage: string | null = null;
+  if (demande) {
+    if (!UUID.test(demande)) return { erreur: "Le responsable des ménages choisi n'est pas valide." };
+    const { data: membre } = await supabase.from("profiles").select("id").eq("id", demande).eq("type", "equipe").eq("actif", true).maybeSingle();
+    if (!membre) return { erreur: "Le responsable des ménages doit être un membre actif de l'équipe." };
+    responsableMenage = membre.id;
+  }
   const { error } = await supabase
     .from("entreprise")
     .update({
@@ -221,6 +231,7 @@ export async function enregistrerEntreprise(_: EtatAction, formData: FormData): 
       rib: champ("rib"),
       email: champ("email"),
       telephone: champ("telephone"),
+      responsable_menage: responsableMenage,
       updated_at: new Date().toISOString(),
     })
     .eq("id", 1);

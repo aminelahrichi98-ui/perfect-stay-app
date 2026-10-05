@@ -3,7 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import { Badge, Card } from "@/components/ui";
 import { exigerAcces, modulesVisibles } from "@/lib/auth";
 import { formatJourLong, momentDeLaJournee } from "@/lib/format";
-import { MODULE_BY_KEY } from "@/lib/modules";
+import { MODULE_BY_KEY, PHASE_ACTUELLE } from "@/lib/modules";
 
 export const metadata = { title: "Dashboard" };
 
@@ -42,7 +42,7 @@ export default async function Dashboard() {
                       <ArrowUpRight className="h-4 w-4 shrink-0 text-ink-3 transition-transform duration-150 ease-[var(--ease-out)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                     </span>
                     <span className="mt-0.5 block text-sm text-ink-2 text-pretty">{m.description}</span>
-                    {m.phase > 1 ? (
+                    {m.phase > PHASE_ACTUELLE ? (
                       <Badge className="mt-2.5" ton="neutre">
                         Phase {m.phase}
                       </Badge>

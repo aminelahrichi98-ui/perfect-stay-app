@@ -21,5 +21,10 @@ npm run test:sql   # teste les règles de sécurité de la base sur une vraie ba
 ## Base de données
 Les scripts SQL sont dans `supabase/migrations/`, à exécuter dans l'ordre dans Supabase > SQL Editor.
 
+## Synchronisation des calendriers (phase 3)
+Les calendriers iCal sont synchronisés toutes les 30 minutes : Supabase (pg_cron + pg_net, gratuit) appelle
+`/api/cron/ical` avec le mot de passe `CRON_SECRET`. Le script `supabase/migrations/0004_planification_synchro.sql`
+met en place cette planification. Vercel garde une passe quotidienne en filet de sécurité (`vercel.json`).
+
 ## Variables d'environnement
 Voir `.env.example`. Les vraies clés ne sont jamais versionnées (`.env*` est ignoré par Git).

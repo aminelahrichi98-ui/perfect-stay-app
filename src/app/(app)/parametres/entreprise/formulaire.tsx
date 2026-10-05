@@ -2,7 +2,7 @@
 
 import { useActionState } from "react";
 import { SubmitButton } from "@/components/submit-button";
-import { Field, Input, Notice, Textarea } from "@/components/ui";
+import { Field, Input, Notice, Select, Textarea } from "@/components/ui";
 import { enregistrerEntreprise } from "../actions";
 
 export type Entreprise = {
@@ -16,9 +16,18 @@ export type Entreprise = {
   rib: string;
   email: string;
   telephone: string;
+  responsable_menage: string | null;
 };
 
-export function FormulaireEntreprise({ valeurs, lectureSeule }: { valeurs: Entreprise; lectureSeule: boolean }) {
+export function FormulaireEntreprise({
+  valeurs,
+  equipe,
+  lectureSeule,
+}: {
+  valeurs: Entreprise;
+  equipe: { id: string; nom: string }[];
+  lectureSeule: boolean;
+}) {
   const [etat, action] = useActionState(enregistrerEntreprise, undefined);
   return (
     <form action={action} className="space-y-8">
@@ -35,6 +44,24 @@ export function FormulaireEntreprise({ valeurs, lectureSeule }: { valeurs: Entre
           </Field>
           <Field label="Téléphone" htmlFor="telephone">
             <Input id="telephone" name="telephone" type="tel" defaultValue={valeurs.telephone} />
+          </Field>
+        </section>
+
+        <section className="space-y-4">
+          <h3 className="font-display text-base font-semibold">Ménages</h3>
+          <Field
+            label="Responsable des ménages par défaut"
+            htmlFor="responsable_menage"
+            hint="Chaque ménage créé automatiquement le jour d'un départ lui est attribué. Vous pouvez le changer ensuite, ménage par ménage."
+          >
+            <Select id="responsable_menage" name="responsable_menage" defaultValue={valeurs.responsable_menage ?? ""} className="sm:max-w-sm">
+              <option value="">Personne (non assigné)</option>
+              {equipe.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nom}
+                </option>
+              ))}
+            </Select>
           </Field>
         </section>
 

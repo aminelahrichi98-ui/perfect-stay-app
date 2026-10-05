@@ -72,6 +72,9 @@ export const MODULES: ModuleDef[] = [
   { key: "documents_sensibles", label: "Fiches de police", href: "/logements", icon: ShieldCheck, phase: 2, description: "Pièces d'identité des voyageurs (données personnelles)", masque: true },
 ];
 
+/** Dernière phase livrée : les modules de cette phase ou des précédentes sont « Disponibles » */
+export const PHASE_ACTUELLE = 3;
+
 export const MODULE_KEYS = MODULES.map((m) => m.key);
 
 export const MODULE_BY_KEY = Object.fromEntries(MODULES.map((m) => [m.key, m])) as Record<ModuleKey, ModuleDef>;

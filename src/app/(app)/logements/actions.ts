@@ -27,6 +27,7 @@ import {
   urlEnvoiSigne,
   urlsLecture,
 } from "@/lib/stockage";
+import { annulerReservationsDesLiens } from "@/lib/synchro-serveur";
 
 export type EtatLogement = { erreur?: string; succes?: string } | undefined;
 
@@ -135,7 +136,11 @@ async function enregistrerEnfants(
     const { data: existants } = await supabase.from("logement_ical").select("id, url").eq("logement_id", id);
     const garder = new Set(lecture.ical.map((c) => c.url));
     const aSupprimer = (existants ?? []).filter((e) => !garder.has(e.url)).map((e) => e.id);
-    if (aSupprimer.length) await supabase.from("logement_ical").delete().in("id", aSupprimer);
+    if (aSupprimer.length) {
+      // Un lien retiré : ses réservations à venir et leurs ménages sont annulés (l'historique passé reste)
+      await annulerReservationsDesLiens(aSupprimer);
+      await supabase.from("logement_ical").delete().in("id", aSupprimer);
+    }
     await supabase.from("logement_contacts").delete().eq("logement_id", id);
     await supabase.from("logement_proprietaires").delete().eq("logement_id", id);
   }
