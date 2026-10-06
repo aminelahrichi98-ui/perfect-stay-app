@@ -33,6 +33,11 @@
   --color-ink-2: oklch(0.4 0.03 335);
   --color-ink-3: oklch(0.5 0.025 335);
 
+  /* Calendrier : nuits réservées en vert */
+  --color-nuit: oklch(0.68 0.14 152);
+  --color-nuit-fort: oklch(0.5 0.12 152);
+  --color-nuit-pale: oklch(0.94 0.05 152);
+
   /* États */
   --color-ok: oklch(0.45 0.12 155);
   --color-ok-bg: oklch(0.95 0.045 155);
@@ -189,4 +194,24 @@ dialog.visionneuse[open] {
 }
 dialog.visionneuse::backdrop {
   animation: fondu 180ms ease-out;
+}
+
+/* Fenêtre de détail d'une réservation */
+dialog.feuille-centree[open] {
+  animation: apparait 200ms var(--ease-out);
+}
+dialog.feuille-centree[open]::backdrop {
+  animation: fondu 180ms ease-out;
+}
+@keyframes apparait {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+/* Nuits bloquées : hachures grises */
+.hachures {
+  background-image: repeating-linear-gradient(135deg, transparent 0 5px, oklch(0.84 0.015 340) 5px 6px);
+  background-color: var(--color-sunken);
 }

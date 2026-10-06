@@ -16,9 +16,11 @@ await db.exec(`
 `);
 await db.exec(readFileSync(R + "0001_fondations.sql", "utf8"));
 await db.exec(readFileSync(R + "0002_logements.sql", "utf8"));
+await db.exec(readFileSync(R + "0003_calendrier.sql", "utf8"));
 // relance : doit passer sans erreur
 await db.exec(readFileSync(R + "0001_fondations.sql", "utf8"));
 await db.exec(readFileSync(R + "0002_logements.sql", "utf8"));
+await db.exec(readFileSync(R + "0003_calendrier.sql", "utf8"));
 await db.exec(`grant select, insert, update, delete on all tables in schema public to authenticated;`);
 console.log("✔ scripts 0001 et 0002 exécutés deux fois sans erreur");
 
@@ -118,4 +120,53 @@ console.log("✔ un même logement de l'ancienne app ne peut pas être importé 
 // Suppression d'un logement : administrateur seulement
 assert.equal((await comme("abdel", `delete from public.logements where id=$1 returning id`, [lg])).rows.length, 0);
 console.log("✔ Abdelkarim ne peut pas supprimer un logement");
+
+// ---------- Phase 3 : réservations et ménages ----------
+await db.query(`insert into public.permissions values ($1,'calendrier',true,true),($1,'menage',true,true)`, [ids.abdel]);
+const ical = (await db.query(`insert into public.logement_ical (logement_id, url) values ($1,'https://example.com/a.ics') returning id`, [lg])).rows[0].id;
+const resa = (await db.query(`insert into public.reservations (logement_id, ical_id, uid, arrivee, depart) values ($1,$2,'uid-1','2026-10-10','2026-10-14') returning id`, [lg, ical])).rows[0].id;
+assert.equal((await comme("abdel", `select * from public.reservations`)).rows.length, 1);
+assert.equal((await comme("equipe2", `select * from public.reservations`)).rows.length, 0);
+assert.equal((await comme("proprio", `select * from public.reservations`)).rows.length, 0);
+console.log("✔ réservations lisibles avec le droit Calendrier seulement");
+
+await echoue("abdel", `insert into public.reservations (logement_id, uid, arrivee, depart) values ($1,'x','2026-11-01','2026-11-03')`, [lg], "écriture directe");
+const maj2 = await comme("abdel", `update public.reservations set statut='annulee' returning id`);
+assert.equal(maj2.rows.length, 0);
+console.log("✔ aucune écriture directe sur les réservations (seule la synchronisation serveur le peut)");
+
+let sens = null; try { await db.query(`insert into public.reservations (logement_id, uid, arrivee, depart) values ($1,'y','2026-11-05','2026-11-05')`, [lg]); } catch (e) { sens = e; }
+assert.ok(sens);
+let doublon = null; try { await db.query(`insert into public.reservations (logement_id, ical_id, uid, arrivee, depart) values ($1,$2,'uid-1','2026-12-01','2026-12-03')`, [lg, ical]); } catch (e) { doublon = e; }
+assert.ok(doublon);
+console.log("✔ départ avant arrivée refusé, pas de doublon pour un même événement iCal");
+
+// Tâches : un ménage automatique par réservation, visible via le droit Ménage
+await db.query(`insert into public.taches (titre, type, logement_id, reservation_id, responsable_id, echeance, cree_auto) values ('Ménage — Villa Test','menage',$1,$2,$3,'2026-10-14',true)`, [lg, resa, ids.abdel]);
+await db.query(`insert into public.taches (titre, type, pole) values ('Relancer le comptable','tache','Comptabilité')`);
+const vuesAbdel = (await comme("abdel", `select titre from public.taches`)).rows.map((r) => r.titre);
+assert.deepEqual(vuesAbdel, ["Ménage — Villa Test"]);
+console.log("✔ avec le droit Ménage, on voit les ménages mais pas les autres tâches");
+let deuxMenages = null; try { await db.query(`insert into public.taches (titre, type, logement_id, reservation_id) values ('Doublon','menage',$1,$2)`, [lg, resa]); } catch (e) { deuxMenages = e; }
+assert.ok(deuxMenages);
+console.log("✔ un seul ménage automatique par réservation");
+
+// Un prestataire ne voit que les tâches qui lui sont attribuées
+await db.query(`insert into public.profiles (id,email,prenom,nom,type) values ($1,'pr@x.ma','Pre','S','prestataire')`, [ (await db.query(`insert into auth.users (email) values ('pr@x.ma') returning id`)).rows[0].id ]);
+const prest = (await db.query(`select id from public.profiles where email='pr@x.ma'`)).rows[0].id;
+ids.prest = prest;
+await db.query(`insert into public.taches (titre, type, responsable_id) values ('Ménage assigné','menage',$1)`, [prest]);
+const vuesPrest = (await comme("prest", `select titre from public.taches`)).rows.map((r) => r.titre);
+assert.deepEqual(vuesPrest, ["Ménage assigné"]);
+const majPrest = await comme("prest", `update public.taches set statut='termine' where titre='Ménage assigné' returning id`);
+assert.equal(majPrest.rows.length, 1);
+const majAutre = await comme("prest", `update public.taches set statut='termine' where titre='Relancer le comptable' returning id`);
+assert.equal(majAutre.rows.length, 0);
+console.log("✔ un prestataire ne voit et ne termine que ses propres tâches");
+
+// Réglage « responsable des ménages »
+await db.query(`update public.entreprise set responsable_menage=$1 where id=1`, [ids.abdel]);
+assert.equal((await comme("abdel", `select responsable_menage from public.entreprise`)).rows[0].responsable_menage, ids.abdel);
+console.log("✔ le responsable des ménages par défaut est lisible pour le calendrier");
+
 console.log("\nTOUS LES CONTRÔLES SQL SONT OK");
