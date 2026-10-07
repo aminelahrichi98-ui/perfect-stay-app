@@ -7,6 +7,7 @@ const R = new URL("../migrations/", import.meta.url).pathname;
 
 await db.exec(`
   create role authenticated;
+  create role anon;
   create schema auth;
   create table auth.users (id uuid primary key default gen_random_uuid(), email text, raw_user_meta_data jsonb default '{}');
   create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
@@ -14,15 +15,13 @@ await db.exec(`
   create table storage.buckets (id text primary key, name text, public boolean);
   grant usage on schema public to authenticated;
 `);
-await db.exec(readFileSync(R + "0001_fondations.sql", "utf8"));
-await db.exec(readFileSync(R + "0002_logements.sql", "utf8"));
-await db.exec(readFileSync(R + "0003_calendrier.sql", "utf8"));
-// relance : doit passer sans erreur
-await db.exec(readFileSync(R + "0001_fondations.sql", "utf8"));
-await db.exec(readFileSync(R + "0002_logements.sql", "utf8"));
-await db.exec(readFileSync(R + "0003_calendrier.sql", "utf8"));
+const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql"];
+for (let passe = 0; passe < 2; passe++) {
+  for (const f of FICHIERS) await db.exec(readFileSync(R + f, "utf8")); // la 2e passe vérifie que les scripts sont relançables
+  if (passe === 0) await db.exec(`grant select, insert, update, delete on all tables in schema public to authenticated;`);
+}
 await db.exec(`grant select, insert, update, delete on all tables in schema public to authenticated;`);
-console.log("✔ scripts 0001 et 0002 exécutés deux fois sans erreur");
+console.log("✔ scripts 0001, 0002, 0003 et 0005 exécutés deux fois sans erreur");
 
 // Comptes : le premier devient administrateur grâce au déclencheur
 const ids = {};
@@ -168,5 +167,125 @@ console.log("✔ un prestataire ne voit et ne termine que ses propres tâches");
 await db.query(`update public.entreprise set responsable_menage=$1 where id=1`, [ids.abdel]);
 assert.equal((await comme("abdel", `select responsable_menage from public.entreprise`)).rows[0].responsable_menage, ids.abdel);
 console.log("✔ le responsable des ménages par défaut est lisible pour le calendrier");
+
+
+// ---------- Phase 4 : comptabilité, factures, Espace propriétaire ----------
+await creer("proprio2", "p2@x.ma");
+await db.query(`insert into public.profiles (id,email,prenom,nom,type) values ($1,'p2@x.ma','Pro','Deux','proprietaire')`, [ids.proprio2]);
+const lg2 = (await db.query(`insert into public.logements (nom, ville) values ('Appart Autre','Casablanca') returning id`)).rows[0].id;
+await db.query(`insert into public.logement_proprietaires values ($1,$2)`, [lg2, ids.proprio2]);
+await db.query(`insert into public.versements (logement_id,date_versement,montant_recu,frais_menage,taux_commission) values ($1,'2026-09-05',3000,200,18)`, [lg2]);
+await db.query(
+  `insert into public.depenses (date_depense, logement_id, categorie, description, montant) values
+   ('2026-09-10',$1,'maintenance','Plomberie',450), ('2026-09-11',$1,'marketing','Publicité',1000), ('2026-09-12',$2,'maintenance','Serrure',300)`,
+  [lg, lg2],
+);
+
+// Dépenses : comptabilité seulement
+assert.equal((await comme("abdel", `select * from public.depenses`)).rows.length, 0);
+assert.equal((await comme("amine", `select * from public.depenses`)).rows.length, 3);
+await echoue("abdel", `insert into public.depenses (date_depense, categorie, montant) values ('2026-09-20','linge',100)`, [], "dépense sans droit comptabilité");
+let negatif = null; try { await db.query(`insert into public.depenses (date_depense, categorie, montant) values ('2026-09-20','linge',-5)`); } catch (e) { negatif = e; }
+assert.ok(negatif);
+let categorieInconnue = null; try { await db.query(`insert into public.depenses (date_depense, categorie, montant) values ('2026-09-20','vacances',50)`); } catch (e) { categorieInconnue = e; }
+assert.ok(categorieInconnue);
+console.log("✔ dépenses : comptabilité seulement, montant positif, catégories contrôlées");
+
+// Espace propriétaire : chacun ne voit QUE ses logements, via des vues limitées
+const vue = async (qui, nom) => (await comme(qui, `select * from public.${nom}`)).rows;
+const l1 = await vue("proprio", "proprietaire_logements");
+assert.deepEqual(l1.map((r) => r.nom), ["Villa Test"]);
+assert.ok(!("code_acces" in l1[0]) && !("wifi_mot_de_passe" in l1[0]) && !("notes" in l1[0]) && !("taux_commission" in l1[0]));
+assert.deepEqual((await vue("proprio2", "proprietaire_logements")).map((r) => r.nom), ["Appart Autre"]);
+assert.equal((await vue("equipe2", "proprietaire_logements")).length, 0);
+assert.equal((await vue("proprio", "proprietaire_versements")).length, 1);
+assert.equal(Number((await vue("proprio2", "proprietaire_versements"))[0].montant_recu), 3000);
+const maint = await vue("proprio", "proprietaire_maintenance");
+assert.deepEqual(maint.map((r) => r.description), ["Plomberie"]); // ni la publicité, ni le logement voisin
+assert.equal((await vue("proprio", "proprietaire_reservations")).length, 1);
+assert.equal((await vue("proprio2", "proprietaire_reservations")).length, 0);
+console.log("✔ chaque propriétaire ne voit que ses logements, ses versements, sa maintenance et son calendrier");
+
+for (const t of ["logements", "versements", "depenses", "reservations", "documents"]) {
+  assert.equal((await comme("proprio", `select * from public.${t}`)).rows.length, 0, `le propriétaire ne doit pas lire ${t}`);
+}
+console.log("✔ un propriétaire ne peut lire aucune table interne directement");
+
+await db.exec(`set role anon;`);
+let anonErr = null; try { await db.query(`select * from public.proprietaire_logements`); } catch (e) { anonErr = e; }
+await db.exec(`reset role;`);
+assert.ok(anonErr);
+console.log("✔ un visiteur non connecté ne voit rien des vues propriétaire");
+
+// Factures : numérotation continue, sans trou, chronologique
+const emettre = (logement, mois, date, ttc = 940) =>
+  db.query(
+    `select * from public.emettre_facture($1,$2,$3,'{"nom":"M. Alami"}','{"raison_sociale":"Perfect Stay"}','[]',$4,20,$5,$6,$7)`,
+    [logement, mois, date, Math.round((ttc / 1.2) * 100) / 100, Math.round((ttc - ttc / 1.2) * 100) / 100, ttc, ids.amine],
+  );
+const f1 = (await emettre(lg, "2026-09-01", "2026-10-01")).rows[0];
+const f2 = (await emettre(lg2, "2026-09-01", "2026-10-01")).rows[0];
+assert.equal(f1.numero, "PS-2026-0001");
+assert.equal(f2.numero, "PS-2026-0002");
+let doublonFacture = null; try { await emettre(lg, "2026-09-01", "2026-10-02"); } catch (e) { doublonFacture = e; }
+assert.ok(doublonFacture, "une seule facture active par logement et par mois");
+const f3 = (await emettre(lg2, "2026-08-01", "2026-10-02")).rows[0];
+assert.equal(f3.numero, "PS-2026-0003", "l'échec précédent ne doit pas consommer de numéro");
+let antidatee = null; try { await emettre(lg, "2026-07-01", "2026-09-15"); } catch (e) { antidatee = e; }
+assert.ok(antidatee, "pas de facture antidatée");
+const f4 = (await emettre(lg, "2026-07-01", "2026-10-03")).rows[0];
+assert.equal(f4.numero, "PS-2026-0004", "pas de trou dans la numérotation");
+const f5 = (await emettre(lg, "2027-01-01", "2027-01-05")).rows[0];
+assert.equal(f5.numero, "PS-2027-0001", "la numérotation repart à 1 chaque année");
+console.log("✔ factures : PS-AAAA-NNNN continues, sans trou, chronologiques, une seule par logement et par mois");
+
+// Factures figées
+let modif = null; try { await db.query(`update public.factures set total_ttc = 1 where id=$1`, [f1.id]); } catch (e) { modif = e; }
+assert.ok(modif);
+let supp = null; try { await db.query(`delete from public.factures where id=$1`, [f1.id]); } catch (e) { supp = e; }
+assert.ok(supp);
+await db.query(`update public.factures set chemin_pdf='lg/f1.pdf' where id=$1`, [f1.id]);
+await db.query(`update public.factures set statut='annulee' where id=$1`, [f4.id]);
+console.log("✔ une facture émise ne se modifie ni ne se supprime (seuls le PDF et l'annulation changent)");
+
+// Personne ne peut émettre une facture depuis l'application des utilisateurs
+let emissionDirecte = null;
+try {
+  await comme("amine", `select public.emettre_facture($1,'2026-06-01','2026-10-04','{}','{}','[]',1,20,0.17,1,null)`, [lg]);
+} catch (e) { emissionDirecte = e; }
+assert.ok(emissionDirecte);
+assert.equal((await comme("amine", `select * from public.facture_sequences`)).rows.length, 0);
+console.log("✔ l'émission d'une facture et ses numéros ne sont pas accessibles aux utilisateurs");
+
+// Qui lit les factures et les rapports ?
+await db.query(`insert into public.rapports_mensuels (logement_id, mois, resume) values ($1,'2026-09-01','{}'), ($2,'2026-09-01','{}')`, [lg, lg2]);
+assert.deepEqual((await comme("proprio", `select numero from public.factures order by numero`)).rows.map((r) => r.numero), ["PS-2026-0001", "PS-2026-0004", "PS-2027-0001"]);
+assert.deepEqual((await comme("proprio2", `select numero from public.factures order by numero`)).rows.map((r) => r.numero), ["PS-2026-0002", "PS-2026-0003"]);
+assert.equal((await comme("proprio", `select * from public.rapports_mensuels`)).rows.length, 1);
+assert.equal((await comme("abdel", `select * from public.factures`)).rows.length, 0);
+assert.equal((await comme("amine", `select * from public.factures`)).rows.length, 5);
+await db.query(`insert into public.permissions values ($1,'comptabilite',true,false)`, [ids.equipe2]);
+assert.equal((await comme("equipe2", `select * from public.factures`)).rows.length, 5);
+assert.equal((await comme("equipe2", `select * from public.rapports_mensuels`)).rows.length, 2);
+console.log("✔ factures et rapports : propriétaire (les siens), comptabilité (tous), les autres rien");
+
+// Un logement supprimé ne fait pas disparaître sa facture
+const lg3 = (await db.query(`insert into public.logements (nom) values ('Éphémère') returning id`)).rows[0].id;
+const f6 = (await emettre(lg3, "2027-02-01", "2027-02-02")).rows[0];
+await db.query(`delete from public.logements where id=$1`, [lg3]);
+const restante = (await db.query(`select numero, logement_id from public.factures where id=$1`, [f6.id])).rows[0];
+assert.equal(restante.numero, f6.numero);
+assert.equal(restante.logement_id, null);
+console.log("✔ supprimer un logement conserve ses factures (obligation de conservation)");
+
+// Vues de la comptabilité : uniquement avec le droit Comptabilité, et sans données sensibles
+assert.equal((await comme("abdel", `select * from public.comptabilite_logements`)).rows.length, 0);
+assert.equal((await comme("proprio", `select * from public.comptabilite_logements`)).rows.length, 0);
+const vuesCompta = (await comme("equipe2", `select * from public.comptabilite_logements`)).rows;
+assert.ok(vuesCompta.length >= 2);
+assert.ok(!("code_acces" in vuesCompta[0]) && !("wifi_mot_de_passe" in vuesCompta[0]) && !("notes" in vuesCompta[0]));
+assert.ok((await comme("equipe2", `select * from public.comptabilite_reservations`)).rows.length >= 1);
+assert.equal((await comme("abdel", `select * from public.comptabilite_reservations`)).rows.length, 0);
+console.log("✔ le comptable voit les logements utiles à la saisie, sans codes d'accès ni notes ; les autres rien");
 
 console.log("\nTOUS LES CONTRÔLES SQL SONT OK");

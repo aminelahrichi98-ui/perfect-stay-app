@@ -118,6 +118,8 @@ function lireFormulaire(formData: FormData): Lecture {
       equipements: texte(formData, "equipements"),
       notes: texte(formData, "notes"),
       proprietaire_nom: texte(formData, "proprietaire_nom"),
+      proprietaire_adresse: texte(formData, "proprietaire_adresse"),
+      proprietaire_ice: texte(formData, "proprietaire_ice"),
     },
     ical,
     contacts,

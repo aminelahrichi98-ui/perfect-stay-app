@@ -73,7 +73,7 @@ export const MODULES: ModuleDef[] = [
 ];
 
 /** Dernière phase livrée : les modules de cette phase ou des précédentes sont « Disponibles » */
-export const PHASE_ACTUELLE = 3;
+export const PHASE_ACTUELLE = 4;
 
 export const MODULE_KEYS = MODULES.map((m) => m.key);
 

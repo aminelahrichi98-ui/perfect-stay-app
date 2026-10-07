@@ -10,14 +10,18 @@ export function VueMois({
   aujourdhui,
   nomLogement,
   reservations,
-  plateformes,
+  plateformes = {},
+  lectureSeule = false,
 }: {
   mois: Mois;
   aujourdhui: string;
   nomLogement: string;
   reservations: ReservationCalendrier[];
-  plateformes: Record<string, string>;
+  plateformes?: Record<string, string>;
+  /** Espace propriétaire : consultation seule, rien n'est cliquable */
+  lectureSeule?: boolean;
 }) {
+  const Bloc = lectureSeule ? "div" : "button";
   const etats = new Map(etatsDuMois(mois, reservations).map((e) => [e.jour, e]));
   const semaines = grilleMois(mois);
   const parId = new Map(reservations.map((r) => [r.id, r]));
@@ -51,9 +55,8 @@ export function VueMois({
                     {Number(jour.slice(8))}
                   </span>
                   {e.etat !== "libre" && e.reservationId ? (
-                    <button
-                      type="button"
-                      data-resa={e.reservationId}
+                    <Bloc
+                      {...(lectureSeule ? {} : { type: "button" as const, "data-resa": e.reservationId })}
                       aria-label={`${e.etat === "nuit" ? "Réservation" : "Nuits bloquées"} du ${formatJour(resa?.arrivee ?? jour)} au ${formatJour(resa?.depart ?? jour)}`}
                       className={cn(
                         "absolute bottom-2 flex h-7 items-center overflow-hidden px-2 text-left text-[0.72rem] font-medium whitespace-nowrap transition-colors duration-150 md:h-8 md:text-xs",
@@ -64,10 +67,10 @@ export function VueMois({
                     >
                       {afficherEtiquette ? (
                         <span className="truncate">
-                          {e.etat === "nuit" ? `${nuits} nuit${nuits > 1 ? "s" : ""} · ${plateformes[e.reservationId] ?? ""}` : "Bloqué"}
+                          {e.etat === "nuit" ? [`${nuits} nuit${nuits > 1 ? "s" : ""}`, plateformes[e.reservationId]].filter(Boolean).join(" · ") : "Bloqué"}
                         </span>
                       ) : null}
-                    </button>
+                    </Bloc>
                   ) : null}
                   {e.depart ? (
                     <span title="Départ : jour de ménage" aria-hidden="true" className="pointer-events-none absolute top-2.5 right-2 h-2 w-2 rounded-full bg-wine-600" />

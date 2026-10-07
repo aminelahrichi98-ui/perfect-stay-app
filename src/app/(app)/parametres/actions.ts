@@ -218,6 +218,8 @@ export async function enregistrerEntreprise(_: EtatAction, formData: FormData): 
     if (!membre) return { erreur: "Le responsable des ménages doit être un membre actif de l'équipe." };
     responsableMenage = membre.id;
   }
+  const taux = Number(champ("taux_tva").replace(",", "."));
+  if (!Number.isFinite(taux) || taux < 0 || taux > 40) return { erreur: "Le taux de TVA doit être compris entre 0 et 40 %." };
   const { error } = await supabase
     .from("entreprise")
     .update({
@@ -232,6 +234,8 @@ export async function enregistrerEntreprise(_: EtatAction, formData: FormData): 
       email: champ("email"),
       telephone: champ("telephone"),
       responsable_menage: responsableMenage,
+      taux_tva: taux,
+      mention_reglement: champ("mention_reglement"),
       updated_at: new Date().toISOString(),
     })
     .eq("id", 1);

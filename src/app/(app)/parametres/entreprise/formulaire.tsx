@@ -17,6 +17,8 @@ export type Entreprise = {
   email: string;
   telephone: string;
   responsable_menage: string | null;
+  taux_tva: number;
+  mention_reglement: string;
 };
 
 export function FormulaireEntreprise({
@@ -79,6 +81,12 @@ export function FormulaireEntreprise({
             </Field>
             <Field label="Patente" htmlFor="patente">
               <Input id="patente" name="patente" defaultValue={valeurs.patente} className="num" />
+            </Field>
+            <Field label="Taux de TVA (%)" htmlFor="taux_tva" hint="Appliqué à la commission : elle est comptée TTC, la TVA est détaillée sur la facture.">
+              <Input id="taux_tva" name="taux_tva" defaultValue={String(valeurs.taux_tva).replace(".", ",")} inputMode="decimal" className="num sm:max-w-32" />
+            </Field>
+            <Field label="Mention de règlement" htmlFor="mention_reglement" hint="Phrase imprimée en bas de chaque facture." className="sm:col-span-2">
+              <Textarea id="mention_reglement" name="mention_reglement" defaultValue={valeurs.mention_reglement} rows={2} />
             </Field>
           </div>
         </section>

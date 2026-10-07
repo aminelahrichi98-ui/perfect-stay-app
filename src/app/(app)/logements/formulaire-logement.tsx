@@ -25,6 +25,8 @@ export type ValeursLogement = {
   equipements: string;
   notes: string;
   proprietaire_nom: string;
+  proprietaire_adresse: string;
+  proprietaire_ice: string;
   proprietaires: string[];
   ical: { plateforme: string; url: string }[];
   contacts: { role: string; nom: string; telephone: string }[];
@@ -46,6 +48,8 @@ export const VALEURS_VIDES: ValeursLogement = {
   equipements: "",
   notes: "",
   proprietaire_nom: "",
+  proprietaire_adresse: "",
+  proprietaire_ice: "",
   proprietaires: [],
   ical: [],
   contacts: [],
@@ -222,6 +226,14 @@ export function FormulaireLogement({
           <Field label="Nom du propriétaire (sans compte)" htmlFor={`${id}-pnom`}>
             <Input id={`${id}-pnom`} name="proprietaire_nom" defaultValue={valeurs.proprietaire_nom} autoComplete="off" />
           </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Adresse du propriétaire" htmlFor={`${id}-padr`} hint="Facultatif. Imprimée sur la facture de commission.">
+              <Input id={`${id}-padr`} name="proprietaire_adresse" defaultValue={valeurs.proprietaire_adresse} autoComplete="off" />
+            </Field>
+            <Field label="ICE du propriétaire" htmlFor={`${id}-pice`} hint="Facultatif, si c'est une société.">
+              <Input id={`${id}-pice`} name="proprietaire_ice" defaultValue={valeurs.proprietaire_ice} inputMode="numeric" autoComplete="off" className="num" />
+            </Field>
+          </div>
         </div>
       </Section>
 

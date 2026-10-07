@@ -51,6 +51,8 @@ export default async function PageModifierLogement({
     equipements: l.equipements,
     notes: l.notes,
     proprietaire_nom: l.proprietaire_nom,
+    proprietaire_adresse: l.proprietaire_adresse,
+    proprietaire_ice: l.proprietaire_ice,
     proprietaires: (liens ?? []).map((x) => x.user_id),
     ical: ical ?? [],
     contacts: contacts ?? [],

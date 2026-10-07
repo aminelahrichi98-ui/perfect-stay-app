@@ -11,7 +11,7 @@ export default async function PageEntreprise() {
   const [{ data }, { data: equipe }] = await Promise.all([
     supabase
       .from("entreprise")
-      .select("raison_sociale, adresse, ice, identifiant_fiscal, registre_commerce, patente, banque, rib, email, telephone, responsable_menage")
+      .select("raison_sociale, adresse, ice, identifiant_fiscal, registre_commerce, patente, banque, rib, email, telephone, responsable_menage, taux_tva, mention_reglement")
       .eq("id", 1)
       .maybeSingle(),
     supabase.from("profiles").select("id, prenom, nom").eq("type", "equipe").eq("actif", true).order("prenom"),
@@ -23,7 +23,7 @@ export default async function PageEntreprise() {
       <p className="mt-1 mb-6 text-ink-2 text-pretty">Ces informations apparaîtront sur les factures de commission et les rapports envoyés aux propriétaires.</p>
       {data ? (
         <FormulaireEntreprise
-          valeurs={data}
+          valeurs={{ ...data, taux_tva: Number(data.taux_tva) }}
           equipe={(equipe ?? []).map((p) => ({ id: p.id, nom: `${p.prenom} ${p.nom}`.trim() }))}
           lectureSeule={!peutModifier(moi, "parametres")}
         />
