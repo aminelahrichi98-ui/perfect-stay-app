@@ -16,7 +16,7 @@ await db.exec(`
   grant usage on schema public to authenticated;
   grant usage on schema auth to authenticated;
 `);
-const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql", "0008_taches.sql"];
+const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql", "0008_taches.sql", "0009_crm_marketing.sql"];
 for (let passe = 0; passe < 2; passe++) {
   for (const f of FICHIERS) await db.exec(readFileSync(R + f, "utf8")); // la 2e passe vérifie que les scripts sont relançables
   if (passe === 0) await db.exec(`grant select, insert, update, delete on all tables in schema public to authenticated;`);
@@ -423,5 +423,48 @@ await db.query(`insert into public.taches (titre, echeance, recurrence_id) value
 let doublonRec = null; try { await db.query(`insert into public.taches (titre, echeance, recurrence_id) values ('Comptabilité du mois','2026-10-31',$1)`, [rec[0].id]); } catch (e) { doublonRec = e; }
 assert.ok(doublonRec);
 console.log("✔ tâches : sous-tâches horodatées, droits Tâches, prestataire cloisonné, récurrence sans doublon");
+
+// ============================ Phase 7 : CRM et marketing ============================
+await creer("sales", "sales@x.ma");
+await db.query(`insert into public.profiles (id,email,prenom,nom,type) values ($1,'sales@x.ma','Sa','Les','equipe')`, [ids.sales]);
+await db.query(`insert into public.permissions values ($1,'crm',true,true)`, [ids.sales]);
+const lead = (await comme("sales", `insert into public.crm_leads (nom, telephone, source) values ('Mme Alaoui','0612345678','meta') returning id`)).rows[0].id;
+await comme("sales", `update public.crm_leads set etape='appele' where id=$1`, [lead]);
+await comme("sales", `update public.crm_leads set etape='rdv' where id=$1`, [lead]);
+await comme("sales", `update public.crm_leads set notes='RDV jeudi' where id=$1`, [lead]); // pas de changement d'étape : rien dans l'historique
+const histo = (await comme("sales", `select etape from public.crm_etapes where lead_id=$1 order by date_etape, etape`, [lead])).rows.map((r) => r.etape).sort();
+assert.deepEqual(histo, ["appele", "nouveau", "rdv"]);
+await comme("sales", `insert into public.crm_appels (lead_id, resultat, auteur_id) values ($1,'rdv_pris',$2)`, [lead, ids.sales]);
+await echoue("sales", `update public.crm_leads set etape='inconnue' where id=$1`, [lead], "étape inconnue");
+await echoue("sales", `insert into public.crm_appels (lead_id, resultat) values ($1,'bizarre')`, [lead], "résultat d'appel inconnu");
+// Même lead Meta reçu deux fois : un seul enregistrement
+await db.query(`insert into public.crm_leads (nom, meta_lead_id) values ('Meta 1','L-1')`);
+let doublonMeta = null; try { await db.query(`insert into public.crm_leads (nom, meta_lead_id) values ('Meta 1 bis','L-1')`); } catch (e) { doublonMeta = e; }
+assert.ok(doublonMeta);
+// Cloisonnement : CRM réservé à ceux qui ont le droit (Abdelkarim, comptable, prestataire : rien)
+for (const qui of ["abdel", "equipe2", "chef", "presta", "proprio"]) {
+  assert.equal((await comme(qui, `select * from public.crm_leads`)).rows.length, 0, `${qui} ne doit pas voir le CRM`);
+  assert.equal((await comme(qui, `select * from public.crm_appels`)).rows.length, 0);
+  assert.equal((await comme(qui, `select * from public.crm_etapes`)).rows.length, 0);
+}
+await echoue("abdel", `insert into public.crm_leads (nom) values ('Intrus')`, [], "lead sans droit CRM");
+await echoue("sales", `insert into public.crm_etapes (lead_id, etape) values ($1,'signe')`, [lead], "falsifier l'historique des étapes");
+console.log("✔ CRM : historique des étapes automatique, doublons Meta bloqués, réservé au droit CRM");
+
+// Marketing
+await creer("marketeur", "marketeur@x.ma");
+await db.query(`insert into public.profiles (id,email,prenom,nom,type) values ($1,'marketeur@x.ma','Mar','Keting','equipe')`, [ids.marketeur]);
+await db.query(`insert into public.permissions values ($1,'marketing',true,true)`, [ids.marketeur]);
+await comme("marketeur", `insert into public.marketing_depenses (date_depense, canal, campagne, montant) values ('2026-10-03','meta','Octobre – Marrakech',1500)`);
+await comme("marketeur", `insert into public.marketing_publications (date_publication, reseau, sujet) values ('2026-10-12','instagram','Visite de la Villa Targa')`);
+assert.equal((await comme("marketeur", `select * from public.marketing_depenses`)).rows.length, 1);
+assert.equal((await comme("marketeur", `select * from public.crm_leads`)).rows.length, 0); // le marketing ne voit pas les leads eux-mêmes
+for (const qui of ["abdel", "equipe2", "sales"]) {
+  assert.equal((await comme(qui, `select * from public.marketing_depenses`)).rows.length, 0);
+  assert.equal((await comme(qui, `select * from public.marketing_publications`)).rows.length, 0);
+}
+await echoue("marketeur", `insert into public.marketing_depenses (date_depense, canal, montant) values ('2026-10-03','tiktok',10)`, [], "canal inconnu");
+await echoue("marketeur", `insert into public.marketing_depenses (date_depense, canal, montant) values ('2026-10-03','meta',0)`, [], "montant nul");
+console.log("✔ marketing : dépenses et publications réservées au droit Marketing, canaux contrôlés");
 
 console.log("\nTOUS LES CONTRÔLES SQL SONT OK");
