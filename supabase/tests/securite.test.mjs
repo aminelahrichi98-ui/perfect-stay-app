@@ -14,14 +14,15 @@ await db.exec(`
   create schema storage;
   create table storage.buckets (id text primary key, name text, public boolean);
   grant usage on schema public to authenticated;
+  grant usage on schema auth to authenticated;
 `);
-const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql"];
+const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql"];
 for (let passe = 0; passe < 2; passe++) {
   for (const f of FICHIERS) await db.exec(readFileSync(R + f, "utf8")); // la 2e passe vérifie que les scripts sont relançables
   if (passe === 0) await db.exec(`grant select, insert, update, delete on all tables in schema public to authenticated;`);
 }
 await db.exec(`grant select, insert, update, delete on all tables in schema public to authenticated;`);
-console.log("✔ scripts 0001, 0002, 0003 et 0005 exécutés deux fois sans erreur");
+console.log("✔ scripts 0001, 0002, 0003, 0005 et 0007 exécutés deux fois sans erreur");
 
 // Comptes : le premier devient administrateur grâce au déclencheur
 const ids = {};
@@ -201,7 +202,7 @@ assert.equal((await vue("equipe2", "proprietaire_logements")).length, 0);
 assert.equal((await vue("proprio", "proprietaire_versements")).length, 1);
 assert.equal(Number((await vue("proprio2", "proprietaire_versements"))[0].montant_recu), 3000);
 const maint = await vue("proprio", "proprietaire_maintenance");
-assert.deepEqual(maint.map((r) => r.description), ["Plomberie"]); // ni la publicité, ni le logement voisin
+assert.deepEqual(maint, []); // la maintenance vient des frais d'incidents (testés plus bas), jamais des dépenses internes
 assert.equal((await vue("proprio", "proprietaire_reservations")).length, 1);
 assert.equal((await vue("proprio2", "proprietaire_reservations")).length, 0);
 console.log("✔ chaque propriétaire ne voit que ses logements, ses versements, sa maintenance et son calendrier");
@@ -287,5 +288,111 @@ assert.ok(!("code_acces" in vuesCompta[0]) && !("wifi_mot_de_passe" in vuesCompt
 assert.ok((await comme("equipe2", `select * from public.comptabilite_reservations`)).rows.length >= 1);
 assert.equal((await comme("abdel", `select * from public.comptabilite_reservations`)).rows.length, 0);
 console.log("✔ le comptable voit les logements utiles à la saisie, sans codes d'accès ni notes ; les autres rien");
+
+// ============================ Phase 5 : opérations ============================
+await creer("presta", "presta@x.ma");
+await db.query(`insert into public.profiles (id,email,prenom,nom,type) values ($1,'presta@x.ma','Pres','Ta','prestataire')`, [ids.presta]);
+await db.query(`insert into public.permissions values ($1,'menage',true,true),($1,'checklists',true,true),($1,'taches',true,true)`, [ids.presta]);
+await creer("chef", "chef@x.ma");
+await db.query(`insert into public.profiles (id,email,prenom,nom,type) values ($1,'chef@x.ma','Chef','C','equipe')`, [ids.chef]);
+await db.query(
+  `insert into public.permissions values ($1,'menage',true,true),($1,'maintenance',true,true),($1,'stock',true,true),($1,'checklists',true,true),($1,'onboarding',true,true)`,
+  [ids.chef],
+);
+
+// Ménages : le prestataire ne voit que les siens, même avec les droits « Ménage » et « Tâches »
+const t1 = (await db.query(`insert into public.taches (titre,type,logement_id,responsable_id,echeance) values ('Ménage A','menage',$1,$2,'2026-10-10') returning id`, [lg, ids.presta])).rows[0].id;
+const t2 = (await db.query(`insert into public.taches (titre,type,logement_id,echeance) values ('Ménage B','menage',$1,'2026-10-11') returning id`, [lg2])).rows[0].id;
+assert.deepEqual((await comme("presta", `select titre from public.taches`)).rows.map((r) => r.titre), ["Ménage A"]);
+assert.equal((await comme("chef", `select * from public.taches where titre in ('Ménage A','Ménage B')`)).rows.length, 2);
+assert.equal((await comme("equipe2", `select * from public.taches where titre in ('Ménage A','Ménage B')`)).rows.length, 0);
+console.log("✔ un prestataire ne voit que les ménages qui lui sont attribués");
+
+// Le prestataire avance sa tâche, rien d'autre
+await comme("presta", `update public.taches set statut='en_cours' where id=$1`, [t1]);
+await echoue("presta", `update public.taches set echeance='2026-12-01' where id=$1`, [t1], "changer l'échéance");
+await echoue("presta", `update public.taches set responsable_id=null where id=$1`, [t1], "se retirer la tâche");
+await echoue("presta", `update public.taches set controle='valide' where id=$1`, [t1], "se valider lui-même");
+await echoue("presta", `update public.taches set statut='annule' where id=$1`, [t1], "annuler");
+assert.equal((await comme("presta", `update public.taches set statut='termine' where id=$1 returning controle, termine_le`, [t1])).rows[0].controle, "en_attente");
+const autre = await comme("presta", `update public.taches set statut='termine' where id=$1 returning id`, [t2]);
+assert.equal(autre.rows.length, 0);
+console.log("✔ le prestataire change l'avancement de sa tâche (jamais le reste) ; terminé = à contrôler");
+
+// Le contrôle qualité appartient à l'équipe
+await comme("chef", `update public.taches set controle='valide', controle_par=$2, controle_le=now() where id=$1`, [t1, ids.chef]);
+assert.equal((await comme("chef", `select controle from public.taches where id=$1`, [t1])).rows[0].controle, "valide");
+await comme("chef", `update public.taches set statut='a_faire', controle='a_refaire', controle_note='Salle de bain' where id=$1`, [t1]);
+assert.equal((await comme("presta", `select controle from public.taches where id=$1`, [t1])).rows[0].controle, "a_refaire");
+console.log("✔ Abdelkarim valide ou renvoie un ménage à refaire");
+
+// Check-lists
+const modeles = (await comme("chef", `select id, nom from public.checklist_modeles order by nom`)).rows;
+assert.equal(modeles.length, 3);
+assert.equal((await comme("presta", `select * from public.checklist_modeles`)).rows.length, 0);
+const cl = (await comme("chef", `insert into public.checklists (nom, logement_id, tache_id) values ('Ménage A',$1,$2) returning id`, [lg, t1])).rows[0].id;
+const pt = (await comme("chef", `insert into public.checklist_points (checklist_id, ordre, libelle) values ($1,1,'Lits'),($1,2,'Sols') returning id`, [cl])).rows;
+const cl2 = (await comme("chef", `insert into public.checklists (nom, logement_id, tache_id) values ('Ménage B',$1,$2) returning id`, [lg2, t2])).rows[0].id;
+await comme("chef", `insert into public.checklist_points (checklist_id, ordre, libelle) values ($1,1,'Lits')`, [cl2]);
+assert.equal((await comme("presta", `select * from public.checklists`)).rows.length, 1);
+assert.equal((await comme("presta", `select * from public.checklist_points`)).rows.length, 2);
+const coche = (await comme("presta", `update public.checklist_points set fait=true where id=$1 returning fait_le, fait_par`, [pt[0].id])).rows[0];
+assert.ok(coche.fait_le);
+assert.equal(coche.fait_par, ids.presta);
+await echoue("presta", `update public.checklist_points set libelle='Rien' where id=$1`, [pt[0].id], "changer le libellé");
+await echoue("presta", `insert into public.checklists (nom, logement_id, tache_id) values ('X',$1,$2)`, [lg2, t2], "créer une check-list sur la tâche d'un autre");
+await comme("presta", `insert into public.checklist_photos (checklist_id, point_id, chemin, chemin_vignette) values ($1,$2,'a.jpg','b.jpg')`, [cl, pt[0].id]);
+await echoue("presta", `insert into public.checklist_photos (checklist_id, chemin, chemin_vignette) values ($1,'a.jpg','b.jpg')`, [cl2], "photo sur la check-list d'un autre");
+assert.equal((await comme("presta", `update public.checklist_photos set pris_le = now() - interval '1 day' returning id`)).rows.length, 0); // antidater : aucune ligne modifiable
+console.log("✔ check-lists : copies des modèles, cochage horodaté par la base, photos, cloisonnement des prestataires");
+
+// Logements vus par les opérations
+const opsPresta = (await comme("presta", `select id, code_acces from public.operations_logements`)).rows;
+assert.equal(opsPresta.length, 1);
+assert.equal(opsPresta[0].id, lg);
+assert.equal((await comme("equipe2", `select * from public.operations_logements`)).rows.length, 0);
+const opsChef = (await comme("chef", `select id, code_acces from public.operations_logements`)).rows;
+assert.ok(opsChef.length >= 2);
+assert.ok(opsChef.every((l) => l.code_acces === null));
+console.log("✔ les opérations voient les logements utiles ; le code d'accès seulement pour le prestataire concerné ou avec le droit Logements");
+
+// Maintenance : frais avancés, visibles du propriétaire concerné seulement
+const inc = (await comme("chef", `insert into public.incidents (logement_id, titre, type) values ($1,'Chauffe-eau HS','panne') returning id`, [lg])).rows[0].id;
+await comme("chef", `insert into public.incident_frais (incident_id, description, montant) values ($1,'Pièce',450),($1,'Main d''œuvre',300)`, [inc]);
+assert.equal((await comme("chef", `select count(*)::int n from public.incident_frais`)).rows[0].n, 2);
+assert.equal((await comme("proprio", `select sum(montant)::numeric s from public.proprietaire_maintenance`)).rows[0].s, "750.00");
+assert.equal((await comme("proprio2", `select * from public.proprietaire_maintenance`)).rows.length, 0);
+assert.equal((await comme("proprio", `select * from public.incidents`)).rows.length, 0);
+assert.equal((await comme("presta", `select * from public.incidents`)).rows.length, 0);
+assert.equal((await comme("equipe2", `select * from public.incident_frais`)).rows.length, 0);
+await comme("chef", `update public.incidents set remboursement='sans_objet' where id=$1`, [inc]);
+assert.equal((await comme("proprio", `select * from public.proprietaire_maintenance`)).rows.length, 0);
+await comme("chef", `update public.incidents set remboursement='a_rembourser' where id=$1`, [inc]);
+await echoue("chef", `insert into public.incident_frais (incident_id, montant) values ($1,0)`, [inc], "frais à zéro");
+console.log("✔ maintenance : frais avancés visibles du propriétaire concerné uniquement");
+
+// Stock : historique non modifiable, niveaux calculés
+const art = (await comme("chef", `select id, nom from public.stock_articles order by nom`)).rows;
+assert.equal(art.length, 7);
+const draps = art.find((a) => a.nom === "Draps").id;
+await comme("chef", `insert into public.stock_mouvements (article_id, logement_id, type, quantite) values ($1,null,'entree',20)`, [draps]);
+await comme("chef", `insert into public.stock_mouvements (article_id, logement_id, type, quantite) values ($1,null,'transfert',-6),($1,$2,'transfert',6)`, [draps, lg]);
+const niveaux = (await comme("chef", `select logement_id, quantite from public.stock_niveaux where article_id=$1 order by quantite`, [draps])).rows;
+assert.deepEqual(niveaux.map((n) => n.quantite), [6, 14]);
+assert.equal((await comme("chef", `update public.stock_mouvements set quantite=99 returning id`)).rows.length, 0); // historique non modifiable
+assert.equal((await comme("chef", `delete from public.stock_mouvements returning id`)).rows.length, 0); // historique non effaçable
+assert.equal((await db.query(`select count(*)::int n from public.stock_mouvements`)).rows[0].n, 3);
+assert.equal((await comme("equipe2", `select * from public.stock_niveaux`)).rows.length, 0);
+assert.equal((await comme("equipe2", `select * from public.stock_articles`)).rows.length, 0);
+console.log("✔ stock : historique infalsifiable, niveaux calculés, droit Stock requis");
+
+// Onboarding
+await comme("chef", `insert into public.onboarding_etapes (logement_id, cle) values ($1,'visite')`, [lg]);
+const et = (await comme("chef", `update public.onboarding_etapes set fait=true where logement_id=$1 and cle='visite' returning fait_le, fait_par`, [lg])).rows[0];
+assert.ok(et.fait_le);
+assert.equal(et.fait_par, ids.chef);
+await echoue("equipe2", `insert into public.onboarding_etapes (logement_id, cle) values ($1,'photos')`, [lg], "onboarding sans le droit");
+await echoue("chef", `insert into public.onboarding_etapes (logement_id, cle) values ($1,'inconnue')`, [lg], "étape inconnue");
+console.log("✔ onboarding : étapes horodatées, droit Onboarding requis");
 
 console.log("\nTOUS LES CONTRÔLES SQL SONT OK");
