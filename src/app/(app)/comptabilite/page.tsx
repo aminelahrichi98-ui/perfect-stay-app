@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowDownRight, ArrowUpRight, Minus, Wallet } from "lucide-react";
+import { Wallet } from "lucide-react";
 import { NavMois } from "@/components/nav-mois";
+import { Evolution } from "@/components/evolution";
 import { buttonClass, Card } from "@/components/ui";
 import { exigerAcces, peutModifier } from "@/lib/auth";
 import { cn } from "@/lib/cn";
@@ -8,33 +9,12 @@ import { aujourdhui, libelleMois, moisDe, moisValide } from "@/lib/dates";
 import { formatMad, formatMontant } from "@/lib/format";
 import type { ModeTva } from "@/lib/mode-tva";
 import { lireModeTva } from "@/lib/mode-tva-serveur";
-import { variation, type Totaux } from "@/lib/synthese";
+import type { Totaux } from "@/lib/synthese";
 import { chargerSynthese, libelleCategorie } from "./donnees";
 
 export const metadata = { title: "Comptabilité" };
 
 const commission = (t: Totaux, mode: ModeTva) => (mode === "ht" ? t.commissionHT : t.commissionTTC);
-
-function Evolution({ precedent, actuel, inverse = false }: { precedent: number; actuel: number; inverse?: boolean }) {
-  const v = variation(precedent, actuel);
-  if (v === null) return <span className="text-[0.8rem] text-ink-3">Pas de comparaison</span>;
-  const arrondi = Math.round(v);
-  if (arrondi === 0) {
-    return (
-      <span className="inline-flex items-center gap-1 text-[0.8rem] text-ink-3">
-        <Minus className="h-3.5 w-3.5" /> stable
-      </span>
-    );
-  }
-  const bon = inverse ? arrondi < 0 : arrondi > 0;
-  const Icone = arrondi > 0 ? ArrowUpRight : ArrowDownRight;
-  return (
-    <span className={cn("num inline-flex items-center gap-1 text-[0.8rem] font-medium", bon ? "text-ok" : "text-danger")}>
-      <Icone className="h-3.5 w-3.5" /> {arrondi > 0 ? "+" : ""}
-      {arrondi} % <span className="font-normal text-ink-3">vs mois précédent</span>
-    </span>
-  );
-}
 
 export default async function PageSynthese({ searchParams }: { searchParams: Promise<{ mois?: string }> }) {
   const u = await exigerAcces("comptabilite");

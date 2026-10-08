@@ -49,5 +49,16 @@ les dépenses publicitaires et le calendrier des publications. Les leads Meta ar
 (signature vérifiée avec `META_APP_SECRET`, jeton de vérification `META_VERIFY_TOKEN`, lecture du lead avec
 `META_PAGE_ACCESS_TOKEN`). Sans Meta, l'import CSV du CRM sert de solution de repli.
 
+## Stratégie, RH et installation sur téléphone (phase 8)
+Le script `supabase/migrations/0010_strategie_rh.sql` ajoute le journal des décisions et les modules RH (fiches, documents
+dans le bucket privé `rh`, recrutements). Le Dashboard affiche les chiffres des modules auxquels l'utilisateur a droit.
+L'app est installable (PWA) : `manifest.webmanifest`, icônes, et un petit service worker (`public/sw.js`) qui ne garde
+que la page « hors ligne » : aucune donnée n'est stockée sur le téléphone.
+
+## Sauvegardes
+Supabase sauvegarde la base chaque jour (conservation selon l'offre : 7 jours en Pro, aucune sauvegarde automatique téléchargeable
+en offre gratuite). Pensez à exporter régulièrement les données importantes (Comptabilité > rapports PDF) et à envisager l'offre Pro
+quand l'activité grandit. Les fichiers (photos, PDF) sont dans Supabase Storage.
+
 ## Variables d'environnement
 Voir `.env.example`. Les vraies clés ne sont jamais versionnées (`.env*` est ignoré par Git).
