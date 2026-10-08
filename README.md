@@ -32,5 +32,11 @@ non modifiables une fois émises), les rapports mensuels et les vues réservées
 `0006_planification_documents.sql` planifie la génération automatique des rapports et factures le 1er de chaque mois
 (`/api/cron/documents`, même `CRON_SECRET` que la synchronisation). Les PDF sont stockés dans le bucket privé `rapports`.
 
+## Opérations et onboarding (phase 5)
+Le script `supabase/migrations/0007_operations.sql` ajoute les ménages avec contrôle qualité, les check-lists
+(modèles, photos horodatées), la maintenance (incidents, frais avancés, remboursements), le stock et l'onboarding.
+Les photos et factures vont dans le bucket privé `operations`. Un compte de type « Prestataire » ne voit que les
+ménages qui lui sont attribués : la base de données applique cette règle, pas seulement l'écran.
+
 ## Variables d'environnement
 Voir `.env.example`. Les vraies clés ne sont jamais versionnées (`.env*` est ignoré par Git).
