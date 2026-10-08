@@ -43,5 +43,11 @@ Le script `supabase/migrations/0008_taches.sql` ajoute les sous-tâches, les pi�
 règles de récurrence. Les tâches récurrentes sont créées 14 jours à l'avance, à l'ouverture de la page Tâches et chaque
 jour à 03:00 par `/api/cron/taches` (sans doublon). « Comptabilité du mois » est créée d'office : dernier jour de chaque mois.
 
+## CRM et Marketing (phase 7)
+Le script `supabase/migrations/0009_crm_marketing.sql` ajoute le pipeline de leads (appels, historique des étapes),
+les dépenses publicitaires et le calendrier des publications. Les leads Meta arrivent par `POST /api/meta/leads`
+(signature vérifiée avec `META_APP_SECRET`, jeton de vérification `META_VERIFY_TOKEN`, lecture du lead avec
+`META_PAGE_ACCESS_TOKEN`). Sans Meta, l'import CSV du CRM sert de solution de repli.
+
 ## Variables d'environnement
 Voir `.env.example`. Les vraies clés ne sont jamais versionnées (`.env*` est ignoré par Git).
