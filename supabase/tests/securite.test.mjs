@@ -16,13 +16,13 @@ await db.exec(`
   grant usage on schema public to authenticated;
   grant usage on schema auth to authenticated;
 `);
-const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql"];
+const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql", "0008_taches.sql"];
 for (let passe = 0; passe < 2; passe++) {
   for (const f of FICHIERS) await db.exec(readFileSync(R + f, "utf8")); // la 2e passe vérifie que les scripts sont relançables
   if (passe === 0) await db.exec(`grant select, insert, update, delete on all tables in schema public to authenticated;`);
 }
 await db.exec(`grant select, insert, update, delete on all tables in schema public to authenticated;`);
-console.log("✔ scripts 0001, 0002, 0003, 0005 et 0007 exécutés deux fois sans erreur");
+console.log("✔ scripts 0001, 0002, 0003, 0005, 0007 et 0008 exécutés deux fois sans erreur");
 
 // Comptes : le premier devient administrateur grâce au déclencheur
 const ids = {};
@@ -394,5 +394,34 @@ assert.equal(et.fait_par, ids.chef);
 await echoue("equipe2", `insert into public.onboarding_etapes (logement_id, cle) values ($1,'photos')`, [lg], "onboarding sans le droit");
 await echoue("chef", `insert into public.onboarding_etapes (logement_id, cle) values ($1,'inconnue')`, [lg], "étape inconnue");
 console.log("✔ onboarding : étapes horodatées, droit Onboarding requis");
+
+// ============================ Phase 6 : tâches ============================
+await creer("collab", "collab@x.ma");
+await db.query(`insert into public.profiles (id,email,prenom,nom,type) values ($1,'collab@x.ma','Col','Lab','equipe')`, [ids.collab]);
+await db.query(`insert into public.permissions values ($1,'taches',true,true)`, [ids.collab]);
+const tp = (await comme("collab", `insert into public.taches (titre, pole, echeance) values ('Relancer le syndic','Opérations','2026-10-12') returning id`)).rows[0].id;
+await comme("collab", `insert into public.tache_sous_taches (tache_id, libelle) values ($1,'Appeler'),($1,'Écrire')`, [tp]);
+const sous = (await comme("collab", `select id from public.tache_sous_taches where tache_id=$1 order by libelle`, [tp])).rows;
+assert.equal(sous.length, 2);
+const coche2 = (await comme("collab", `update public.tache_sous_taches set fait=true where id=$1 returning fait_le`, [sous[0].id])).rows[0];
+assert.ok(coche2.fait_le);
+// Sans le droit Tâches : rien (ni la tâche, ni ses sous-tâches, ni les récurrences)
+assert.equal((await comme("equipe2", `select * from public.tache_sous_taches`)).rows.length, 0);
+assert.equal((await comme("equipe2", `select * from public.tache_recurrences`)).rows.length, 0);
+await echoue("equipe2", `insert into public.tache_sous_taches (tache_id, libelle) values ($1,'X')`, [tp], "sous-tâche sans droit");
+// Le prestataire n'accède qu'aux éléments des tâches qui lui sont attribuées
+assert.equal((await comme("presta", `select * from public.tache_sous_taches where tache_id=$1`, [tp])).rows.length, 0);
+await db.query(`insert into public.tache_sous_taches (tache_id, libelle) values ($1,'Détail ménage')`, [t1]);
+assert.equal((await comme("presta", `select * from public.tache_sous_taches`)).rows.length, 1);
+assert.equal((await comme("presta", `select * from public.tache_recurrences`)).rows.length, 0);
+// La récurrence demandée d'office existe, et une règle ne crée jamais deux fois la même date
+const rec = (await comme("collab", `select id, titre, frequence from public.tache_recurrences`)).rows;
+assert.equal(rec.length, 1);
+assert.equal(rec[0].titre, "Comptabilité du mois");
+assert.equal(rec[0].frequence, "dernier_jour_mois");
+await db.query(`insert into public.taches (titre, echeance, recurrence_id) values ('Comptabilité du mois','2026-10-31',$1)`, [rec[0].id]);
+let doublonRec = null; try { await db.query(`insert into public.taches (titre, echeance, recurrence_id) values ('Comptabilité du mois','2026-10-31',$1)`, [rec[0].id]); } catch (e) { doublonRec = e; }
+assert.ok(doublonRec);
+console.log("✔ tâches : sous-tâches horodatées, droits Tâches, prestataire cloisonné, récurrence sans doublon");
 
 console.log("\nTOUS LES CONTRÔLES SQL SONT OK");

@@ -38,5 +38,10 @@ Le script `supabase/migrations/0007_operations.sql` ajoute les ménages avec con
 Les photos et factures vont dans le bucket privé `operations`. Un compte de type « Prestataire » ne voit que les
 ménages qui lui sont attribués : la base de données applique cette règle, pas seulement l'écran.
 
+## Tâches (phase 6)
+Le script `supabase/migrations/0008_taches.sql` ajoute les sous-tâches, les pièces jointes (bucket privé `taches`) et les
+règles de récurrence. Les tâches récurrentes sont créées 14 jours à l'avance, à l'ouverture de la page Tâches et chaque
+jour à 03:00 par `/api/cron/taches` (sans doublon). « Comptabilité du mois » est créée d'office : dernier jour de chaque mois.
+
 ## Variables d'environnement
 Voir `.env.example`. Les vraies clés ne sont jamais versionnées (`.env*` est ignoré par Git).
