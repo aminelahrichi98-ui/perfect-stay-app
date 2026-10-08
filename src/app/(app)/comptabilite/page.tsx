@@ -49,17 +49,24 @@ export default async function PageSynthese({ searchParams }: { searchParams: Pro
   const libelleCommission = mode === "ht" ? "Commissions HT" : "Commissions TTC";
   const vide = t.nbVersements === 0 && actuel.depensesTotal === 0;
 
+  const suffixe = mode === "ht" ? "HT" : "TTC";
+  const commissionNette = (tot: typeof t, depenses: number) => Math.round((commission(tot, mode) - depenses) * 100) / 100;
   const tuiles = [
     {
-      titre: libelleCommission,
-      valeur: commission(t, mode),
-      precedent: commission(tp, mode),
-      note: mode === "ttc" ? `dont TVA ${formatMontant(t.tva)} MAD` : `+ TVA ${formatMontant(t.tva)} = ${formatMontant(t.commissionTTC)} TTC`,
+      titre: "Encaissements",
+      valeur: t.encaisse,
+      precedent: tp.encaisse,
+      note: "ménage + commissions TTC",
       fort: true,
     },
     { titre: "Frais de ménage perçus", valeur: t.menage, precedent: tp.menage, note: `${t.nbVersements} versement${t.nbVersements > 1 ? "s" : ""} ce mois-ci` },
     { titre: "Dépenses", valeur: actuel.depensesTotal, precedent: precedent.depensesTotal, note: "non refacturées aux propriétaires", inverse: true },
-    { titre: "Solde Perfect Stay", valeur: actuel.solde, precedent: precedent.solde, note: "ménage + commission TTC − dépenses" },
+    {
+      titre: `Commissions nettes ${suffixe}`,
+      valeur: commissionNette(t, actuel.depensesTotal),
+      precedent: commissionNette(tp, precedent.depensesTotal),
+      note: `commissions ${suffixe} − dépenses`,
+    },
   ];
 
   return (
@@ -76,7 +83,7 @@ export default async function PageSynthese({ searchParams }: { searchParams: Pro
       <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {tuiles.map((c, i) => (
           <li key={c.titre} className="enter" style={{ "--i": i + 1 } as React.CSSProperties}>
-            <Card className={cn("h-full p-5", c.fort && "border-aub-900 bg-aub-900 text-white")}>
+            <Card className={cn("h-full p-5", c.fort && "!border-aub-900 !bg-aub-900 text-white")}>
               <p className={cn("text-sm", c.fort ? "text-aub-200" : "text-ink-2")}>{c.titre}</p>
               <p className="num mt-1 font-display text-[1.65rem] leading-tight font-semibold tracking-tight">
                 {formatMontant(c.valeur)} <span className={cn("text-base font-medium", c.fort ? "text-aub-300" : "text-ink-3")}>MAD</span>
