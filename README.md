@@ -26,5 +26,11 @@ Les calendriers iCal sont synchronisés toutes les 30 minutes : Supabase (pg_cro
 `/api/cron/ical` avec le mot de passe `CRON_SECRET`. Le script `supabase/migrations/0004_planification_synchro.sql`
 met en place cette planification. Vercel garde une passe quotidienne en filet de sécurité (`vercel.json`).
 
+## Comptabilité et espace propriétaire (phase 4)
+Le script `supabase/migrations/0005_comptabilite.sql` ajoute les dépenses, les factures (numéros PS-AAAA-NNNN continus,
+non modifiables une fois émises), les rapports mensuels et les vues réservées aux propriétaires. Le script
+`0006_planification_documents.sql` planifie la génération automatique des rapports et factures le 1er de chaque mois
+(`/api/cron/documents`, même `CRON_SECRET` que la synchronisation). Les PDF sont stockés dans le bucket privé `rapports`.
+
 ## Variables d'environnement
 Voir `.env.example`. Les vraies clés ne sont jamais versionnées (`.env*` est ignoré par Git).

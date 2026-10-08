@@ -49,3 +49,10 @@ export function formatDateHeure(date: Date | string) {
   const heure = new Intl.DateTimeFormat("fr-FR", { hour: "2-digit", minute: "2-digit", hour12: false, timeZone: FUSEAU }).format(d);
   return `${formatDate(d)} à ${heure}`;
 }
+
+/** 1 234,50 : toujours deux décimales, pour les tableaux comptables et les factures (sans la devise) */
+export function formatMontant(montant: number) {
+  return new Intl.NumberFormat("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    .format(montant)
+    .replace(/ | /g, " ");
+}
