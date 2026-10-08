@@ -73,7 +73,7 @@ export const MODULES: ModuleDef[] = [
 ];
 
 /** Dernière phase livrée : les modules de cette phase ou des précédentes sont « Disponibles » */
-export const PHASE_ACTUELLE = 4;
+export const PHASE_ACTUELLE = 5;
 
 export const MODULE_KEYS = MODULES.map((m) => m.key);
 
@@ -104,7 +104,7 @@ export type TypeUtilisateur = "equipe" | "proprietaire" | "prestataire";
 export const TYPES_UTILISATEUR: { value: TypeUtilisateur; label: string; description: string }[] = [
   { value: "equipe", label: "Équipe", description: "Accède aux modules cochés ci-dessous" },
   { value: "proprietaire", label: "Propriétaire", description: "Voit uniquement l'Espace propriétaire, limité à ses logements" },
-  { value: "prestataire", label: "Prestataire", description: "Ménage, maintenance : seulement les tâches qui lui sont attribuées" },
+  { value: "prestataire", label: "Prestataire", description: "Ménage et check-lists : seulement les ménages qui lui sont attribués" },
 ];
 
 export type Droit = { voir: boolean; modifier: boolean };
@@ -129,7 +129,6 @@ export const MODELES_DROITS: { id: string; label: string; droits: Droits }[] = [
     id: "prestataire",
     label: "Prestataire ménage",
     droits: {
-      taches: { voir: true, modifier: true },
       menage: { voir: true, modifier: true },
       checklists: { voir: true, modifier: true },
     },
