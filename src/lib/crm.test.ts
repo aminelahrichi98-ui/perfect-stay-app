@@ -80,3 +80,14 @@ test("coût par lead", () => {
   assert.equal(coutParLead(1000, 3), 333.33);
   assert.equal(coutParLead(500, 0), null);
 });
+
+import { anciennete } from "./rh.ts";
+
+test("ancienneté d'un membre de l'équipe", () => {
+  const ref = new Date("2026-10-15T00:00:00Z");
+  assert.equal(anciennete("2026-10-01", ref), "moins d'un mois");
+  assert.equal(anciennete("2026-05-10", ref), "5 mois");
+  assert.equal(anciennete("2024-07-15", ref), "2 ans et 3 mois");
+  assert.equal(anciennete("2025-10-15", ref), "1 an");
+  assert.equal(anciennete("2025-10-20", ref), "11 mois");
+});

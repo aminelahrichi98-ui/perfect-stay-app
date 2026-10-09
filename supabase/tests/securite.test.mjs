@@ -16,7 +16,7 @@ await db.exec(`
   grant usage on schema public to authenticated;
   grant usage on schema auth to authenticated;
 `);
-const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql", "0008_taches.sql", "0009_crm_marketing.sql"];
+const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql", "0008_taches.sql", "0009_crm_marketing.sql", "0010_strategie_rh.sql"];
 for (let passe = 0; passe < 2; passe++) {
   for (const f of FICHIERS) await db.exec(readFileSync(R + f, "utf8")); // la 2e passe vérifie que les scripts sont relançables
   if (passe === 0) await db.exec(`grant select, insert, update, delete on all tables in schema public to authenticated;`);
@@ -466,5 +466,27 @@ for (const qui of ["abdel", "equipe2", "sales"]) {
 await echoue("marketeur", `insert into public.marketing_depenses (date_depense, canal, montant) values ('2026-10-03','tiktok',10)`, [], "canal inconnu");
 await echoue("marketeur", `insert into public.marketing_depenses (date_depense, canal, montant) values ('2026-10-03','meta',0)`, [], "montant nul");
 console.log("✔ marketing : dépenses et publications réservées au droit Marketing, canaux contrôlés");
+
+// ============================ Phase 8 : stratégie et RH ============================
+await creer("rhmanager", "rh@x.ma");
+await db.query(`insert into public.profiles (id,email,prenom,nom,type) values ($1,'rh@x.ma','R','H','equipe')`, [ids.rhmanager]);
+await db.query(`insert into public.permissions values ($1,'rh',true,true),($1,'strategie',true,false)`, [ids.rhmanager]);
+const membre = (await comme("rhmanager", `insert into public.rh_membres (nom, role, type_contrat) values ('Abdelkarim','Responsable opérations','cdi') returning id`)).rows[0].id;
+await comme("rhmanager", `insert into public.rh_documents (membre_id, nom, chemin) values ($1,'Contrat.pdf','rh/x.pdf')`, [membre]);
+const poste = (await comme("rhmanager", `insert into public.rh_recrutements (poste) values ('Agent de ménage') returning id`)).rows[0].id;
+await comme("rhmanager", `insert into public.rh_candidats (recrutement_id, nom) values ($1,'Candidat A')`, [poste]);
+for (const qui of ["abdel", "equipe2", "chef", "sales", "marketeur", "presta", "proprio", "collab"]) {
+  for (const t of ["rh_membres", "rh_documents", "rh_recrutements", "rh_candidats"]) {
+    assert.equal((await comme(qui, `select * from public.${t}`)).rows.length, 0, `${qui} ne doit pas lire ${t}`);
+  }
+}
+await echoue("abdel", `insert into public.rh_membres (nom) values ('Intrus')`, [], "fiche RH sans droit");
+await echoue("rhmanager", `insert into public.rh_candidats (recrutement_id, nom, etape) values ($1,'X','inconnue')`, [poste], "étape de candidat inconnue");
+// Stratégie : lecture seule pour qui n'a que « Voir »
+await db.query(`insert into public.strategie_notes (titre, type) values ('Ouvrir Casablanca en 2027','decision')`);
+assert.equal((await comme("rhmanager", `select * from public.strategie_notes`)).rows.length, 1);
+await echoue("rhmanager", `insert into public.strategie_notes (titre) values ('Non')`, [], "écriture avec droit en lecture seule");
+assert.equal((await comme("abdel", `select * from public.strategie_notes`)).rows.length, 0);
+console.log("✔ RH et stratégie : réservés à leurs droits, Abdelkarim n'y accède pas");
 
 console.log("\nTOUS LES CONTRÔLES SQL SONT OK");

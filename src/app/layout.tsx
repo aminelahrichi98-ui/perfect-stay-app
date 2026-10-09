@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Instrument_Sans } from "next/font/google";
+import { EnregistrerSw } from "@/components/enregistrer-sw";
 import "./globals.css";
 
 const titre = Bricolage_Grotesque({
@@ -33,7 +34,10 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" className={`${titre.variable} ${corps.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <EnregistrerSw />
+      </body>
     </html>
   );
 }
