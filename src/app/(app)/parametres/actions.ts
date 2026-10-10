@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getUtilisateur, peutModifier, type Utilisateur } from "@/lib/auth";
@@ -80,11 +81,15 @@ export async function creerUtilisateur(_: EtatAction, formData: FormData): Promi
   const { data: existant } = await admin.from("profiles").select("id").eq("email", email).maybeSingle();
   if (existant) return { erreur: "Un compte existe déjà avec cette adresse e-mail." };
 
-  const { data: invite, error: erreurInvitation } = await admin.auth.admin.inviteUserByEmail(email, {
-    data: { prenom, nom },
+  // Le compte est créé sans envoyer d'e-mail : l'accès se donne ensuite par un lien à copier (WhatsApp, SMS…)
+  // ou par e-mail, depuis la fiche du compte. Cela évite les e-mails perdus ou limités par l'hébergeur.
+  const { data: invite, error: erreurInvitation } = await admin.auth.admin.createUser({
+    email,
+    email_confirm: true,
+    user_metadata: { prenom, nom },
   });
   if (erreurInvitation || !invite.user) {
-    return { erreur: "L'invitation n'a pas pu être envoyée. Vérifiez l'adresse e-mail et réessayez dans une minute." };
+    return { erreur: "Le compte n'a pas pu être créé. Vérifiez l'adresse e-mail et réessayez dans une minute." };
   }
   const id = invite.user.id;
 
@@ -116,7 +121,7 @@ export async function creerUtilisateur(_: EtatAction, formData: FormData): Promi
   }
 
   revalidatePath("/parametres");
-  redirect(`/parametres?cree=${encodeURIComponent(prenom)}`);
+  redirect(`/parametres/utilisateurs/${id}?cree=1`);
 }
 
 export async function modifierUtilisateur(id: string, _: EtatAction, formData: FormData): Promise<EtatAction> {
@@ -188,6 +193,36 @@ export async function changerStatut(id: string, actif: boolean) {
   await admin.auth.admin.updateUserById(id, { ban_duration: actif ? "none" : "876000h" });
   revalidatePath("/parametres");
   revalidatePath(`/parametres/utilisateurs/${id}`);
+}
+
+/** Adresse du site telle que l'utilisateur la voit (jamais une adresse écrite en dur). */
+async function origineDuSite() {
+  const h = await headers();
+  const hote = h.get("x-forwarded-host") ?? h.get("host") ?? "";
+  const proto = h.get("x-forwarded-proto") ?? (hote.startsWith("localhost") ? "http" : "https");
+  return `${proto}://${hote}`;
+}
+
+/**
+ * Lien personnel pour choisir son mot de passe et se connecter. Il se copie et s'envoie par le canal de son choix.
+ * Valable une seule fois et pour une durée limitée (1 heure par défaut) : il se régénère à volonté.
+ */
+export async function genererLienAcces(id: string): Promise<{ erreur?: string; lien?: string }> {
+  const moi = await appelant();
+  if (!moi) return { erreur: "Action non autorisée." };
+  if (!UUID.test(id)) return { erreur: "Compte invalide." };
+  const admin = createAdminClient();
+  const { data: cible } = await admin.from("profiles").select("email, is_admin").eq("id", id).maybeSingle();
+  if (!cible) return { erreur: "Ce compte n'existe plus." };
+  if (cible.is_admin && !moi.admin) return { erreur: "Seul un administrateur peut générer un lien pour un autre administrateur." };
+  const { data, error } = await admin.auth.admin.generateLink({ type: "recovery", email: cible.email });
+  const jeton = data?.properties?.hashed_token;
+  if (error || !jeton) return { erreur: "Le lien n'a pas pu être créé. Réessayez dans un instant." };
+  const lien = new URL("/auth/confirm", await origineDuSite());
+  lien.searchParams.set("token_hash", jeton);
+  lien.searchParams.set("type", "recovery");
+  lien.searchParams.set("next", "/mot-de-passe");
+  return { lien: lien.toString() };
 }
 
 export async function renvoyerEmail(id: string): Promise<EtatAction> {

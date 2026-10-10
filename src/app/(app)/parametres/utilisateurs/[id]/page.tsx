@@ -6,14 +6,15 @@ import { exigerAcces, peutModifier } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { isModuleKey, type Droits } from "@/lib/modules";
 import { modifierUtilisateur } from "../../actions";
-import { BoutonRenvoyer, BoutonStatut } from "../../actions-compte";
+import { BoutonRenvoyer, BoutonStatut, LienAcces } from "../../actions-compte";
 import { FormulaireUtilisateur } from "../../formulaire-utilisateur";
 
 export const metadata = { title: "Utilisateur" };
 
-export default async function PageUtilisateur({ params }: { params: Promise<{ id: string }> }) {
+export default async function PageUtilisateur({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ cree?: string }> }) {
   const moi = await exigerAcces("parametres", "modifier");
   const { id } = await params;
+  const sp = await searchParams;
   const supabase = await createClient();
 
   const [{ data: profil }, { data: lignes }, { data: logements }, { data: liens }] = await Promise.all([
@@ -70,6 +71,18 @@ export default async function PageUtilisateur({ params }: { params: Promise<{ id
           />
         )}
       </Card>
+
+      {sp.cree ? <Notice ton="ok">Compte créé. Donnez maintenant son accès à {profil.prenom} avec le lien ci-dessous.</Notice> : null}
+
+      {!soi && !verrouille ? (
+        <Card className="space-y-3 p-5 md:p-7">
+          <div>
+            <h3 className="font-medium">Donner l&apos;accès à {profil.prenom}</h3>
+            <p className="mt-0.5 text-sm text-ink-2 text-pretty">Générez un lien personnel et envoyez-le par WhatsApp, SMS ou e-mail. {profil.prenom} l&apos;ouvre, choisit son mot de passe et arrive dans l&apos;application.</p>
+          </div>
+          <LienAcces id={id} prenom={profil.prenom} />
+        </Card>
+      ) : null}
 
       {!soi && !verrouille ? (
         <Card className="space-y-4 p-5 md:p-7">
