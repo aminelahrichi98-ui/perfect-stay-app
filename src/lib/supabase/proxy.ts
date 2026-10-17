@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { COOKIE_RESTER, optionsSession, veutRester } from "./session";
 
 const ROUTES_PUBLIQUES = ["/api/meta", "/hors-ligne", "/connexion", "/auth", "/mot-de-passe-oublie", "/api/cron"];
 
@@ -14,13 +15,14 @@ export async function updateSession(request: NextRequest) {
     return response;
   }
 
+  const rester = veutRester(request.cookies.get(COOKIE_RESTER)?.value);
   const supabase = createServerClient(url, key, {
     cookies: {
       getAll: () => request.cookies.getAll(),
       setAll(cookiesToSet) {
         cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
         response = NextResponse.next({ request });
-        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+        cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, optionsSession(options, rester)));
       },
     },
   });

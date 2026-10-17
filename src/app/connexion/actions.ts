@@ -1,6 +1,8 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { COOKIE_RESTER, DUREE_RESTER } from "@/lib/supabase/session";
 import { createClient } from "@/lib/supabase/server";
 
 export type EtatFormulaire = { erreur?: string; succes?: string } | undefined;
@@ -10,7 +12,10 @@ export async function seConnecter(_: EtatFormulaire, formData: FormData): Promis
   const motDePasse = String(formData.get("motDePasse") ?? "");
   if (!email || !motDePasse) return { erreur: "Saisissez votre e-mail et votre mot de passe." };
 
-  const supabase = await createClient();
+  // La case « Rester connecté » (cochée par défaut) décide de la durée de la session
+  const rester = formData.get("rester") === "on";
+  (await cookies()).set(COOKIE_RESTER, rester ? "1" : "0", { path: "/", maxAge: DUREE_RESTER, sameSite: "lax", secure: process.env.NODE_ENV === "production" });
+  const supabase = await createClient({ rester });
   const { data, error } = await supabase.auth.signInWithPassword({ email, password: motDePasse });
   if (error || !data.user) {
     return { erreur: "E-mail ou mot de passe incorrect. Vérifiez votre saisie ou utilisez « Mot de passe oublié »." };
