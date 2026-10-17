@@ -1,4 +1,4 @@
-import { formatJour } from "./dates.ts";
+import { ajouterJours, formatJour } from "./dates.ts";
 
 export const CANAUX_RESERVATION = [
   { value: "airbnb", label: "Airbnb" },
@@ -38,3 +38,6 @@ export function libelleSejour(v: { arrivee?: string | null; depart?: string | nu
   const dates = v.arrivee && v.depart ? `${court(v.arrivee)} → ${court(v.depart)}` : formatJour(v.depart ?? v.date_versement);
   return canal ? `${dates} · ${canal}` : dates;
 }
+
+/** La plateforme verse le lendemain du check-in : c'est le jour où le versement est comptabilisé. */
+export const dateDeVersement = (arrivee: string) => ajouterJours(arrivee, 1);

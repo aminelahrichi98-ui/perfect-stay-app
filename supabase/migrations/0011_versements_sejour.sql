@@ -17,4 +17,4 @@ alter table public.versements add constraint versements_sejour_check
   check (arrivee is null or depart is null or depart > arrivee);
 
 comment on column public.versements.date_versement is
-  'Date de rattachement comptable du versement : c''est la date de check-out quand elle est connue (le mois du rapport et de la facture).';
+  'Date de rattachement comptable du versement : le lendemain du check-in quand le séjour est connu (la plateforme verse ce jour-là). Elle décide du mois du rapport et de la facture.';

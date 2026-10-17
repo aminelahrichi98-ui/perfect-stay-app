@@ -8,7 +8,7 @@ import { emettreFacture, genererDocumentsDuMois, genererRapport, regenererPdfFac
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { nomSur, supprimer, urlEnvoiSigne, urlsLecture } from "@/lib/stockage";
-import { CANAUX_RESERVATION } from "@/lib/canaux";
+import { CANAUX_RESERVATION, dateDeVersement } from "@/lib/canaux";
 import { CATEGORIES_DEPENSE } from "./donnees";
 
 export type EtatCompta = { erreur?: string; succes?: string } | undefined;
@@ -31,18 +31,25 @@ const nombre = (v: FormDataEntryValue | null | string) => {
 const texte = (f: FormData, n: string) => String(f.get(n) ?? "").trim();
 const jourValide = (j: string) => JOUR.test(j) && !Number.isNaN(Date.parse(`${j}T00:00:00Z`));
 
-/** Séjour d'un versement : check-in, check-out (date de rattachement au mois) et canal de la réservation. */
-function lireSejour(f: FormData, o: { arriveeObligatoire: boolean; canalObligatoire: boolean }) {
+/**
+ * Séjour d'un versement : check-in, check-out et canal de la réservation.
+ * La plateforme verse le lendemain du check-in : c'est ce jour-là que le versement est comptabilisé
+ * (donc dans le mois de ce lendemain). Un ancien versement sans séjour garde sa date d'origine.
+ */
+function lireSejour(f: FormData, o: { arriveeObligatoire: boolean; canalObligatoire: boolean; dateActuelle?: string }) {
   const arrivee = texte(f, "arrivee");
   const depart = texte(f, "depart");
   const canal = texte(f, "canal");
   if (o.arriveeObligatoire && !jourValide(arrivee)) return { erreur: "Indiquez la date d'arrivée (check-in)." } as const;
   if (arrivee && !jourValide(arrivee)) return { erreur: "La date d'arrivée n'est pas valide." } as const;
-  if (!jourValide(depart)) return { erreur: "Indiquez la date de départ (check-out)." } as const;
+  if ((o.arriveeObligatoire || arrivee) && !jourValide(depart)) return { erreur: "Indiquez la date de départ (check-out)." } as const;
+  if (depart && !jourValide(depart)) return { erreur: "La date de départ n'est pas valide." } as const;
   if (arrivee && depart <= arrivee) return { erreur: "Le départ doit être après l'arrivée." } as const;
   if (o.canalObligatoire && !canal) return { erreur: "Choisissez le canal de la réservation." } as const;
   if (canal && !CANAUX_RESERVATION.some((c) => c.value === canal)) return { erreur: "Canal de réservation inconnu." } as const;
-  return { arrivee: arrivee || null, depart, canal: canal || null } as const;
+  const date = arrivee ? dateDeVersement(arrivee) : o.dateActuelle;
+  if (!date) return { erreur: "Indiquez la date d'arrivée (check-in)." } as const;
+  return { arrivee: arrivee || null, depart: depart || null, canal: canal || null, date } as const;
 }
 
 /** Une facture a-t-elle déjà été émise pour ce logement et ce mois ? (elle ne contiendrait pas le changement) */
@@ -68,7 +75,7 @@ export async function creerVersement(_: EtatCompta, formData: FormData): Promise
   const reservationId = texte(formData, "reservation_id");
   const sejour = lireSejour(formData, { arriveeObligatoire: true, canalObligatoire: true });
   if ("erreur" in sejour) return { erreur: sejour.erreur };
-  const date = sejour.depart; // le versement compte dans le mois du check-out
+  const date = sejour.date; // lendemain du check-in : jour où la plateforme verse
   const montant = nombre(formData.get("montant_recu"));
   const note = texte(formData, "note").slice(0, 300);
 
@@ -121,12 +128,12 @@ export async function modifierVersement(id: string, _: EtatCompta, formData: For
   if (!(montant > 0)) return { erreur: "Saisissez le montant reçu (un nombre positif, en MAD)." };
 
   const supabase = await createClient();
-  const { data: actuel } = await supabase.from("versements").select("logement_id, frais_menage, taux_commission, arrivee, canal").eq("id", id).maybeSingle();
+  const { data: actuel } = await supabase.from("versements").select("logement_id, frais_menage, taux_commission, arrivee, canal, date_versement").eq("id", id).maybeSingle();
   if (!actuel) return { erreur: "Ce versement n'existe plus." };
   // Un ancien versement (saisi avant ces champs) peut être modifié sans en renseigner le séjour
-  const sejour = lireSejour(formData, { arriveeObligatoire: Boolean(actuel.arrivee), canalObligatoire: Boolean(actuel.canal) });
+  const sejour = lireSejour(formData, { arriveeObligatoire: Boolean(actuel.arrivee), canalObligatoire: Boolean(actuel.canal), dateActuelle: actuel.date_versement });
   if ("erreur" in sejour) return { erreur: sejour.erreur };
-  const date = sejour.depart;
+  const date = sejour.date;
 
   let menage = Number(actuel.frais_menage);
   let taux = Number(actuel.taux_commission);

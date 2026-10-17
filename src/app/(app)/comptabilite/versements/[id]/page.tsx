@@ -45,7 +45,7 @@ export default async function PageVersement({ params }: { params: Promise<{ id: 
           edition={{
             logementId: v.logement_id,
             arrivee: v.arrivee ?? "",
-            depart: v.depart ?? v.date_versement,
+            depart: v.depart ?? "",
             canal: v.canal ?? "",
             montant: String(Number(v.montant_recu)).replace(".", ","),
             note: v.note,

@@ -490,7 +490,7 @@ assert.equal((await comme("abdel", `select * from public.strategie_notes`)).rows
 console.log("✔ RH et stratégie : réservés à leurs droits, Abdelkarim n'y accède pas");
 
 // ============================ Versements : séjour et canal ============================
-const vs = (await comme("amine", `insert into public.versements (logement_id, date_versement, arrivee, depart, canal, montant_recu, frais_menage, taux_commission) values ($1,'2026-10-08','2026-10-05','2026-10-08','airbnb',3000,300,15) returning id`, [lg])).rows[0].id;
+const vs = (await comme("amine", `insert into public.versements (logement_id, date_versement, arrivee, depart, canal, montant_recu, frais_menage, taux_commission) values ($1,'2026-10-06','2026-10-05','2026-10-08','airbnb',3000,300,15) returning id`, [lg])).rows[0].id;
 assert.ok(vs);
 await echoue("amine", `insert into public.versements (logement_id, date_versement, canal, montant_recu, frais_menage, taux_commission) values ($1,'2026-10-08','tripadvisor',3000,300,15)`, [lg], "canal inconnu");
 await echoue("amine", `insert into public.versements (logement_id, date_versement, arrivee, depart, montant_recu, frais_menage, taux_commission) values ($1,'2026-10-08','2026-10-08','2026-10-05',3000,300,15)`, [lg], "check-out avant le check-in");
