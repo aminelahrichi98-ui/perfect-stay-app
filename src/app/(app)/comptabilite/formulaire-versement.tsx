@@ -4,6 +4,7 @@ import { TriangleAlert } from "lucide-react";
 import { useActionState, useMemo, useState } from "react";
 import { SubmitButton } from "@/components/submit-button";
 import { Field, Input, Notice, Select, Textarea } from "@/components/ui";
+import { CANAUX_RESERVATION, canalDepuisPlateforme, dateDeVersement } from "@/lib/canaux";
 import { calculerVersement } from "@/lib/compta";
 import { formatJour, moisDe, nbNuits } from "@/lib/dates";
 import { formatMontant } from "@/lib/format";
@@ -26,7 +27,9 @@ type Props = {
   /** Mode modification : logement figé, ménage et taux d'origine du versement */
   edition?: {
     logementId: string;
-    date: string;
+    arrivee: string;
+    depart: string;
+    canal: string;
     montant: string;
     note: string;
     fraisMenage: number;
@@ -49,11 +52,13 @@ function Ligne({ label, valeur, fort, signe }: { label: string; valeur: string; 
   );
 }
 
-export function FormulaireVersement({ action, logements, reservations, tauxTva, mode, aujourdhui, facturesEmises, libelleBouton, edition }: Props) {
+export function FormulaireVersement({ action, logements, reservations, tauxTva, mode, facturesEmises, libelleBouton, edition }: Props) {
   const [etat, formAction] = useActionState(action, undefined);
   const [logementId, setLogementId] = useState(edition?.logementId ?? "");
   const [reservationId, setReservationId] = useState("");
-  const [date, setDate] = useState(edition?.date ?? aujourdhui);
+  const [arrivee, setArrivee] = useState(edition?.arrivee ?? "");
+  const [depart, setDepart] = useState(edition?.depart ?? "");
+  const [canal, setCanal] = useState(edition?.canal ?? "");
   const [montant, setMontant] = useState(edition?.montant ?? "");
   const [actualiser, setActualiser] = useState(false);
 
@@ -73,7 +78,9 @@ export function FormulaireVersement({ action, logements, reservations, tauxTva, 
     }
   }, [montant, logement, menage, taux, tauxTva]);
 
-  const dejaFacture = logement && /^\d{4}-\d{2}-\d{2}$/.test(date) && facturesEmises.includes(`${logement.id}|${moisDe(date)}`);
+  const dateCompta = /^\d{4}-\d{2}-\d{2}$/.test(arrivee) ? dateDeVersement(arrivee) : "";
+  const dejaFacture = logement && dateCompta && facturesEmises.includes(`${logement.id}|${moisDe(dateCompta)}`);
+  const nuits = arrivee && depart && depart > arrivee ? nbNuits(arrivee, depart) : 0;
   const ecartReference = edition && logement && (logement.frais_menage !== edition.fraisMenage || logement.taux_commission !== edition.taux);
 
   return (
@@ -121,7 +128,11 @@ export function FormulaireVersement({ action, logements, reservations, tauxTva, 
                 onChange={(e) => {
                   setReservationId(e.target.value);
                   const r = reservations.find((x) => x.id === e.target.value);
-                  if (r) setDate(r.arrivee);
+                  if (r) {
+                    setArrivee(r.arrivee);
+                    setDepart(r.depart);
+                    setCanal(canalDepuisPlateforme(r.plateforme));
+                  }
                 }}
               >
                 <option value="">Aucune : saisie libre</option>
@@ -140,8 +151,21 @@ export function FormulaireVersement({ action, logements, reservations, tauxTva, 
           </>
         )}
 
-        <Field label="Date du versement" htmlFor="date_versement" hint="Le jour où le versement a été reçu.">
-          <Input id="date_versement" name="date_versement" type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="num" />
+        <Field label="Arrivée (check-in)" htmlFor="arrivee" hint={dateCompta ? `Comptabilisé le ${formatJour(dateCompta)}, lendemain du check-in.` : "Comptabilisé le lendemain du check-in."}>
+          <Input id="arrivee" name="arrivee" type="date" value={arrivee} onChange={(e) => setArrivee(e.target.value)} required={!edition || Boolean(edition.arrivee)} className="num" />
+        </Field>
+        <Field label="Départ (check-out)" htmlFor="depart" hint={nuits ? `${nuits} nuit${nuits > 1 ? "s" : ""}` : undefined}>
+          <Input id="depart" name="depart" type="date" value={depart} min={arrivee || undefined} onChange={(e) => setDepart(e.target.value)} required={!edition || Boolean(edition.arrivee)} className="num" />
+        </Field>
+        <Field label="Canal de la réservation" htmlFor="canal" className="sm:col-span-2">
+          <Select id="canal" name="canal" value={canal} onChange={(e) => setCanal(e.target.value)} required={!edition}>
+            <option value="">Choisir le canal…</option>
+            {CANAUX_RESERVATION.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
+              </option>
+            ))}
+          </Select>
         </Field>
         <Field label="Montant reçu (MAD)" htmlFor="montant_recu" hint="Chiffre d'affaires de la réservation moins la commission de la plateforme.">
           <Input

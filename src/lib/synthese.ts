@@ -11,6 +11,9 @@ export type VersementBrut = {
   taux_commission: number;
   note?: string;
   reservation_id?: string | null;
+  arrivee?: string | null;
+  depart?: string | null;
+  canal?: string | null;
 };
 
 export type LigneCalculee = VersementBrut & { calcul: ResultatVersement };

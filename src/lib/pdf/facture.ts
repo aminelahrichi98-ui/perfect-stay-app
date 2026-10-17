@@ -22,6 +22,8 @@ export type Destinataire = { nom: string; adresse: string; ice: string };
 
 export type LigneFacture = {
   date: string;
+  /** « 05/10 → 08/10 · Airbnb » (absent sur les anciens versements) */
+  sejour?: string;
   montantRecu: number;
   fraisMenage: number;
   loyerNet: number;
@@ -154,7 +156,7 @@ export async function genererFacturePdf(d: DonneesFacture): Promise<Uint8Array> 
     const yh = ybas - 12;
     dessin.rect(p, MARGE, yh - 18, LARGEUR_UTILE, 18, COULEURS.creme, { rayon: 4 });
     const cols = colonnes();
-    dessin.texte(p, "Date", cols.date, yh - 12, { taille: 8, gras: true, couleur: COULEURS.gris });
+    dessin.texte(p, "Séjour", cols.date, yh - 12, { taille: 8, gras: true, couleur: COULEURS.gris });
     dessin.texte(p, "Montant reçu", cols.recu, yh - 12, { taille: 8, gras: true, couleur: COULEURS.gris, align: "droite" });
     dessin.texte(p, "Ménage", cols.menage, yh - 12, { taille: 8, gras: true, couleur: COULEURS.gris, align: "droite" });
     dessin.texte(p, "Loyer net", cols.net, yh - 12, { taille: 8, gras: true, couleur: COULEURS.gris, align: "droite" });
@@ -183,7 +185,7 @@ export async function genererFacturePdf(d: DonneesFacture): Promise<Uint8Array> 
       yy = enteteTableau(courante, A4.hauteur - 60);
     }
     yy -= 16;
-    dessin.texte(courante, formatJour(l.date), cols.date, yy, { taille: 8.5 });
+    dessin.texte(courante, l.sejour ?? formatJour(l.date), cols.date, yy, { taille: 8.5 });
     dessin.texte(courante, formatMontant(l.montantRecu), cols.recu, yy, { taille: 8.5, align: "droite" });
     dessin.texte(courante, formatMontant(l.fraisMenage), cols.menage, yy, { taille: 8.5, align: "droite" });
     dessin.texte(courante, formatMontant(l.loyerNet), cols.net, yy, { taille: 8.5, align: "droite" });
