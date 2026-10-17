@@ -18,7 +18,7 @@ export default async function PageVersement({ params }: { params: Promise<{ id: 
   const supabase = await createClient();
   const { data: v } = await supabase
     .from("versements")
-    .select("id, logement_id, date_versement, montant_recu, frais_menage, taux_commission, note")
+    .select("id, logement_id, date_versement, arrivee, depart, canal, montant_recu, frais_menage, taux_commission, note")
     .eq("id", id)
     .maybeSingle();
   if (!v) notFound();
@@ -44,7 +44,9 @@ export default async function PageVersement({ params }: { params: Promise<{ id: 
           logements={logements}
           edition={{
             logementId: v.logement_id,
-            date: v.date_versement,
+            arrivee: v.arrivee ?? "",
+            depart: v.depart ?? v.date_versement,
+            canal: v.canal ?? "",
             montant: String(Number(v.montant_recu)).replace(".", ","),
             note: v.note,
             fraisMenage: Number(v.frais_menage),

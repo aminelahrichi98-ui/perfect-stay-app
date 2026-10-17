@@ -3,7 +3,8 @@ import { Link2, Plus, Wallet } from "lucide-react";
 import { NavMois } from "@/components/nav-mois";
 import { Badge, buttonClass, Card, Notice } from "@/components/ui";
 import { exigerAcces, peutModifier } from "@/lib/auth";
-import { aujourdhui, formatJour, libelleMois, moisDe, moisSuivant, moisValide, premierDuMois } from "@/lib/dates";
+import { libelleSejour } from "@/lib/canaux";
+import { aujourdhui, libelleMois, moisDe, moisSuivant, moisValide, premierDuMois } from "@/lib/dates";
 import { formatMontant } from "@/lib/format";
 import { lireModeTva } from "@/lib/mode-tva-serveur";
 import { createClient } from "@/lib/supabase/server";
@@ -32,7 +33,7 @@ export default async function PageVersements({
 
   let requete = supabase
     .from("versements")
-    .select("id, logement_id, date_versement, montant_recu, frais_menage, taux_commission, note, reservation_id")
+    .select("id, logement_id, date_versement, arrivee, depart, canal, montant_recu, frais_menage, taux_commission, note, reservation_id")
     .gte("date_versement", premierDuMois(mois))
     .lt("date_versement", premierDuMois(moisSuivant(mois)))
     .order("date_versement", { ascending: false });
@@ -45,6 +46,9 @@ export default async function PageVersements({
         id: v.id,
         logement_id: v.logement_id,
         date_versement: v.date_versement,
+        arrivee: v.arrivee,
+        depart: v.depart,
+        canal: v.canal,
         montant_recu: Number(v.montant_recu),
         frais_menage: Number(v.frais_menage),
         taux_commission: Number(v.taux_commission),
@@ -86,7 +90,7 @@ export default async function PageVersements({
                   <>
                     <span className="min-w-0 flex-1">
                       <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                        <span className="num font-medium">{formatJour(l.date_versement)}</span>
+                        <span className="num font-medium">{libelleSejour(l)}</span>
                         <span className="truncate text-ink-2">{nomDe.get(l.logement_id) ?? "Logement"}</span>
                         {l.reservation_id ? (
                           <Badge ton="ok">

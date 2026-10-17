@@ -16,7 +16,7 @@ await db.exec(`
   grant usage on schema public to authenticated;
   grant usage on schema auth to authenticated;
 `);
-const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql", "0008_taches.sql", "0009_crm_marketing.sql", "0010_strategie_rh.sql"];
+const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql", "0008_taches.sql", "0009_crm_marketing.sql", "0010_strategie_rh.sql", "0011_versements_sejour.sql"];
 for (let passe = 0; passe < 2; passe++) {
   for (const f of FICHIERS) await db.exec(readFileSync(R + f, "utf8")); // la 2e passe vérifie que les scripts sont relançables
   if (passe === 0) await db.exec(`grant select, insert, update, delete on all tables in schema public to authenticated;`);
@@ -488,5 +488,13 @@ assert.equal((await comme("rhmanager", `select * from public.strategie_notes`)).
 await echoue("rhmanager", `insert into public.strategie_notes (titre) values ('Non')`, [], "écriture avec droit en lecture seule");
 assert.equal((await comme("abdel", `select * from public.strategie_notes`)).rows.length, 0);
 console.log("✔ RH et stratégie : réservés à leurs droits, Abdelkarim n'y accède pas");
+
+// ============================ Versements : séjour et canal ============================
+const vs = (await comme("amine", `insert into public.versements (logement_id, date_versement, arrivee, depart, canal, montant_recu, frais_menage, taux_commission) values ($1,'2026-10-08','2026-10-05','2026-10-08','airbnb',3000,300,15) returning id`, [lg])).rows[0].id;
+assert.ok(vs);
+await echoue("amine", `insert into public.versements (logement_id, date_versement, canal, montant_recu, frais_menage, taux_commission) values ($1,'2026-10-08','tripadvisor',3000,300,15)`, [lg], "canal inconnu");
+await echoue("amine", `insert into public.versements (logement_id, date_versement, arrivee, depart, montant_recu, frais_menage, taux_commission) values ($1,'2026-10-08','2026-10-08','2026-10-05',3000,300,15)`, [lg], "check-out avant le check-in");
+await comme("amine", `insert into public.versements (logement_id, date_versement, montant_recu, frais_menage, taux_commission) values ($1,'2026-10-09',2000,300,15)`, [lg]); // anciens versements sans séjour : toujours acceptés
+console.log("✔ versements : séjour (check-in/out) et canal contrôlés, anciens versements conservés");
 
 console.log("\nTOUS LES CONTRÔLES SQL SONT OK");

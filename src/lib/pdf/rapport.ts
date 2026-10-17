@@ -6,6 +6,7 @@ import { mentionsLegales, type Vendeur } from "./facture.ts";
 
 export type LigneRapport = {
   date: string;
+  sejour?: string;
   montantRecu: number;
   fraisMenage: number;
   loyerNet: number;
@@ -99,7 +100,7 @@ export async function genererRapportPdf(d: DonneesRapport): Promise<Uint8Array> 
     dessin.texte(p, "DÉTAIL DES VERSEMENTS (MAD)", MARGE, ybas, { taille: 8, gras: true, couleur: COULEURS.bordeaux });
     const yh = ybas - 12;
     dessin.rect(p, MARGE, yh - 18, LARGEUR_UTILE, 18, COULEURS.creme, { rayon: 4 });
-    dessin.texte(p, "Date", colonnes.date, yh - 12, { taille: 8, gras: true, couleur: COULEURS.gris });
+    dessin.texte(p, "Séjour", colonnes.date, yh - 12, { taille: 8, gras: true, couleur: COULEURS.gris });
     dessin.texte(p, "Montant reçu", colonnes.recu, yh - 12, { taille: 8, gras: true, couleur: COULEURS.gris, align: "droite" });
     dessin.texte(p, "Ménage", colonnes.menage, yh - 12, { taille: 8, gras: true, couleur: COULEURS.gris, align: "droite" });
     dessin.texte(p, "Loyer net", colonnes.net, yh - 12, { taille: 8, gras: true, couleur: COULEURS.gris, align: "droite" });
@@ -123,7 +124,7 @@ export async function genererRapportPdf(d: DonneesRapport): Promise<Uint8Array> 
       y = entete(page, A4.hauteur - 60);
     }
     y -= 16;
-    dessin.texte(page, formatJour(l.date), colonnes.date, y, { taille: 8.5 });
+    dessin.texte(page, l.sejour ?? formatJour(l.date), colonnes.date, y, { taille: 8.5 });
     dessin.texte(page, formatMontant(l.montantRecu), colonnes.recu, y, { taille: 8.5, align: "droite" });
     dessin.texte(page, formatMontant(l.fraisMenage), colonnes.menage, y, { taille: 8.5, align: "droite" });
     dessin.texte(page, formatMontant(l.loyerNet), colonnes.net, y, { taille: 8.5, align: "droite" });

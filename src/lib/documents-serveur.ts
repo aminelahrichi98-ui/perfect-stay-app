@@ -1,4 +1,5 @@
 import "server-only";
+import { libelleSejour } from "@/lib/canaux";
 import { etatsDuMois, nuitsReservees } from "@/lib/calendrier";
 import { aujourdhui, moisPrecedent, moisSuivant, premierDuMois, type Mois } from "@/lib/dates";
 import { calculerLigne, totaliser, type VersementBrut } from "@/lib/synthese";
@@ -55,7 +56,7 @@ async function chargerMois(admin: Admin, logementId: string, mois: Mois): Promis
   const [{ data: versements }, { data: reservations }, { data: depenses }, { data: liens }] = await Promise.all([
     admin
       .from("versements")
-      .select("id, logement_id, date_versement, montant_recu, frais_menage, taux_commission, note")
+      .select("id, logement_id, date_versement, arrivee, depart, canal, montant_recu, frais_menage, taux_commission, note")
       .eq("logement_id", logementId)
       .gte("date_versement", debut)
       .lt("date_versement", fin)
@@ -92,6 +93,9 @@ async function chargerMois(admin: Admin, logementId: string, mois: Mois): Promis
       id: v.id,
       logement_id: v.logement_id,
       date_versement: v.date_versement,
+      arrivee: v.arrivee,
+      depart: v.depart,
+      canal: v.canal,
       montant_recu: Number(v.montant_recu),
       frais_menage: Number(v.frais_menage),
       taux_commission: Number(v.taux_commission),
@@ -129,6 +133,7 @@ export async function genererRapport(logementId: string, mois: Mois) {
     proprietaire: donnees.proprietaire,
     lignes: lignes.map((l) => ({
       date: l.date_versement,
+      sejour: libelleSejour(l),
       montantRecu: l.calcul.montantRecu,
       fraisMenage: l.calcul.fraisMenage,
       loyerNet: l.calcul.loyerNetHorsMenage,
@@ -223,6 +228,7 @@ export async function emettreFacture(logementId: string, mois: Mois, parUtilisat
   };
   const lignesFacture: LigneFacture[] = lignes.map((l) => ({
     date: l.date_versement,
+    sejour: libelleSejour(l),
     montantRecu: l.calcul.montantRecu,
     fraisMenage: l.calcul.fraisMenage,
     loyerNet: l.calcul.loyerNetHorsMenage,

@@ -8,6 +8,7 @@ import { emettreFacture, genererDocumentsDuMois, genererRapport, regenererPdfFac
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { nomSur, supprimer, urlEnvoiSigne, urlsLecture } from "@/lib/stockage";
+import { CANAUX_RESERVATION } from "@/lib/canaux";
 import { CATEGORIES_DEPENSE } from "./donnees";
 
 export type EtatCompta = { erreur?: string; succes?: string } | undefined;
@@ -30,6 +31,20 @@ const nombre = (v: FormDataEntryValue | null | string) => {
 const texte = (f: FormData, n: string) => String(f.get(n) ?? "").trim();
 const jourValide = (j: string) => JOUR.test(j) && !Number.isNaN(Date.parse(`${j}T00:00:00Z`));
 
+/** Séjour d'un versement : check-in, check-out (date de rattachement au mois) et canal de la réservation. */
+function lireSejour(f: FormData, o: { arriveeObligatoire: boolean; canalObligatoire: boolean }) {
+  const arrivee = texte(f, "arrivee");
+  const depart = texte(f, "depart");
+  const canal = texte(f, "canal");
+  if (o.arriveeObligatoire && !jourValide(arrivee)) return { erreur: "Indiquez la date d'arrivée (check-in)." } as const;
+  if (arrivee && !jourValide(arrivee)) return { erreur: "La date d'arrivée n'est pas valide." } as const;
+  if (!jourValide(depart)) return { erreur: "Indiquez la date de départ (check-out)." } as const;
+  if (arrivee && depart <= arrivee) return { erreur: "Le départ doit être après l'arrivée." } as const;
+  if (o.canalObligatoire && !canal) return { erreur: "Choisissez le canal de la réservation." } as const;
+  if (canal && !CANAUX_RESERVATION.some((c) => c.value === canal)) return { erreur: "Canal de réservation inconnu." } as const;
+  return { arrivee: arrivee || null, depart, canal: canal || null } as const;
+}
+
 /** Une facture a-t-elle déjà été émise pour ce logement et ce mois ? (elle ne contiendrait pas le changement) */
 async function factureDejaEmise(logementId: string, date: string) {
   const supabase = await createClient();
@@ -51,12 +66,13 @@ export async function creerVersement(_: EtatCompta, formData: FormData): Promise
 
   const logementId = texte(formData, "logement_id");
   const reservationId = texte(formData, "reservation_id");
-  const date = texte(formData, "date_versement");
+  const sejour = lireSejour(formData, { arriveeObligatoire: true, canalObligatoire: true });
+  if ("erreur" in sejour) return { erreur: sejour.erreur };
+  const date = sejour.depart; // le versement compte dans le mois du check-out
   const montant = nombre(formData.get("montant_recu"));
   const note = texte(formData, "note").slice(0, 300);
 
   if (!UUID.test(logementId)) return { erreur: "Choisissez le logement concerné." };
-  if (!jourValide(date)) return { erreur: "Indiquez la date du versement." };
   if (!(montant > 0)) return { erreur: "Saisissez le montant reçu (un nombre positif, en MAD)." };
 
   const supabase = await createClient();
@@ -79,6 +95,9 @@ export async function creerVersement(_: EtatCompta, formData: FormData): Promise
     logement_id: logementId,
     reservation_id: reservation,
     date_versement: date,
+    arrivee: sejour.arrivee,
+    depart: sejour.depart,
+    canal: sejour.canal,
     montant_recu: montant,
     frais_menage: menage,
     taux_commission: Number(logement.taux_commission),
@@ -96,16 +115,18 @@ export async function modifierVersement(id: string, _: EtatCompta, formData: For
   const u = await comptable();
   if (!u) return { erreur: "Vous n'avez pas le droit de modifier des versements." };
 
-  const date = texte(formData, "date_versement");
   const montant = nombre(formData.get("montant_recu"));
   const note = texte(formData, "note").slice(0, 300);
   const actualiser = formData.has("actualiser");
-  if (!jourValide(date)) return { erreur: "Indiquez la date du versement." };
   if (!(montant > 0)) return { erreur: "Saisissez le montant reçu (un nombre positif, en MAD)." };
 
   const supabase = await createClient();
-  const { data: actuel } = await supabase.from("versements").select("logement_id, frais_menage, taux_commission").eq("id", id).maybeSingle();
+  const { data: actuel } = await supabase.from("versements").select("logement_id, frais_menage, taux_commission, arrivee, canal").eq("id", id).maybeSingle();
   if (!actuel) return { erreur: "Ce versement n'existe plus." };
+  // Un ancien versement (saisi avant ces champs) peut être modifié sans en renseigner le séjour
+  const sejour = lireSejour(formData, { arriveeObligatoire: Boolean(actuel.arrivee), canalObligatoire: Boolean(actuel.canal) });
+  if ("erreur" in sejour) return { erreur: sejour.erreur };
+  const date = sejour.depart;
 
   let menage = Number(actuel.frais_menage);
   let taux = Number(actuel.taux_commission);
@@ -120,7 +141,7 @@ export async function modifierVersement(id: string, _: EtatCompta, formData: For
 
   const { data, error } = await supabase
     .from("versements")
-    .update({ date_versement: date, montant_recu: montant, frais_menage: menage, taux_commission: taux, note })
+    .update({ date_versement: date, arrivee: sejour.arrivee, depart: sejour.depart, canal: sejour.canal, montant_recu: montant, frais_menage: menage, taux_commission: taux, note })
     .eq("id", id)
     .select("id");
   if (error || !data?.length) return { erreur: "Les modifications n'ont pas pu être enregistrées. Vérifiez vos droits et réessayez." };
