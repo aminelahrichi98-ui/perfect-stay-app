@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Link2, Plus, Wallet } from "lucide-react";
+import { FileUp, Link2, Plus, Wallet } from "lucide-react";
 import { NavMois } from "@/components/nav-mois";
 import { Badge, buttonClass, Card, Notice } from "@/components/ui";
 import { exigerAcces, peutModifier } from "@/lib/auth";
@@ -75,9 +75,14 @@ export default async function PageVersements({
         <NavMois mois={mois} moisCourant={courant} lien={(m) => `/comptabilite/versements?${new URLSearchParams({ mois: m, ...(filtre ? { logement: filtre } : {}) })}`} />
         <FiltreLogement chemin="/comptabilite/versements" logements={logements} valeur={filtre} autres={autres} />
         {modifiable ? (
-          <Link href="/comptabilite/versements/nouveau" className={buttonClass("primary", "md", "ml-auto")}>
-            <Plus className="h-4 w-4" /> Nouveau versement
-          </Link>
+          <div className="ml-auto flex flex-wrap gap-2">
+            <Link href="/comptabilite/versements/importer" className={buttonClass("secondary", "md")}>
+              <FileUp className="h-4 w-4" /> Importer Airbnb
+            </Link>
+            <Link href="/comptabilite/versements/nouveau" className={buttonClass("primary", "md")}>
+              <Plus className="h-4 w-4" /> Nouveau versement
+            </Link>
+          </div>
         ) : null}
       </div>
 

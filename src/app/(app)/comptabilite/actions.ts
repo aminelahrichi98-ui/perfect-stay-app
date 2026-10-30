@@ -9,6 +9,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { nomSur, supprimer, urlEnvoiSigne, urlsLecture } from "@/lib/stockage";
 import { CANAUX_RESERVATION, dateDeVersement } from "@/lib/canaux";
+import { decider, type ContexteImport, type LigneAirbnb } from "@/lib/import-airbnb";
 import { CATEGORIES_DEPENSE } from "./donnees";
 
 export type EtatCompta = { erreur?: string; succes?: string } | undefined;
@@ -348,4 +349,129 @@ export async function urlDocument(type: "facture" | "rapport", id: string): Prom
   if (!data?.chemin_pdf) return { erreur: "Document introuvable ou pas encore disponible." };
   const { data: signee } = await createAdminClient().storage.from(BUCKET_RAPPORTS).createSignedUrl(data.chemin_pdf, 120);
   return signee?.signedUrl ? { url: signee.signedUrl } : { erreur: "Le document n'a pas pu être ouvert." };
+}
+
+/* ---------------------------------- Import du relevé Airbnb ---------------------------------- */
+
+export type LigneImportAirbnb = LigneAirbnb & { logementChoisi: string };
+
+/** Ce que la base sait déjà des réservations et versements du fichier (pour ne rien saisir deux fois). */
+async function contexteAirbnb(lignes: LigneAirbnb[]): Promise<ContexteImport> {
+  const supabase = await createClient();
+  const codes = [...new Set(lignes.map((l) => l.code))].slice(0, 2000);
+  const arrivees = [...new Set(lignes.map((l) => l.arrivee))].filter(jourValide).slice(0, 2000);
+
+  const [{ data: logements }, { data: resas }, { data: parRef }, { data: parDate }] = await Promise.all([
+    supabase.from("comptabilite_logements").select("id, frais_menage"),
+    codes.length ? supabase.from("comptabilite_reservations").select("id, logement_id, code").in("code", codes) : Promise.resolve({ data: [] }),
+    codes.length ? supabase.from("versements").select("reservation_ref, arrivee").in("reservation_ref", codes) : Promise.resolve({ data: [] }),
+    arrivees.length ? supabase.from("versements").select("logement_id, arrivee, reservation_id").in("arrivee", arrivees) : Promise.resolve({ data: [] }),
+  ]);
+  const reservations: ContexteImport["reservations"] = {};
+  for (const r of resas ?? []) if (r.code) reservations[r.code] = { id: r.id, logement_id: r.logement_id };
+  const ids = Object.values(reservations).map((r) => r.id);
+  const { data: verses } = ids.length ? await supabase.from("versements").select("reservation_id").in("reservation_id", ids) : { data: [] };
+
+  return {
+    reservations,
+    refs: (parRef ?? []).map((v) => `${v.reservation_ref}|${v.arrivee}`),
+    occupes: (parDate ?? []).map((v) => `${v.logement_id}|${v.arrivee}`),
+    reservationsVersees: (verses ?? []).map((v) => v.reservation_id as string),
+    logements: Object.fromEntries((logements ?? []).map((l) => [l.id, { frais_menage: Number(l.frais_menage) }])),
+  };
+}
+
+export async function verifierImportAirbnb(lignes: LigneAirbnb[]): Promise<{ erreur?: string; contexte?: ContexteImport }> {
+  if (!(await comptable())) return { erreur: "Vous n'avez pas le droit d'importer des versements." };
+  if (lignes.length > 2000) return { erreur: "Importez 2 000 réservations au maximum à la fois." };
+  try {
+    return { contexte: await contexteAirbnb(lignes) };
+  } catch {
+    return { erreur: "Les versements existants n'ont pas pu être vérifiés. Réessayez." };
+  }
+}
+
+export type BilanImportAirbnb = { erreur?: string; crees?: number; deja?: number; refuses?: { code: string; raison: string }[]; mois?: string[]; factures?: string[] };
+
+export async function importerVersementsAirbnb(lignes: LigneImportAirbnb[], taux: Record<string, number>): Promise<BilanImportAirbnb> {
+  const u = await comptable();
+  if (!u) return { erreur: "Vous n'avez pas le droit d'importer des versements." };
+  if (!lignes.length) return { erreur: "Aucune réservation à importer." };
+  if (lignes.length > 2000) return { erreur: "Importez 2 000 réservations au maximum à la fois." };
+
+  const supabase = await createClient();
+  const ctx = await contexteAirbnb(lignes);
+  const { data: logements } = await supabase.from("comptabilite_logements").select("id, frais_menage, taux_commission");
+  const tauxCommission = new Map((logements ?? []).map((l) => [l.id, Number(l.taux_commission)]));
+
+  const aCreer: Record<string, unknown>[] = [];
+  const refuses: { code: string; raison: string }[] = [];
+  let deja = 0;
+  for (const l of lignes) {
+    const code = String(l.code ?? "").trim().toUpperCase().slice(0, 40);
+    if (!code || !jourValide(l.arrivee) || !jourValide(l.depart) || l.depart <= l.arrivee || !Number.isFinite(l.montant)) {
+      refuses.push({ code: code || "?", raison: "Ligne illisible" });
+      continue;
+    }
+    const devise = String(l.devise ?? "MAD").toUpperCase();
+    const conversion = devise === "MAD" ? 1 : Number(taux[devise]);
+    const d = decider({ ...l, code }, UUID.test(l.logementChoisi) ? l.logementChoisi : "", conversion, ctx);
+    if (d.statut === "deja") {
+      deja++;
+      continue;
+    }
+    if (d.statut !== "ok") {
+      refuses.push({ code, raison: d.raison });
+      continue;
+    }
+    // Le fichier peut contenir deux fois la même réservation : la seconde est ignorée
+    ctx.refs.push(`${code}|${l.arrivee}`);
+    ctx.occupes.push(`${d.logementId}|${l.arrivee}`);
+    if (d.reservationId) ctx.reservationsVersees.push(d.reservationId);
+
+    const voyageur = String(l.voyageur ?? "").trim();
+    const note = [
+      "Import Airbnb",
+      voyageur,
+      devise !== "MAD" ? `${l.montant} ${devise} × ${conversion}` : "",
+    ]
+      .filter(Boolean)
+      .join(" · ")
+      .slice(0, 300);
+    aCreer.push({
+      logement_id: d.logementId,
+      reservation_id: d.reservationId,
+      reservation_ref: code,
+      date_versement: dateDeVersement(l.arrivee),
+      arrivee: l.arrivee,
+      depart: l.depart,
+      canal: "airbnb",
+      montant_recu: d.montant,
+      frais_menage: ctx.logements[d.logementId].frais_menage,
+      taux_commission: tauxCommission.get(d.logementId) ?? 0,
+      note,
+      created_by: u.id,
+    });
+  }
+
+  if (aCreer.length) {
+    const { error } = await supabase.from("versements").insert(aCreer);
+    if (error) return { erreur: "L'import n'a pas pu être terminé. Rien n'a été enregistré, réessayez." };
+  }
+
+  // Factures déjà émises pour un logement et un mois touchés par l'import : elles ne contiendront pas ces versements
+  const couples = [...new Set(aCreer.map((v) => `${v.logement_id}|${moisDe(v.date_versement as string)}`))];
+  const mois = [...new Set(aCreer.map((v) => moisDe(v.date_versement as string)))].sort();
+  let factures: string[] = [];
+  if (couples.length) {
+    const { data } = await supabase
+      .from("factures")
+      .select("numero, logement_id, mois")
+      .eq("statut", "emise")
+      .in("mois", mois.map(premierDuMois));
+    factures = (data ?? []).filter((f) => couples.includes(`${f.logement_id}|${moisDe(f.mois)}`)).map((f) => f.numero as string);
+  }
+
+  revalidatePath("/comptabilite", "layout");
+  return { crees: aCreer.length, deja, refuses, mois, factures };
 }
