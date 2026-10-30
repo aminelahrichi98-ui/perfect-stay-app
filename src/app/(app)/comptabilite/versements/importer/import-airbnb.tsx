@@ -207,7 +207,9 @@ export function ImportAirbnb({ logements }: { logements: Logement[] }) {
                 {devises.map((d) => (
                   <label key={d} className="flex items-center gap-2 text-sm">
                     <span className="whitespace-nowrap">1 {d} =</span>
-                    <Input inputMode="decimal" value={taux[d] ?? ""} onChange={(e) => setTaux((t) => ({ ...t, [d]: e.target.value }))} placeholder="10,85" className="h-11 w-28" />
+                    <span className="w-28">
+                      <Input inputMode="decimal" value={taux[d] ?? ""} onChange={(e) => setTaux((t) => ({ ...t, [d]: e.target.value }))} placeholder="10,85" className="h-11" />
+                    </span>
                     <span>MAD</span>
                   </label>
                 ))}
