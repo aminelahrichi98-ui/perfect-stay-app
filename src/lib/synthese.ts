@@ -9,6 +9,8 @@ export type VersementBrut = {
   montant_recu: number;
   frais_menage: number;
   taux_commission: number;
+  /** Ménage encaissé par le propriétaire (valeur figée au moment du versement) */
+  menage_proprietaire?: boolean;
   note?: string;
   reservation_id?: string | null;
   arrivee?: string | null;
@@ -25,6 +27,7 @@ export function calculerLigne(v: VersementBrut, tauxTva: number = TAUX_TVA_DEFAU
       montantRecu: v.montant_recu,
       fraisMenage: v.frais_menage,
       tauxCommission: v.taux_commission,
+      menageProprietaire: Boolean(v.menage_proprietaire),
       tauxTva,
     }),
   };
@@ -33,7 +36,10 @@ export function calculerLigne(v: VersementBrut, tauxTva: number = TAUX_TVA_DEFAU
 export type Totaux = {
   nbVersements: number;
   montantsRecus: number;
+  /** Ménage perçu par Perfect Stay */
   menage: number;
+  /** Ménage encaissé par les propriétaires (inclus dans leur revenu) */
+  menageProprietaire: number;
   loyerNet: number;
   /** Somme des commissions TTC : ce que Perfect Stay reçoit au titre de la commission */
   commissionTTC: number;
@@ -55,18 +61,20 @@ const m = (centimes: number) => centimes / 100;
 export function totaliser(lignes: LigneCalculee[], tauxTva: number = TAUX_TVA_DEFAUT): Totaux {
   const somme = (f: (l: LigneCalculee) => number) => lignes.reduce((s, l) => s + c(f(l)), 0);
   const commission = somme((l) => l.calcul.commission);
-  const menage = somme((l) => l.calcul.fraisMenage);
+  const menage = somme((l) => l.calcul.menageGestionnaire);
+  const menageProprietaire = somme((l) => l.calcul.menageProprietaire);
   const loyerNet = somme((l) => l.calcul.loyerNetHorsMenage);
   const { ht, tva } = repartirTva(m(commission), tauxTva);
   return {
     nbVersements: lignes.length,
     montantsRecus: m(somme((l) => l.calcul.montantRecu)),
     menage: m(menage),
+    menageProprietaire: m(menageProprietaire),
     loyerNet: m(loyerNet),
     commissionTTC: m(commission),
     commissionHT: ht,
     tva,
-    revenuProprietaire: m(loyerNet - commission),
+    revenuProprietaire: m(loyerNet - commission + menageProprietaire),
     encaisse: m(menage + commission),
   };
 }

@@ -84,7 +84,7 @@ export async function creerVersement(_: EtatCompta, formData: FormData): Promise
   if (!(montant > 0)) return { erreur: "Saisissez le montant reçu (un nombre positif, en MAD)." };
 
   const supabase = await createClient();
-  const { data: logement } = await supabase.from("comptabilite_logements").select("id, nom, frais_menage, taux_commission").eq("id", logementId).maybeSingle();
+  const { data: logement } = await supabase.from("comptabilite_logements").select("id, nom, frais_menage, taux_commission, menage_encaisse_par").eq("id", logementId).maybeSingle();
   if (!logement) return { erreur: "Ce logement n'existe pas ou vous n'y avez pas accès." };
   const menage = Number(logement.frais_menage);
   if (montant < menage) {
@@ -108,6 +108,7 @@ export async function creerVersement(_: EtatCompta, formData: FormData): Promise
     canal: sejour.canal,
     montant_recu: montant,
     frais_menage: menage,
+    menage_proprietaire: logement.menage_encaisse_par === "proprietaire",
     taux_commission: Number(logement.taux_commission),
     note,
     created_by: u.id,
@@ -129,7 +130,7 @@ export async function modifierVersement(id: string, _: EtatCompta, formData: For
   if (!(montant > 0)) return { erreur: "Saisissez le montant reçu (un nombre positif, en MAD)." };
 
   const supabase = await createClient();
-  const { data: actuel } = await supabase.from("versements").select("logement_id, frais_menage, taux_commission, arrivee, canal, date_versement").eq("id", id).maybeSingle();
+  const { data: actuel } = await supabase.from("versements").select("logement_id, frais_menage, taux_commission, menage_proprietaire, arrivee, canal, date_versement").eq("id", id).maybeSingle();
   if (!actuel) return { erreur: "Ce versement n'existe plus." };
   // Un ancien versement (saisi avant ces champs) peut être modifié sans en renseigner le séjour
   const sejour = lireSejour(formData, { arriveeObligatoire: Boolean(actuel.arrivee), canalObligatoire: Boolean(actuel.canal), dateActuelle: actuel.date_versement });
@@ -138,18 +139,20 @@ export async function modifierVersement(id: string, _: EtatCompta, formData: For
 
   let menage = Number(actuel.frais_menage);
   let taux = Number(actuel.taux_commission);
+  let menageProprietaire = Boolean(actuel.menage_proprietaire);
   if (actualiser) {
-    const { data: l } = await supabase.from("comptabilite_logements").select("frais_menage, taux_commission").eq("id", actuel.logement_id).maybeSingle();
+    const { data: l } = await supabase.from("comptabilite_logements").select("frais_menage, taux_commission, menage_encaisse_par").eq("id", actuel.logement_id).maybeSingle();
     if (l) {
       menage = Number(l.frais_menage);
       taux = Number(l.taux_commission);
+      menageProprietaire = l.menage_encaisse_par === "proprietaire";
     }
   }
   if (montant < menage) return { erreur: `Le montant reçu est inférieur aux frais de ménage (${menage} MAD).` };
 
   const { data, error } = await supabase
     .from("versements")
-    .update({ date_versement: date, arrivee: sejour.arrivee, depart: sejour.depart, canal: sejour.canal, montant_recu: montant, frais_menage: menage, taux_commission: taux, note })
+    .update({ date_versement: date, arrivee: sejour.arrivee, depart: sejour.depart, canal: sejour.canal, montant_recu: montant, frais_menage: menage, menage_proprietaire: menageProprietaire, taux_commission: taux, note })
     .eq("id", id)
     .select("id");
   if (error || !data?.length) return { erreur: "Les modifications n'ont pas pu être enregistrées. Vérifiez vos droits et réessayez." };
@@ -401,8 +404,9 @@ export async function importerVersementsAirbnb(lignes: LigneImportAirbnb[], taux
 
   const supabase = await createClient();
   const ctx = await contexteAirbnb(lignes);
-  const { data: logements } = await supabase.from("comptabilite_logements").select("id, frais_menage, taux_commission");
+  const { data: logements } = await supabase.from("comptabilite_logements").select("id, frais_menage, taux_commission, menage_encaisse_par");
   const tauxCommission = new Map((logements ?? []).map((l) => [l.id, Number(l.taux_commission)]));
+  const menageChezProprietaire = new Set((logements ?? []).filter((l) => l.menage_encaisse_par === "proprietaire").map((l) => l.id));
 
   const aCreer: Record<string, unknown>[] = [];
   const refuses: { code: string; raison: string }[] = [];
@@ -448,6 +452,7 @@ export async function importerVersementsAirbnb(lignes: LigneImportAirbnb[], taux
       canal: "airbnb",
       montant_recu: d.montant,
       frais_menage: ctx.logements[d.logementId].frais_menage,
+      menage_proprietaire: menageChezProprietaire.has(d.logementId),
       taux_commission: tauxCommission.get(d.logementId) ?? 0,
       note,
       created_by: u.id,

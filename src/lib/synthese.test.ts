@@ -72,3 +72,16 @@ test("variation par rapport au mois précédent", () => {
   assert.equal(variation(200, 100), -50);
   assert.equal(variation(0, 100), null);
 });
+
+test("totaux : le ménage encaissé par le propriétaire n'est pas compté comme perçu par Perfect Stay", () => {
+  const lignes = [
+    calculerLigne({ id: "a", logement_id: "L", date_versement: "2026-10-06", montant_recu: 3000, frais_menage: 300, taux_commission: 20 }),
+    calculerLigne({ id: "b", logement_id: "L", date_versement: "2026-10-07", montant_recu: 3000, frais_menage: 300, taux_commission: 20, menage_proprietaire: true }),
+  ];
+  const t = totaliser(lignes);
+  assert.equal(t.menage, 300);
+  assert.equal(t.menageProprietaire, 300);
+  assert.equal(t.commissionTTC, 1080);
+  assert.equal(t.revenuProprietaire, 2160 + 2460);
+  assert.equal(t.encaisse, 300 + 1080);
+});

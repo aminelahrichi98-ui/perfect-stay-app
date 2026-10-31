@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getUtilisateur, peutModifier, peutVoir, type Utilisateur } from "@/lib/auth";
 import { tamponnerImage } from "@/lib/horodatage";
 import {
+  ENCAISSEMENT_MENAGE,
   PLATEFORMES,
   ROLES_CONTACT,
   STATUTS_LOGEMENT,
@@ -65,6 +66,8 @@ function lireFormulaire(formData: FormData): Lecture {
 
   const frais = nombre(formData.get("frais_menage"));
   if (!(frais >= 0)) return { ok: false, erreur: "Les frais de ménage doivent être un montant en MAD (0 ou plus)." };
+  const encaissement = texte(formData, "menage_encaisse_par") || "gestionnaire";
+  if (!ENCAISSEMENT_MENAGE.some((e) => e.value === encaissement)) return { ok: false, erreur: "Indiquez qui encaisse les frais de ménage." };
   const taux = nombre(formData.get("taux_commission"));
   if (!(taux >= 0 && taux <= 100)) return { ok: false, erreur: "Le taux de commission doit être compris entre 0 et 100 %." };
 
@@ -111,6 +114,7 @@ function lireFormulaire(formData: FormData): Lecture {
       maps_url: mapsUrl,
       capacite,
       frais_menage: frais,
+      menage_encaisse_par: encaissement,
       taux_commission: taux,
       code_acces: texte(formData, "code_acces"),
       wifi_nom: texte(formData, "wifi_nom"),

@@ -31,7 +31,7 @@ export default async function EspaceProprietaire({ searchParams }: { searchParam
   // Tout ce qui est lu ici passe par des vues qui ne montrent que les logements de ce propriétaire
   const [{ data: logements }, { data: versements }, { data: reservations }, { data: maintenance }, { data: rapports }, { data: factures }] = await Promise.all([
     supabase.from("proprietaire_logements").select("id, nom, ville, type").order("nom"),
-    supabase.from("proprietaire_versements").select("id, logement_id, date_versement, montant_recu, frais_menage, taux_commission").gte("date_versement", debut).lt("date_versement", fin),
+    supabase.from("proprietaire_versements").select("id, logement_id, date_versement, montant_recu, frais_menage, taux_commission, menage_proprietaire").gte("date_versement", debut).lt("date_versement", fin),
     supabase.from("proprietaire_reservations").select("id, logement_id, type, arrivee, depart").lt("arrivee", fin).gt("depart", debut),
     supabase.from("proprietaire_maintenance").select("logement_id, montant, date_depense").gte("date_depense", debut).lt("date_depense", fin),
     supabase.from("rapports_mensuels").select("id, logement_id, mois, chemin_pdf").not("chemin_pdf", "is", null).order("mois", { ascending: false }).limit(60),
@@ -44,7 +44,7 @@ export default async function EspaceProprietaire({ searchParams }: { searchParam
   const cartes = liste.map((l) => {
     const lignes = (versements ?? [])
       .filter((v) => v.logement_id === l.id && dansLeMois(v.date_versement, mois))
-      .map((v) => calculerLigne({ id: v.id, logement_id: v.logement_id, date_versement: v.date_versement, montant_recu: Number(v.montant_recu), frais_menage: Number(v.frais_menage), taux_commission: Number(v.taux_commission) }));
+      .map((v) => calculerLigne({ id: v.id, logement_id: v.logement_id, date_versement: v.date_versement, montant_recu: Number(v.montant_recu), frais_menage: Number(v.frais_menage), taux_commission: Number(v.taux_commission), menage_proprietaire: Boolean(v.menage_proprietaire) }));
     const totaux = totaliser(lignes);
     const resas = (reservations ?? []).filter((r) => r.logement_id === l.id).map((r) => ({ id: r.id, arrivee: r.arrivee, depart: r.depart, type: r.type as "reservation" | "blocage" }));
     const etats = etatsDuMois(mois, resas);

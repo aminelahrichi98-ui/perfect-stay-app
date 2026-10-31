@@ -56,7 +56,7 @@ async function chargerMois(admin: Admin, logementId: string, mois: Mois): Promis
   const [{ data: versements }, { data: reservations }, { data: depenses }, { data: liens }] = await Promise.all([
     admin
       .from("versements")
-      .select("id, logement_id, date_versement, arrivee, depart, canal, montant_recu, frais_menage, taux_commission, note")
+      .select("id, logement_id, date_versement, arrivee, depart, canal, montant_recu, frais_menage, taux_commission, menage_proprietaire, note")
       .eq("logement_id", logementId)
       .gte("date_versement", debut)
       .lt("date_versement", fin)
@@ -99,6 +99,7 @@ async function chargerMois(admin: Admin, logementId: string, mois: Mois): Promis
       montant_recu: Number(v.montant_recu),
       frais_menage: Number(v.frais_menage),
       taux_commission: Number(v.taux_commission),
+      menage_proprietaire: Boolean(v.menage_proprietaire),
       note: v.note,
     })),
     reservations: (reservations ?? []) as DonneesMois["reservations"],
@@ -142,13 +143,15 @@ export async function genererRapport(logementId: string, mois: Mois) {
     })),
     totaux: {
       montantsRecus: totaux.montantsRecus,
-      menage: totaux.menage,
+      // Colonne « Ménage » : tout le ménage des séjours, qu'il soit perçu par Perfect Stay ou par le propriétaire
+      menage: Math.round((totaux.menage + totaux.menageProprietaire) * 100) / 100,
       loyerNet: totaux.loyerNet,
       commissionTTC: totaux.commissionTTC,
       tva: totaux.tva,
       revenuProprietaire: totaux.revenuProprietaire,
     },
     tauxTva: entreprise.taux_tva,
+    menageChezProprietaire: lignes.every((l) => l.menage_proprietaire) ? "tous" : lignes.some((l) => l.menage_proprietaire) ? "certains" : "aucun",
     nuits,
     nbSejours: sejours,
     reservations: donnees.reservations,

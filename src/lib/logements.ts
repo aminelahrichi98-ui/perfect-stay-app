@@ -69,3 +69,11 @@ export function elementsACompleter(l: {
   if (!l.nbPhotos) manque.push({ cle: "photos", texte: "les photos" });
   return manque;
 }
+
+/** Qui encaisse les frais de ménage : Perfect Stay (gestionnaire) ou le propriétaire */
+export const ENCAISSEMENT_MENAGE = [
+  { value: "gestionnaire", label: "Encaissés par le gestionnaire", detail: "Perfect Stay garde les frais de ménage." },
+  { value: "proprietaire", label: "Encaissés par le propriétaire", detail: "Les frais de ménage s'ajoutent au revenu du propriétaire." },
+] as const;
+
+export type EncaissementMenage = (typeof ENCAISSEMENT_MENAGE)[number]["value"];

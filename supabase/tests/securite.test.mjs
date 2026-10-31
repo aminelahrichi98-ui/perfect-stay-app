@@ -16,7 +16,7 @@ await db.exec(`
   grant usage on schema public to authenticated;
   grant usage on schema auth to authenticated;
 `);
-const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql", "0008_taches.sql", "0009_crm_marketing.sql", "0010_strategie_rh.sql", "0011_versements_sejour.sql"];
+const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql", "0008_taches.sql", "0009_crm_marketing.sql", "0010_strategie_rh.sql", "0011_versements_sejour.sql", "0012_menage_encaisse_par.sql"];
 for (let passe = 0; passe < 2; passe++) {
   for (const f of FICHIERS) await db.exec(readFileSync(R + f, "utf8")); // la 2e passe vérifie que les scripts sont relançables
   if (passe === 0) await db.exec(`grant select, insert, update, delete on all tables in schema public to authenticated;`);
@@ -496,5 +496,12 @@ await echoue("amine", `insert into public.versements (logement_id, date_versemen
 await echoue("amine", `insert into public.versements (logement_id, date_versement, arrivee, depart, montant_recu, frais_menage, taux_commission) values ($1,'2026-10-08','2026-10-08','2026-10-05',3000,300,15)`, [lg], "check-out avant le check-in");
 await comme("amine", `insert into public.versements (logement_id, date_versement, montant_recu, frais_menage, taux_commission) values ($1,'2026-10-09',2000,300,15)`, [lg]); // anciens versements sans séjour : toujours acceptés
 console.log("✔ versements : séjour (check-in/out) et canal contrôlés, anciens versements conservés");
+
+// ============================ Ménage : encaissé par le gestionnaire ou le propriétaire ============================
+assert.equal((await comme("amine", `select menage_encaisse_par from public.comptabilite_logements where id=$1`, [lg])).rows[0].menage_encaisse_par, "gestionnaire");
+await comme("amine", `update public.logements set menage_encaisse_par='proprietaire' where id=$1`, [lg]);
+await echoue("amine", `update public.logements set menage_encaisse_par='voyageur' where id=$1`, [lg], "encaissement du ménage inconnu");
+assert.equal((await comme("amine", `select menage_proprietaire from public.versements where id=$1`, [vs])).rows[0].menage_proprietaire, false);
+console.log("✔ ménage : réglage par logement contrôlé, versements existants inchangés");
 
 console.log("\nTOUS LES CONTRÔLES SQL SONT OK");

@@ -11,7 +11,7 @@ import { formatMontant } from "@/lib/format";
 import type { ModeTva } from "@/lib/mode-tva";
 import type { EtatCompta } from "./actions";
 
-export type LogementSaisie = { id: string; nom: string; frais_menage: number; taux_commission: number };
+export type LogementSaisie = { id: string; nom: string; frais_menage: number; taux_commission: number; menage_proprietaire: boolean };
 export type ReservationSaisie = { id: string; logement_id: string; arrivee: string; depart: string; plateforme: string; code: string; deja: number };
 
 type Props = {
@@ -34,6 +34,7 @@ type Props = {
     note: string;
     fraisMenage: number;
     taux: number;
+    menageProprietaire: boolean;
   };
 };
 
@@ -66,22 +67,23 @@ export function FormulaireVersement({ action, logements, reservations, tauxTva, 
   const reservationsDuLogement = reservations.filter((r) => r.logement_id === logementId);
   const menage = edition ? (actualiser && logement ? logement.frais_menage : edition.fraisMenage) : (logement?.frais_menage ?? 0);
   const taux = edition ? (actualiser && logement ? logement.taux_commission : edition.taux) : (logement?.taux_commission ?? 0);
+  const menageProprietaire = edition ? (actualiser && logement ? logement.menage_proprietaire : edition.menageProprietaire) : Boolean(logement?.menage_proprietaire);
 
   const calcul = useMemo(() => {
     const m = versNombre(montant);
     if (!logement || !(m > 0)) return null;
     if (m < menage) return { erreur: `Le montant est inférieur aux frais de ménage (${formatMontant(menage)} MAD).` } as const;
     try {
-      return { r: calculerVersement({ montantRecu: m, fraisMenage: menage, tauxCommission: taux, tauxTva }) } as const;
+      return { r: calculerVersement({ montantRecu: m, fraisMenage: menage, tauxCommission: taux, menageProprietaire, tauxTva }) } as const;
     } catch {
       return null;
     }
-  }, [montant, logement, menage, taux, tauxTva]);
+  }, [montant, logement, menage, taux, menageProprietaire, tauxTva]);
 
   const dateCompta = /^\d{4}-\d{2}-\d{2}$/.test(arrivee) ? dateDeVersement(arrivee) : "";
   const dejaFacture = logement && dateCompta && facturesEmises.includes(`${logement.id}|${moisDe(dateCompta)}`);
   const nuits = arrivee && depart && depart > arrivee ? nbNuits(arrivee, depart) : 0;
-  const ecartReference = edition && logement && (logement.frais_menage !== edition.fraisMenage || logement.taux_commission !== edition.taux);
+  const ecartReference = edition && logement && (logement.frais_menage !== edition.fraisMenage || logement.taux_commission !== edition.taux || logement.menage_proprietaire !== edition.menageProprietaire);
 
   return (
     <form action={formAction} className="space-y-7">
@@ -188,7 +190,7 @@ export function FormulaireVersement({ action, logements, reservations, tauxTva, 
           <p className="text-sm text-ink-3">Choisissez un logement et saisissez le montant reçu : tout le reste se calcule tout seul.</p>
         ) : !calcul ? (
           <p className="text-sm text-ink-3">
-            {logement.nom} : ménage {formatMontant(menage)} MAD, commission {pct(taux)}. Saisissez le montant reçu pour voir le détail.
+            {logement.nom} : ménage {formatMontant(menage)} MAD ({menageProprietaire ? "encaissé par le propriétaire" : "encaissé par le gestionnaire"}), commission {pct(taux)}. Saisissez le montant reçu pour voir le détail.
           </p>
         ) : "erreur" in calcul ? (
           <p className="flex items-start gap-2 text-sm text-danger">
@@ -197,7 +199,7 @@ export function FormulaireVersement({ action, logements, reservations, tauxTva, 
         ) : (
           <dl className="divide-y divide-line">
             <Ligne label="Montant reçu" valeur={`${formatMontant(calcul.r.montantRecu)} MAD`} />
-            <Ligne signe="−" label="Frais de ménage" valeur={`${formatMontant(calcul.r.fraisMenage)} MAD`} />
+            <Ligne signe="−" label={menageProprietaire ? "Frais de ménage (encaissés par le propriétaire)" : "Frais de ménage (encaissés par le gestionnaire)"} valeur={`${formatMontant(calcul.r.fraisMenage)} MAD`} />
             <Ligne signe="=" label="Loyer net hors ménage" valeur={`${formatMontant(calcul.r.loyerNetHorsMenage)} MAD`} fort />
             <Ligne
               label={`Commission Perfect Stay (${pct(taux)}) ${mode === "ht" ? "HT" : "TTC"}`}
@@ -209,8 +211,8 @@ export function FormulaireVersement({ action, logements, reservations, tauxTva, 
                 ? `dont ${formatMontant(calcul.r.commissionHT)} HT + ${formatMontant(calcul.r.tvaCommission)} de TVA (${pct(tauxTva)})`
                 : `soit ${formatMontant(calcul.r.commission)} TTC avec ${formatMontant(calcul.r.tvaCommission)} de TVA (${pct(tauxTva)})`}
             </div>
-            <Ligne label="Revenu net du propriétaire" valeur={`${formatMontant(calcul.r.revenuProprietaire)} MAD`} fort />
-            <Ligne label="Encaissé par Perfect Stay (ménage + commission TTC)" valeur={`${formatMontant(calcul.r.encaisseParPerfectStay)} MAD`} fort />
+            <Ligne label={menageProprietaire ? "Revenu net du propriétaire (ménage inclus)" : "Revenu net du propriétaire"} valeur={`${formatMontant(calcul.r.revenuProprietaire)} MAD`} fort />
+            <Ligne label={menageProprietaire ? "Encaissé par Perfect Stay (commission TTC)" : "Encaissé par Perfect Stay (ménage + commission TTC)"} valeur={`${formatMontant(calcul.r.encaisseParPerfectStay)} MAD`} fort />
           </dl>
         )}
       </div>
@@ -219,10 +221,10 @@ export function FormulaireVersement({ action, logements, reservations, tauxTva, 
         <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-line-strong bg-surface p-3.5 shadow-card">
           <input type="checkbox" name="actualiser" checked={actualiser} onChange={(e) => setActualiser(e.target.checked)} className="mt-1 h-4 w-4" />
           <span className="text-sm">
-            <span className="block font-medium">Utiliser le ménage et le taux actuels du logement</span>
+            <span className="block font-medium">Utiliser les réglages actuels du logement (ménage et commission)</span>
             <span className="block text-[0.82rem] text-ink-2">
-              Ce versement garde ses valeurs d&apos;origine (ménage {formatMontant(edition.fraisMenage)} MAD, commission {pct(edition.taux)}). Le logement a maintenant
-              {logement ? ` ${formatMontant(logement.frais_menage)} MAD et ${pct(logement.taux_commission)}` : " d'autres valeurs"}.
+              Ce versement garde ses valeurs d&apos;origine (ménage {formatMontant(edition.fraisMenage)} MAD {edition.menageProprietaire ? "encaissé par le propriétaire" : "encaissé par le gestionnaire"}, commission {pct(edition.taux)}). Le logement a maintenant
+              {logement ? ` ${formatMontant(logement.frais_menage)} MAD ${logement.menage_proprietaire ? "encaissé par le propriétaire" : "encaissé par le gestionnaire"} et ${pct(logement.taux_commission)}` : " d'autres valeurs"}.
             </span>
           </span>
         </label>

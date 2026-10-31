@@ -23,6 +23,8 @@ export type DonneesRapport = {
   lignes: LigneRapport[];
   totaux: { montantsRecus: number; menage: number; loyerNet: number; commissionTTC: number; tva: number; revenuProprietaire: number };
   tauxTva: number;
+  /** Qui a encaissé le ménage des séjours du mois (réglage du logement au moment de chaque versement) */
+  menageChezProprietaire?: "aucun" | "tous" | "certains";
   nuits: number;
   nbSejours: number;
   reservations: { id: string; arrivee: string; depart: string; type: "reservation" | "blocage" }[];
@@ -148,7 +150,13 @@ export async function genererRapportPdf(d: DonneesRapport): Promise<Uint8Array> 
     y -= 22;
     y = dessin.paragraphe(
       page,
-      `La commission de Perfect Stay est exprimée toutes taxes comprises (dont TVA ${String(d.tauxTva).replace(".", ",")} % : ${formatMontant(d.totaux.tva)} MAD). Les frais de ménage sont perçus directement par Perfect Stay et ne sont pas déduits de votre revenu.`,
+      `La commission de Perfect Stay est exprimée toutes taxes comprises (dont TVA ${String(d.tauxTva).replace(".", ",")} % : ${formatMontant(d.totaux.tva)} MAD). ${
+        d.menageChezProprietaire === "tous"
+          ? "Les frais de ménage vous reviennent : ils sont inclus dans votre revenu."
+          : d.menageChezProprietaire === "certains"
+            ? "Selon le séjour, les frais de ménage sont perçus par Perfect Stay ou vous reviennent (ils sont alors inclus dans votre revenu)."
+            : "Les frais de ménage sont perçus directement par Perfect Stay et ne sont pas déduits de votre revenu."
+      }`,
       MARGE,
       y,
       LARGEUR_UTILE,

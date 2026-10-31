@@ -73,7 +73,8 @@ export default async function PageLogement({
   const st = libelleStatut(l.statut);
   const carte = urlCarte({ mapsUrl: l.maps_url, adresse: l.adresse, ville: l.ville });
   const lien = lienMaps({ mapsUrl: l.maps_url, adresse: l.adresse, ville: l.ville });
-  const exemple = calculerVersement({ montantRecu: 5000, fraisMenage: Number(l.frais_menage), tauxCommission: Number(l.taux_commission) });
+  const menageProprietaire = l.menage_encaisse_par === "proprietaire";
+  const exemple = calculerVersement({ montantRecu: 5000, fraisMenage: Number(l.frais_menage), tauxCommission: Number(l.taux_commission), menageProprietaire });
   const tauxTexte = String(Number(l.taux_commission)).replace(".", ",");
   const manque = elementsACompleter({
     ville: l.ville,
@@ -202,6 +203,7 @@ export default async function PageLogement({
             <dl className="divide-y divide-line">
               <Ligne label="Frais de ménage">
                 <span className="num font-medium">{formatMad(Number(l.frais_menage))}</span>
+                <span className="block text-[0.8rem] text-ink-3">{menageProprietaire ? "Encaissés par le propriétaire" : "Encaissés par le gestionnaire"}</span>
               </Ligne>
               <Ligne label="Commission Perfect Stay">
                 <span className="num font-medium">{tauxTexte} %</span>
@@ -209,8 +211,11 @@ export default async function PageLogement({
             </dl>
             <div className="mt-3 rounded-xl bg-sunken/70 p-3 text-[0.82rem] leading-relaxed text-ink-2">
               <p className="font-medium text-ink">Pour {formatMad(5000)} reçus :</p>
-              <p className="num">Propriétaire : {formatMad(exemple.revenuProprietaire)}</p>
-              <p className="num">Perfect Stay : {formatMad(exemple.encaisseParPerfectStay)} (ménage + commission)</p>
+              <p className="num">
+                Propriétaire : {formatMad(exemple.revenuProprietaire)}
+                {menageProprietaire ? " (ménage inclus)" : ""}
+              </p>
+              <p className="num">Perfect Stay : {formatMad(exemple.encaisseParPerfectStay)} {menageProprietaire ? "(commission)" : "(ménage + commission)"}</p>
             </div>
           </Bloc>
 

@@ -6,7 +6,7 @@ import { SubmitButton } from "@/components/submit-button";
 import { Field, Input, Notice, Select, Textarea } from "@/components/ui";
 import { calculerVersement } from "@/lib/compta";
 import { formatMad } from "@/lib/format";
-import { PLATEFORMES, ROLES_CONTACT, STATUTS_LOGEMENT, TAUX_COMMISSION_DEFAUT, TYPES_LOGEMENT } from "@/lib/logements";
+import { ENCAISSEMENT_MENAGE, PLATEFORMES, ROLES_CONTACT, STATUTS_LOGEMENT, TAUX_COMMISSION_DEFAUT, TYPES_LOGEMENT } from "@/lib/logements";
 import type { EtatLogement } from "./actions";
 
 export type ValeursLogement = {
@@ -18,6 +18,7 @@ export type ValeursLogement = {
   adresse: string;
   maps_url: string;
   frais_menage: string;
+  menage_encaisse_par: string;
   taux_commission: string;
   code_acces: string;
   wifi_nom: string;
@@ -41,6 +42,7 @@ export const VALEURS_VIDES: ValeursLogement = {
   adresse: "",
   maps_url: "",
   frais_menage: "",
+  menage_encaisse_par: "gestionnaire",
   taux_commission: String(TAUX_COMMISSION_DEFAUT),
   code_acces: "",
   wifi_nom: "",
@@ -70,13 +72,13 @@ function Section({ titre, description, children }: { titre: string; description?
 }
 
 /** Exemple chiffré en direct : Amine voit tout de suite l'effet du taux et des frais saisis. */
-function ExempleCommission({ frais, taux }: { frais: string; taux: string }) {
+function ExempleCommission({ frais, taux, menageProprietaire }: { frais: string; taux: string; menageProprietaire: boolean }) {
   const montant = 5000;
   let r;
   try {
     const f = frais.trim() === "" ? 0 : versNombre(frais);
     const t = versNombre(taux);
-    r = calculerVersement({ montantRecu: montant, fraisMenage: f, tauxCommission: t });
+    r = calculerVersement({ montantRecu: montant, fraisMenage: f, tauxCommission: t, menageProprietaire });
   } catch {
     r = null;
   }
@@ -93,8 +95,8 @@ function ExempleCommission({ frais, taux }: { frais: string; taux: string }) {
         <dl className="mt-2 divide-y divide-line">
           {ligne("Loyer net hors ménage", formatMad(r.loyerNetHorsMenage))}
           {ligne("Commission Perfect Stay", formatMad(r.commission))}
-          {ligne("Revenu net du propriétaire", formatMad(r.revenuProprietaire), true)}
-          {ligne("Encaissé par Perfect Stay (ménage + commission)", formatMad(r.encaisseParPerfectStay), true)}
+          {ligne(menageProprietaire ? "Revenu net du propriétaire (ménage inclus)" : "Revenu net du propriétaire", formatMad(r.revenuProprietaire), true)}
+          {ligne(menageProprietaire ? "Encaissé par Perfect Stay (commission)" : "Encaissé par Perfect Stay (ménage + commission)", formatMad(r.encaisseParPerfectStay), true)}
         </dl>
       ) : (
         <p className="mt-2 text-sm text-ink-3">Saisissez les frais de ménage et le taux pour voir le calcul.</p>
@@ -120,6 +122,7 @@ export function FormulaireLogement({
   const id = useId();
   const [frais, setFrais] = useState(valeurs.frais_menage);
   const [taux, setTaux] = useState(valeurs.taux_commission);
+  const [encaissement, setEncaissement] = useState(valeurs.menage_encaisse_par);
   const [cles, setCles] = useState(1);
   const [ical, setIcal] = useState(() => valeurs.ical.map((c, i) => ({ ...c, cle: i })));
   const [contacts, setContacts] = useState(() => valeurs.contacts.map((c, i) => ({ ...c, cle: i })));
@@ -157,7 +160,7 @@ export function FormulaireLogement({
         </div>
       </Section>
 
-      <Section titre="Tarifs et commission" description="Ces deux valeurs servent à tous les calculs de la comptabilité. Chaque logement a les siens.">
+      <Section titre="Tarifs et commission" description="Ces réglages servent à tous les calculs de la comptabilité. Chaque logement a les siens.">
         <div className="grid gap-5 sm:grid-cols-2">
           <Field label="Frais de ménage (MAD)" htmlFor={`${id}-menage`} hint="Montant fixe facturé pour chaque ménage.">
             <Input
@@ -183,7 +186,31 @@ export function FormulaireLogement({
             />
           </Field>
         </div>
-        <ExempleCommission frais={frais} taux={taux} />
+        <fieldset>
+          <legend className="mb-2 text-sm font-medium">Frais de ménage</legend>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {ENCAISSEMENT_MENAGE.map((o) => (
+              <label
+                key={o.value}
+                className="press flex cursor-pointer items-start gap-3 rounded-xl border border-line p-4 has-[:checked]:border-wine-500 has-[:checked]:bg-wine-50"
+              >
+                <input
+                  type="radio"
+                  name="menage_encaisse_par"
+                  value={o.value}
+                  checked={encaissement === o.value}
+                  onChange={() => setEncaissement(o.value)}
+                  className="mt-0.5 h-5 w-5 shrink-0 accent-wine-600"
+                />
+                <span>
+                  <span className="block font-medium">{o.label}</span>
+                  <span className="block text-sm text-ink-2 text-pretty">{o.detail}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+        <ExempleCommission frais={frais} taux={taux} menageProprietaire={encaissement === "proprietaire"} />
       </Section>
 
       <Section titre="Localisation">

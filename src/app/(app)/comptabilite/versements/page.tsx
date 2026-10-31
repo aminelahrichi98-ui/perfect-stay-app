@@ -33,7 +33,7 @@ export default async function PageVersements({
 
   let requete = supabase
     .from("versements")
-    .select("id, logement_id, date_versement, arrivee, depart, canal, montant_recu, frais_menage, taux_commission, note, reservation_id")
+    .select("id, logement_id, date_versement, arrivee, depart, canal, montant_recu, frais_menage, taux_commission, menage_proprietaire, note, reservation_id")
     .gte("date_versement", premierDuMois(mois))
     .lt("date_versement", premierDuMois(moisSuivant(mois)))
     .order("date_versement", { ascending: false });
@@ -52,6 +52,7 @@ export default async function PageVersements({
         montant_recu: Number(v.montant_recu),
         frais_menage: Number(v.frais_menage),
         taux_commission: Number(v.taux_commission),
+        menage_proprietaire: Boolean(v.menage_proprietaire),
         note: v.note,
         reservation_id: v.reservation_id,
       },

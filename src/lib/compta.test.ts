@@ -46,3 +46,18 @@ test("HT + TVA = TTC, toujours exactement, quel que soit le montant", () => {
 test("TVA à 0 % : le HT est égal au TTC", () => {
   assert.deepEqual(repartirTva(1000, 0), { ht: 1000, tva: 0, ttc: 1000 });
 });
+
+test("ménage encaissé par le propriétaire : la commission ne change pas, le ménage lui revient", () => {
+  const gestionnaire = calculerVersement({ montantRecu: 3000, fraisMenage: 300, tauxCommission: 20 });
+  const proprietaire = calculerVersement({ montantRecu: 3000, fraisMenage: 300, tauxCommission: 20, menageProprietaire: true });
+  assert.equal(gestionnaire.commission, 540);
+  assert.equal(proprietaire.commission, 540);
+  assert.equal(gestionnaire.revenuProprietaire, 2160);
+  assert.equal(proprietaire.revenuProprietaire, 2460);
+  assert.equal(gestionnaire.encaisseParPerfectStay, 840);
+  assert.equal(proprietaire.encaisseParPerfectStay, 540);
+  assert.deepEqual([gestionnaire.menageGestionnaire, gestionnaire.menageProprietaire], [300, 0]);
+  assert.deepEqual([proprietaire.menageGestionnaire, proprietaire.menageProprietaire], [0, 300]);
+  // Tout l'argent reçu est réparti : propriétaire + Perfect Stay = montant reçu
+  assert.equal(proprietaire.revenuProprietaire + proprietaire.encaisseParPerfectStay, 3000);
+});
