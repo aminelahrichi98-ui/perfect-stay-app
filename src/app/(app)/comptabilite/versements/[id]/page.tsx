@@ -18,7 +18,7 @@ export default async function PageVersement({ params }: { params: Promise<{ id: 
   const supabase = await createClient();
   const { data: v } = await supabase
     .from("versements")
-    .select("id, logement_id, date_versement, arrivee, depart, canal, montant_recu, frais_menage, taux_commission, note")
+    .select("id, logement_id, date_versement, arrivee, depart, canal, montant_recu, frais_menage, taux_commission, menage_proprietaire, note")
     .eq("id", id)
     .maybeSingle();
   if (!v) notFound();
@@ -27,7 +27,7 @@ export default async function PageVersement({ params }: { params: Promise<{ id: 
   // Le logement doit rester dans la liste même s'il est en pause
   const logements = saisie.logements.some((l) => l.id === v.logement_id)
     ? saisie.logements
-    : [...saisie.logements, { id: v.logement_id, nom: saisie.nomsLogements[v.logement_id] ?? "Logement", frais_menage: Number(v.frais_menage), taux_commission: Number(v.taux_commission) }];
+    : [...saisie.logements, { id: v.logement_id, nom: saisie.nomsLogements[v.logement_id] ?? "Logement", frais_menage: Number(v.frais_menage), taux_commission: Number(v.taux_commission), menage_proprietaire: Boolean(v.menage_proprietaire) }];
 
   return (
     <div className="max-w-2xl space-y-5">
@@ -51,6 +51,7 @@ export default async function PageVersement({ params }: { params: Promise<{ id: 
             note: v.note,
             fraisMenage: Number(v.frais_menage),
             taux: Number(v.taux_commission),
+            menageProprietaire: Boolean(v.menage_proprietaire),
           }}
         />
       </Card>

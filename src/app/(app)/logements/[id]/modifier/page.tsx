@@ -44,6 +44,7 @@ export default async function PageModifierLogement({
     adresse: l.adresse,
     maps_url: l.maps_url,
     frais_menage: String(Number(l.frais_menage)).replace(".", ","),
+    menage_encaisse_par: l.menage_encaisse_par ?? "gestionnaire",
     taux_commission: String(Number(l.taux_commission)).replace(".", ","),
     code_acces: l.code_acces,
     wifi_nom: l.wifi_nom,

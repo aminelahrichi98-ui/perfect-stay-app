@@ -27,7 +27,7 @@ export async function chargerSaisie() {
     tauxTva,
     aujourdhui: jour,
     nomsLogements: Object.fromEntries(logements.map((l) => [l.id, l.nom])),
-    logements: logements.filter((l) => l.statut !== "en_pause").map((l) => ({ id: l.id, nom: l.nom, frais_menage: l.frais_menage, taux_commission: l.taux_commission })),
+    logements: logements.filter((l) => l.statut !== "en_pause").map((l) => ({ id: l.id, nom: l.nom, frais_menage: l.frais_menage, taux_commission: l.taux_commission, menage_proprietaire: l.menage_encaisse_par === "proprietaire" })),
     reservations: (resas ?? []).map((r) => ({ ...r, deja: deja.get(r.id) ?? 0 })),
     facturesEmises: (factures ?? []).filter((f) => f.logement_id).map((f) => `${f.logement_id}|${moisDe(f.mois)}`),
   };

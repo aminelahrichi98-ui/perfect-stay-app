@@ -6,6 +6,11 @@
  *   Revenu net propriétaire = Loyer net hors ménage − Commission
  *   Encaissé par Perfect Stay = Frais de ménage + Commission
  *
+ * Quand le logement indique que le ménage est encaissé par le propriétaire, la commission ne change pas
+ * (elle porte toujours sur le loyer hors ménage) mais le ménage revient au propriétaire :
+ *   Revenu net propriétaire = Loyer net hors ménage − Commission + Frais de ménage
+ *   Encaissé par Perfect Stay = Commission
+ *
  * Tout est calculé en centimes entiers pour éviter les erreurs d'arrondi.
  * Le taux est en pourcentage (20 = 20 %) et propre à chaque logement.
  */
@@ -20,6 +25,8 @@ export type EntreeVersement = {
   fraisMenage: number;
   /** Taux de commission du logement, en % */
   tauxCommission: number;
+  /** Le ménage est-il encaissé par le propriétaire (et non par Perfect Stay) ? */
+  menageProprietaire?: boolean;
   /** TVA en % (20 par défaut) */
   tauxTva?: number;
 };
@@ -27,6 +34,9 @@ export type EntreeVersement = {
 export type ResultatVersement = {
   montantRecu: number;
   fraisMenage: number;
+  /** Part du ménage qui revient à Perfect Stay (gestionnaire) ou au propriétaire : l'une des deux vaut 0 */
+  menageGestionnaire: number;
+  menageProprietaire: number;
   loyerNetHorsMenage: number;
   /** Commission TTC : c'est ce que Perfect Stay reçoit réellement */
   commission: number;
@@ -55,6 +65,7 @@ export function calculerVersement({
   montantRecu,
   fraisMenage,
   tauxCommission,
+  menageProprietaire = false,
   tauxTva = TAUX_TVA_DEFAUT,
 }: EntreeVersement): ResultatVersement {
   if (![montantRecu, fraisMenage, tauxCommission].every(Number.isFinite)) {
@@ -68,14 +79,18 @@ export function calculerVersement({
   const menage = enCentimes(fraisMenage);
   const loyerNet = recu - menage;
   const commission = Math.round((loyerNet * tauxCommission) / 100);
-  const revenuProprietaire = loyerNet - commission;
-  const encaisse = menage + commission;
+  const menagePerfectStay = menageProprietaire ? 0 : menage;
+  const menagePourProprietaire = menageProprietaire ? menage : 0;
+  const revenuProprietaire = loyerNet - commission + menagePourProprietaire;
+  const encaisse = menagePerfectStay + commission;
 
   const { ht, tva } = repartirTva(enMad(commission), tauxTva);
 
   return {
     montantRecu: enMad(recu),
     fraisMenage: enMad(menage),
+    menageGestionnaire: enMad(menagePerfectStay),
+    menageProprietaire: enMad(menagePourProprietaire),
     loyerNetHorsMenage: enMad(loyerNet),
     commission: enMad(commission),
     commissionHT: ht,

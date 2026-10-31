@@ -226,8 +226,13 @@ create or replace view public.proprietaire_reservations as
       where lp.logement_id = r.logement_id and lp.user_id = (select auth.uid())
     );
 
+-- Colonnes ajoutées plus tard (0012) : déclarées ici aussi pour que ce script reste relançable
+alter table public.logements add column if not exists menage_encaisse_par text not null default 'gestionnaire';
+alter table public.versements add column if not exists menage_proprietaire boolean not null default false;
+
 create or replace view public.proprietaire_versements as
-  select v.id, v.logement_id, v.date_versement, v.montant_recu, v.frais_menage, v.taux_commission
+  select v.id, v.logement_id, v.date_versement, v.montant_recu, v.frais_menage, v.taux_commission,
+         v.menage_proprietaire
   from public.versements v
   where exists (
     select 1 from public.logement_proprietaires lp
@@ -254,7 +259,8 @@ grant select on public.proprietaire_logements, public.proprietaire_reservations,
 create or replace view public.comptabilite_logements as
   select l.id, l.nom, l.ville, l.type, l.statut, l.frais_menage, l.taux_commission,
          l.proprietaire_nom, l.proprietaire_adresse, l.proprietaire_ice,
-         exists (select 1 from public.logement_ical i where i.logement_id = l.id) as a_calendrier
+         exists (select 1 from public.logement_ical i where i.logement_id = l.id) as a_calendrier,
+         l.menage_encaisse_par
   from public.logements l
   where public.a_droit('comptabilite', 'voir');
 

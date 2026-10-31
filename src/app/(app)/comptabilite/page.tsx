@@ -39,7 +39,14 @@ export default async function PageSynthese({ searchParams }: { searchParams: Pro
       note: "ménage + commissions TTC",
       fort: true,
     },
-    { titre: "Frais de ménage perçus", valeur: t.menage, precedent: tp.menage, note: `${t.nbVersements} versement${t.nbVersements > 1 ? "s" : ""} ce mois-ci` },
+    {
+      titre: "Frais de ménage perçus",
+      valeur: t.menage,
+      precedent: tp.menage,
+      note: t.menageProprietaire
+        ? `hors ${formatMontant(t.menageProprietaire)} MAD encaissés par les propriétaires`
+        : `${t.nbVersements} versement${t.nbVersements > 1 ? "s" : ""} ce mois-ci`,
+    },
     { titre: "Dépenses", valeur: actuel.depensesTotal, precedent: precedent.depensesTotal, note: "non refacturées aux propriétaires", inverse: true },
     {
       titre: `Commissions nettes ${suffixe}`,

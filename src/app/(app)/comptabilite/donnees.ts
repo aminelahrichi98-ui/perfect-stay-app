@@ -17,7 +17,7 @@ export async function lireLogementsCompta() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("comptabilite_logements")
-    .select("id, nom, ville, type, statut, frais_menage, taux_commission, proprietaire_nom, proprietaire_adresse, proprietaire_ice, a_calendrier")
+    .select("id, nom, ville, type, statut, frais_menage, taux_commission, proprietaire_nom, proprietaire_adresse, proprietaire_ice, a_calendrier, menage_encaisse_par")
     .order("nom");
   return (data ?? []).map((l) => ({
     ...l,
@@ -38,7 +38,7 @@ export async function chargerSynthese(mois: Mois) {
     lireTauxTva(),
     supabase
       .from("versements")
-      .select("id, logement_id, date_versement, montant_recu, frais_menage, taux_commission")
+      .select("id, logement_id, date_versement, montant_recu, frais_menage, taux_commission, menage_proprietaire")
       .gte("date_versement", debut)
       .lt("date_versement", fin),
     supabase.from("comptabilite_reservations").select("id, logement_id, type, arrivee, depart").lt("arrivee", fin).gt("depart", debut),
@@ -52,6 +52,7 @@ export async function chargerSynthese(mois: Mois) {
     montant_recu: Number(v.montant_recu),
     frais_menage: Number(v.frais_menage),
     taux_commission: Number(v.taux_commission),
+    menage_proprietaire: Boolean(v.menage_proprietaire),
   }));
   const args = {
     tauxTva,
