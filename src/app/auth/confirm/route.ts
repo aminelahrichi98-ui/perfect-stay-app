@@ -11,9 +11,16 @@ export async function GET(request: NextRequest) {
   // On n'accepte que des chemins internes (pas de redirection vers un site extérieur).
   const destination = suite.startsWith("/") && !suite.startsWith("//") ? suite : "/mot-de-passe";
 
+  const supabase = await createClient();
+  // Lien fabriqué par l'app (accès d'un membre) ou modèle d'e-mail avec jeton
   if (tokenHash && type) {
-    const supabase = await createClient();
     const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+    if (!error) return NextResponse.redirect(new URL(destination, request.url));
+  }
+  // Lien de l'e-mail Supabase standard (« Mot de passe oublié ») : un code à échanger contre une session
+  const code = searchParams.get("code");
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) return NextResponse.redirect(new URL(destination, request.url));
   }
   const echec = new URL("/connexion", request.url);

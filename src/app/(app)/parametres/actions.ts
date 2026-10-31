@@ -1,9 +1,9 @@
 "use server";
 
-import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getUtilisateur, peutModifier, type Utilisateur } from "@/lib/auth";
+import { lienRetourMotDePasse, origineDuSite } from "@/lib/origine";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -196,13 +196,6 @@ export async function changerStatut(id: string, actif: boolean) {
 }
 
 /** Adresse du site telle que l'utilisateur la voit (jamais une adresse écrite en dur). */
-async function origineDuSite() {
-  const h = await headers();
-  const hote = h.get("x-forwarded-host") ?? h.get("host") ?? "";
-  const proto = h.get("x-forwarded-proto") ?? (hote.startsWith("localhost") ? "http" : "https");
-  return `${proto}://${hote}`;
-}
-
 /**
  * Lien personnel pour choisir son mot de passe et se connecter. Il se copie et s'envoie par le canal de son choix.
  * Valable une seule fois et pour une durée limitée (1 heure par défaut) : il se régénère à volonté.
@@ -232,7 +225,7 @@ export async function renvoyerEmail(id: string): Promise<EtatAction> {
   const { data: cible } = await admin.from("profiles").select("email").eq("id", id).maybeSingle();
   if (!cible) return { erreur: "Ce compte n'existe plus." };
   const supabase = await createClient();
-  const { error } = await supabase.auth.resetPasswordForEmail(cible.email);
+  const { error } = await supabase.auth.resetPasswordForEmail(cible.email, { redirectTo: await lienRetourMotDePasse() });
   if (error) return { erreur: "L'e-mail n'a pas pu partir. Réessayez dans une minute." };
   return { succes: `E-mail envoyé à ${cible.email}.` };
 }

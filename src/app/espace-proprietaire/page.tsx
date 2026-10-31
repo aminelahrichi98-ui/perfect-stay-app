@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { Building2, LogOut } from "lucide-react";
+import Link from "next/link";
+import { Building2, KeyRound, LogOut } from "lucide-react";
 import { seDeconnecter } from "@/app/connexion/actions";
 import { VueMois } from "@/app/(app)/calendrier/vue-mois";
 import { LogoMark } from "@/components/logo";
@@ -59,11 +60,16 @@ export default async function EspaceProprietaire({ searchParams }: { searchParam
           <LogoMark className="h-6 w-auto" />
           <span className="font-display text-base font-semibold tracking-tight">Perfect Stay</span>
         </span>
-        <form action={seDeconnecter}>
-          <button type="submit" className="press inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm text-aub-200 hover:bg-white/10">
-            <LogOut className="h-4 w-4" /> Déconnexion
-          </button>
-        </form>
+        <span className="flex items-center gap-1">
+          <Link href="/mon-compte" className="press inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm text-aub-200 hover:bg-white/10">
+            <KeyRound className="h-4 w-4" /> <span className="hidden sm:inline">Mot de passe</span>
+          </Link>
+          <form action={seDeconnecter}>
+            <button type="submit" className="press inline-flex h-9 items-center gap-2 rounded-lg px-3 text-sm text-aub-200 hover:bg-white/10">
+              <LogOut className="h-4 w-4" /> Déconnexion
+            </button>
+          </form>
+        </span>
       </header>
 
       <main className="mx-auto max-w-3xl space-y-8 px-4 py-8 md:py-12">
