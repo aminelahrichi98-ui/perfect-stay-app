@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { lienRetourMotDePasse } from "@/lib/origine";
 import { COOKIE_RESTER, DUREE_RESTER } from "@/lib/supabase/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -38,7 +39,7 @@ export async function demanderReinitialisation(_: EtatFormulaire, formData: Form
   if (!email) return { erreur: "Saisissez votre adresse e-mail." };
 
   const supabase = await createClient();
-  await supabase.auth.resetPasswordForEmail(email);
+  await supabase.auth.resetPasswordForEmail(email, { redirectTo: await lienRetourMotDePasse() });
   // Réponse identique que l'adresse existe ou non, pour ne pas révéler qui a un compte.
   return { succes: "Si un compte existe pour cette adresse, un e-mail vient de partir avec un lien pour choisir un nouveau mot de passe." };
 }
@@ -56,6 +57,29 @@ export async function definirMotDePasse(_: EtatFormulaire, formData: FormData): 
   const { error } = await supabase.auth.updateUser({ password: motDePasse });
   if (error) return { erreur: "Impossible d'enregistrer ce mot de passe. Essayez-en un autre, plus long ou moins courant." };
   redirect("/");
+}
+
+/** Changer son mot de passe une fois connecté : l'ancien est redemandé, pour qu'un téléphone resté ouvert ne suffise pas. */
+export async function changerMotDePasse(_: EtatFormulaire, formData: FormData): Promise<EtatFormulaire> {
+  const actuel = String(formData.get("actuel") ?? "");
+  const motDePasse = String(formData.get("motDePasse") ?? "");
+  const confirmation = String(formData.get("confirmation") ?? "");
+  if (!actuel) return { erreur: "Saisissez votre mot de passe actuel." };
+  if (motDePasse.length < 10) return { erreur: "Choisissez un nouveau mot de passe d'au moins 10 caractères." };
+  if (motDePasse !== confirmation) return { erreur: "Les deux nouveaux mots de passe ne sont pas identiques." };
+  if (motDePasse === actuel) return { erreur: "Le nouveau mot de passe doit être différent de l'actuel." };
+
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  const email = data.user?.email;
+  if (!email) return { erreur: "Votre session a expiré. Reconnectez-vous puis réessayez." };
+
+  const { error: mauvais } = await supabase.auth.signInWithPassword({ email, password: actuel });
+  if (mauvais) return { erreur: "Le mot de passe actuel est incorrect. Si vous l'avez oublié, utilisez « Mot de passe oublié » depuis la page de connexion." };
+
+  const { error } = await supabase.auth.updateUser({ password: motDePasse });
+  if (error) return { erreur: "Impossible d'enregistrer ce mot de passe. Essayez-en un autre, plus long ou moins courant." };
+  return { succes: "Votre mot de passe a été changé. Utilisez-le dès votre prochaine connexion." };
 }
 
 export async function seDeconnecter() {

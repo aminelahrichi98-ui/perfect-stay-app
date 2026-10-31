@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, LogOut, Menu, X } from "lucide-react";
+import { ChevronDown, KeyRound, LogOut, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -124,6 +124,14 @@ function BlocUtilisateur({ utilisateur }: Pick<Props, "utilisateur">) {
         </p>
         <p className="truncate text-xs text-aub-300">{utilisateur.role}</p>
       </div>
+      <Link
+        href="/mon-compte"
+        aria-label="Changer mon mot de passe"
+        title="Changer mon mot de passe"
+        className="press grid h-9 w-9 place-items-center rounded-lg text-aub-300 hover:bg-white/10 hover:text-white"
+      >
+        <KeyRound className="h-[1.1rem] w-[1.1rem]" />
+      </Link>
       <form action={seDeconnecter}>
         <button
           type="submit"
