@@ -1,6 +1,7 @@
 import {
   BedDouble,
   Briefcase,
+  Calculator,
   CalendarDays,
   CalendarRange,
   CheckSquare,
@@ -26,6 +27,7 @@ export type ModuleKey =
   | "strategie"
   | "marketing"
   | "crm"
+  | "estimateur"
   | "onboarding"
   | "logements"
   | "calendrier"
@@ -59,6 +61,7 @@ export const MODULES: ModuleDef[] = [
   { key: "strategie", label: "Stratégie entreprise", href: "/strategie", icon: Compass, phase: 8, description: "Décisions et avancement par pôle" },
   { key: "marketing", label: "Marketing", href: "/marketing", icon: Megaphone, phase: 7, description: "Dépenses pub et publications" },
   { key: "crm", label: "CRM", href: "/crm", icon: Users, phase: 7, description: "Prospects propriétaires" },
+  { key: "estimateur", label: "Estimateur", href: "/estimateur", icon: Calculator, phase: 8, description: "Estimation de revenus en PDF pour un propriétaire prospect" },
   { key: "onboarding", label: "Onboarding", href: "/onboarding", icon: Rocket, phase: 5, description: "Intégration d'un nouveau logement" },
   { key: "logements", label: "Logements", href: "/logements", icon: Home, phase: 2, description: "Fiches, documents, contacts" },
   { key: "calendrier", label: "Calendrier", href: "/calendrier", icon: CalendarDays, phase: 3, description: "Réservations et synchronisation Airbnb" },
