@@ -16,7 +16,7 @@ await db.exec(`
   grant usage on schema public to authenticated;
   grant usage on schema auth to authenticated;
 `);
-const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql", "0008_taches.sql", "0009_crm_marketing.sql", "0010_strategie_rh.sql", "0011_versements_sejour.sql", "0012_menage_encaisse_par.sql"];
+const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql", "0008_taches.sql", "0009_crm_marketing.sql", "0010_strategie_rh.sql", "0011_versements_sejour.sql", "0012_menage_encaisse_par.sql", "0013_estimateur.sql"];
 for (let passe = 0; passe < 2; passe++) {
   for (const f of FICHIERS) await db.exec(readFileSync(R + f, "utf8")); // la 2e passe vérifie que les scripts sont relançables
   if (passe === 0) await db.exec(`grant select, insert, update, delete on all tables in schema public to authenticated;`);
@@ -503,5 +503,19 @@ await comme("amine", `update public.logements set menage_encaisse_par='proprieta
 await echoue("amine", `update public.logements set menage_encaisse_par='voyageur' where id=$1`, [lg], "encaissement du ménage inconnu");
 assert.equal((await comme("amine", `select menage_proprietaire from public.versements where id=$1`, [vs])).rows[0].menage_proprietaire, false);
 console.log("✔ ménage : réglage par logement contrôlé, versements existants inchangés");
+
+// ============================ Estimateur ============================
+const est = `insert into public.estimations (prenom, quartier, type_bien, standing, brut_bas, brut_haut, net_bas, net_haut) values ('Karim','Maarif','2ch','premium',100000,140000,65600,91840) returning id`;
+const idEst = (await comme("amine", est)).rows[0].id;
+assert.ok(idEst);
+await echoue("abdel", est, [], "estimation sans droit");
+assert.equal((await comme("abdel", `select * from public.estimations`)).rows.length, 0);
+await db.query(`insert into public.permissions (user_id,module,can_view,can_edit) values ($1,'estimateur',true,false)`, [ids.abdel]);
+assert.equal((await comme("abdel", `select * from public.estimations`)).rows.length, 1);
+await echoue("abdel", est, [], "estimation avec droit en lecture seule");
+assert.equal((await comme("abdel", `delete from public.estimations where id=$1`, [idEst])).rowCount, 0);
+await echoue("amine", `insert into public.estimations (prenom, quartier, type_bien, standing, brut_bas, brut_haut, net_bas, net_haut) values ('X','Maarif','chateau','premium',1,2,1,2)`, [], "type de bien inconnu");
+await echoue("amine", `insert into public.estimations (prenom, quartier, type_bien, standing, brut_bas, brut_haut, net_bas, net_haut) values ('X','Maarif','2ch','premium',1,2,5,2)`, [], "fourchette nette inversée");
+console.log("✔ estimateur : réservé au droit « Estimateur », suppression par un administrateur seulement");
 
 console.log("\nTOUS LES CONTRÔLES SQL SONT OK");

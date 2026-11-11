@@ -23,7 +23,7 @@ function construireMenu(autorises: ModuleKey[]): { principal: Entree[]; bas: Mod
   const a = new Set(autorises);
   const principal: Entree[] = [];
   const ajoute = (k: ModuleKey) => a.has(k) && principal.push({ type: "lien", key: k });
-  (["dashboard", "taches", "strategie", "marketing", "crm", "onboarding", "logements", "calendrier"] as ModuleKey[]).forEach(ajoute);
+  (["dashboard", "taches", "strategie", "marketing", "crm", "estimateur", "onboarding", "logements", "calendrier"] as ModuleKey[]).forEach(ajoute);
   const ops = (["menage", "maintenance", "stock", "checklists"] as ModuleKey[]).filter((k) => a.has(k));
   if (ops.length) principal.push({ type: "groupe", enfants: ops });
   (["comptabilite", "rh"] as ModuleKey[]).forEach(ajoute);
