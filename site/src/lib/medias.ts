@@ -18,6 +18,6 @@ export const MEDIAS: Record<string, Media> = {
   transformation: { video: `${CDN}hf_20261115_102107_2996e098-f6b2-4276-b112-f9c404bb4876.mp4`, videoMobile: null, poster: POSTER_VIDE },
   messages: { video: `${CDN}hf_20261115_101813_ba2be31a-0d65-4fda-b6a8-ce01bc0f9689.mp4`, videoMobile: null, poster: null },
   operations: { video: `${CDN}hf_20261115_101814_f2e82da4-ef1d-418d-b8d7-c32c7afa4d7d.mp4`, videoMobile: null, poster: null },
-  portefeuille: { video: null, videoMobile: null, poster: null },
+  portefeuille: { video: `${CDN}hf_20261115_101813_3159bba8-92c0-4231-bb53-e200513e3ac2.mp4`, videoMobile: null, poster: null },
   convergence: { video: `${CDN}hf_20261115_101813_589e00f6-9531-4d44-b1ad-ab6d41bf5604.mp4`, videoMobile: null, poster: null },
 };
