@@ -18,7 +18,7 @@ export function CtaMobile() {
   return (
     <div
       className={cn(
-        "fixed inset-x-0 bottom-0 z-30 border-t border-papier/[0.06] bg-charbon/90 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl transition-transform duration-500 md:hidden",
+        "fixed inset-x-0 bottom-0 z-30 border-t border-white/[0.06] bg-charbon/90 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur-xl transition-transform duration-500 md:hidden",
         visible && !tunnelOuvert ? "translate-y-0" : "translate-y-full",
       )}
     >

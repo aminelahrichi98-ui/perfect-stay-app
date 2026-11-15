@@ -22,7 +22,7 @@ const mad = (n: number) => `${new Intl.NumberFormat("fr-FR").format(n).replace(/
 
 function Kpi({ label, valeur, note }: { label: string; valeur: string; note?: string }) {
   return (
-    <div className="rounded-2xl border border-papier/[0.06] bg-charbon/60 p-4">
+    <div className="rounded-2xl border border-white/[0.06] bg-charbon/60 p-4">
       <p className="text-[0.72rem] text-papier/50">{label}</p>
       <p className="num mt-1.5 text-[1.1rem] font-semibold tracking-tight whitespace-nowrap text-papier sm:text-[1.35rem]">{valeur}</p>
       {note ? <p className="mt-0.5 text-[0.7rem] text-papier/40">{note}</p> : null}
@@ -47,7 +47,7 @@ function Performance() {
         <Kpi label="Prix moyen par nuit" valeur={mad(m.prixMoyen)} />
         <Kpi label="Revenus sur 12 mois" valeur={mad(total)} note={`Occupation moyenne ${occMoy} %`} />
       </div>
-      <div className="rounded-2xl border border-papier/[0.06] bg-charbon/60 p-4">
+      <div className="rounded-2xl border border-white/[0.06] bg-charbon/60 p-4">
         <div className="flex items-center justify-between text-[0.75rem] text-papier/55">
           <span>Revenus mensuels</span>
           <span>Touchez un mois</span>
@@ -56,18 +56,18 @@ function Performance() {
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
             <defs>
               <linearGradient id="aire" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor="#230c1f" stopOpacity="0.35" />
-                <stop offset="1" stopColor="#230c1f" stopOpacity="0" />
+                <stop offset="0" stopColor="#b69a70" stopOpacity="0.35" />
+                <stop offset="1" stopColor="#b69a70" stopOpacity="0" />
               </linearGradient>
             </defs>
             <path d={`${ligne} L100 100 L0 100Z`} fill="url(#aire)" />
-            <path d={ligne} fill="none" stroke="#230c1f" strokeWidth="1.4" vectorEffect="non-scaling-stroke" />
+            <path d={ligne} fill="none" stroke="#b69a70" strokeWidth="1.4" vectorEffect="non-scaling-stroke" />
             <line x1={points[choisi][0]} x2={points[choisi][0]} y1="0" y2="100" stroke="#f5f2ec" strokeOpacity="0.25" vectorEffect="non-scaling-stroke" />
           </svg>
           <span className="pointer-events-none absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-charbon bg-or" style={{ left: `${points[choisi][0]}%`, top: `${points[choisi][1]}%` }} />
           <div className="absolute inset-0 flex">
             {mois.map((x, i) => (
-              <button key={x.mois} type="button" onClick={() => setChoisi(i)} aria-label={`${x.mois} : ${mad(x.revenus)}`} aria-pressed={choisi === i} className="h-full flex-1 rounded-md hover:bg-papier/[0.03]" />
+              <button key={x.mois} type="button" onClick={() => setChoisi(i)} aria-label={`${x.mois} : ${mad(x.revenus)}`} aria-pressed={choisi === i} className="h-full flex-1 rounded-md hover:bg-white/[0.03]" />
             ))}
           </div>
         </div>
@@ -93,7 +93,7 @@ const STATUT_OP: Record<Operation["statut"], { label: string; classe: string; ic
 function Operations() {
   return (
     <div className="grid gap-3 lg:grid-cols-[1fr_15rem]">
-      <ul className="divide-y divide-papier/[0.06] rounded-2xl border border-papier/[0.06] bg-charbon/60">
+      <ul className="divide-y divide-white/[0.06] rounded-2xl border border-white/[0.06] bg-charbon/60">
         {DEMO_SYNC.operations.map((o, i) => {
           const Icone = ICONE_OP[o.type];
           const s = STATUT_OP[o.statut];
@@ -129,10 +129,10 @@ function Qualite() {
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {DEMO_SYNC.controles.map((c) => (
-          <figure key={c.piece} className="overflow-hidden rounded-2xl border border-papier/[0.06] bg-charbon/60">
+          <figure key={c.piece} className="overflow-hidden rounded-2xl border border-white/[0.06] bg-charbon/60">
             <div className="relative aspect-[4/3]" style={{ background: `linear-gradient(135deg, ${c.teinte[0]}, ${c.teinte[1]})` }}>
-              <span className="absolute inset-x-[18%] bottom-[22%] h-[22%] rounded-md bg-papier/35" />
-              <span className="absolute top-[18%] right-[16%] h-[30%] w-[22%] rounded-sm bg-papier/45" />
+              <span className="absolute inset-x-[18%] bottom-[22%] h-[22%] rounded-md bg-white/35" />
+              <span className="absolute top-[18%] right-[16%] h-[30%] w-[22%] rounded-sm bg-white/45" />
               <span className="num absolute bottom-2 left-2 rounded bg-charbon/75 px-1.5 py-0.5 text-[0.62rem] text-papier">{c.quand}</span>
             </div>
             <figcaption className="flex items-center justify-between px-3 py-2.5 text-[0.78rem]">
@@ -155,14 +155,14 @@ function Patrimoine() {
   const l = DEMO_SYNC.logement;
   return (
     <div className="grid gap-3 lg:grid-cols-[15rem_1fr]">
-      <div className="rounded-2xl border border-papier/[0.06] bg-charbon/60 p-4">
-        <div className="aspect-[4/3] rounded-xl bg-[linear-gradient(135deg,#d9cdbd,#4b2742)]" />
+      <div className="rounded-2xl border border-white/[0.06] bg-charbon/60 p-4">
+        <div className="aspect-[4/3] rounded-xl bg-[linear-gradient(135deg,#d9cdbd,#8c7350)]" />
         <p className="mt-3 text-[0.92rem] text-papier">{l.nom}</p>
         <p className="text-[0.75rem] text-papier/50">
           {l.quartier} · {l.chambres} chambres
         </p>
       </div>
-      <ul className="divide-y divide-papier/[0.06] rounded-2xl border border-papier/[0.06] bg-charbon/60">
+      <ul className="divide-y divide-white/[0.06] rounded-2xl border border-white/[0.06] bg-charbon/60">
         {DEMO_SYNC.documents.map((d) => {
           const Icone = ICONE_DOC[d.type];
           return (
@@ -189,7 +189,7 @@ export function TableauDeBord() {
 
   return (
     <section id="application" aria-labelledby="titre-application" className="relative scroll-mt-20 overflow-hidden bg-graphite py-20 md:py-28">
-      <div aria-hidden className="absolute top-0 left-1/2 h-[30rem] w-[60rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(35_12_31/0.06),transparent)]" />
+      <div aria-hidden className="absolute top-0 left-1/2 h-[30rem] w-[60rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(182_154_112/0.12),transparent)]" />
       <div className="relative mx-auto max-w-[88rem] px-5 md:px-10">
         <Revele className="mx-auto max-w-3xl text-center">
           <Surtitre className="justify-center">Technologie propriétaire</Surtitre>
@@ -200,19 +200,19 @@ export function TableauDeBord() {
         </Revele>
 
         <Revele delai={150} className="mt-12 md:mt-16">
-          <div ref={ref} className="overflow-hidden rounded-[1.75rem] border border-papier/[0.08] bg-charbon shadow-[0_60px_120px_-40px_rgb(35_12_31/0.18)]">
+          <div ref={ref} className="overflow-hidden rounded-[1.75rem] border border-white/[0.08] bg-charbon shadow-[0_60px_120px_-40px_rgb(0_0_0/0.9)]">
             {/* Barre de fenêtre */}
-            <div className="flex items-center gap-3 border-b border-papier/[0.06] px-5 py-3.5">
+            <div className="flex items-center gap-3 border-b border-white/[0.06] px-5 py-3.5">
               <span className="flex gap-1.5" aria-hidden>
-                <span className="h-2.5 w-2.5 rounded-full bg-papier/15" />
-                <span className="h-2.5 w-2.5 rounded-full bg-papier/15" />
-                <span className="h-2.5 w-2.5 rounded-full bg-papier/15" />
+                <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
+                <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
+                <span className="h-2.5 w-2.5 rounded-full bg-white/15" />
               </span>
               <span className="text-[0.78rem] text-papier/55">Espace propriétaire · {DEMO_SYNC.logement.nom}</span>
               <span className="ml-auto rounded-full border border-or/40 bg-or/10 px-3 py-1 text-[0.68rem] font-medium tracking-wide text-or-clair">Données de démonstration</span>
             </div>
             <div className="grid md:grid-cols-[13rem_1fr]">
-              <nav aria-label="Modules du tableau de bord" className="flex gap-1 overflow-x-auto border-b border-papier/[0.06] p-3 md:flex-col md:border-r md:border-b-0">
+              <nav aria-label="Modules du tableau de bord" className="flex gap-1 overflow-x-auto border-b border-white/[0.06] p-3 md:flex-col md:border-r md:border-b-0">
                 {ONGLETS.map((o) => {
                   const Icone = o.icone;
                   return (
@@ -221,7 +221,7 @@ export function TableauDeBord() {
                       type="button"
                       aria-pressed={onglet === o.id}
                       onClick={() => setOnglet(o.id)}
-                      className={cn("flex h-11 shrink-0 items-center gap-2.5 rounded-xl px-3.5 text-[0.86rem] transition-colors", onglet === o.id ? "bg-papier/[0.07] text-papier" : "text-papier/55 hover:text-papier")}
+                      className={cn("flex h-11 shrink-0 items-center gap-2.5 rounded-xl px-3.5 text-[0.86rem] transition-colors", onglet === o.id ? "bg-white/[0.07] text-papier" : "text-papier/55 hover:text-papier")}
                     >
                       <Icone className={cn("h-4 w-4", onglet === o.id ? "text-or" : "")} />
                       {o.label}

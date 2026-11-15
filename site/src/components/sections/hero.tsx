@@ -42,7 +42,7 @@ export function Hero() {
         </div>
       </div>
 
-      <div className="mx-auto flex w-full max-w-[88rem] items-center justify-between border-t border-papier/[0.07] px-5 py-4 text-[0.78rem] text-papier/45 md:px-10">
+      <div className="mx-auto flex w-full max-w-[88rem] items-center justify-between border-t border-white/[0.07] px-5 py-4 text-[0.78rem] text-papier/45 md:px-10">
         <span>{MARQUE.signature}</span>
         <a href="#parcours" className="hidden items-center gap-2 hover:text-papier/80 sm:inline-flex">
           Défiler <ArrowDown className="h-3.5 w-3.5 [animation:flotte_2.4s_ease-in-out_infinite]" />

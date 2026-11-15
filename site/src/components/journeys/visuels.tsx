@@ -27,7 +27,7 @@ import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
 
 const Cadre = ({ children, className, legende = "Illustration" }: { children: React.ReactNode; className?: string; legende?: string }) => (
-  <div className={cn("grain relative aspect-[5/4] w-full overflow-hidden rounded-[1.75rem] border border-papier/[0.07] bg-graphite sm:aspect-[16/11]", className)}>
+  <div className={cn("grain relative aspect-[5/4] w-full overflow-hidden rounded-[1.75rem] border border-white/[0.07] bg-graphite sm:aspect-[16/11]", className)}>
     {children}
     <span className="absolute bottom-4 left-5 text-[0.68rem] tracking-[0.18em] text-papier/35 uppercase">{legende}</span>
   </div>
@@ -57,7 +57,7 @@ export function VisuelVacance({ actif }: { actif: boolean }) {
   const vacants = [8, 9, 10];
   return (
     <Cadre>
-      <div className="absolute inset-0 bg-[radial-gradient(80%_70%_at_80%_10%,rgb(35_12_31/0.04),transparent)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(80%_70%_at_80%_10%,rgb(217_205_189/0.12),transparent)]" />
       <div className="relative flex h-full flex-col justify-center gap-6 p-6 sm:p-10">
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 sm:gap-2.5">
           {MOIS.map((m, i) => {
@@ -68,7 +68,7 @@ export function VisuelVacance({ actif }: { actif: boolean }) {
                 key={m}
                 className={cn(
                   "rounded-xl border px-2.5 py-3 transition-all duration-700",
-                  estVacant ? "border-alerte/40 bg-alerte/10" : "border-papier/[0.06] bg-charbon/60",
+                  estVacant ? "border-alerte/40 bg-alerte/10" : "border-white/[0.06] bg-charbon/60",
                 )}
               >
                 <p className="text-[0.7rem] text-papier/50">{m}</p>
@@ -79,7 +79,7 @@ export function VisuelVacance({ actif }: { actif: boolean }) {
         </div>
         <div className={cn("flex flex-wrap gap-2 transition-opacity duration-700", etape >= 4 ? "opacity-100" : "opacity-0")}>
           {["Charges de copropriété", "Taxe d'habitation", "Assurance", "Crédit immobilier"].map((c) => (
-            <span key={c} className="rounded-full border border-papier/10 px-3 py-1.5 text-[0.74rem] text-papier/65">
+            <span key={c} className="rounded-full border border-white/10 px-3 py-1.5 text-[0.74rem] text-papier/65">
               {c} · continue
             </span>
           ))}
@@ -92,7 +92,7 @@ export function VisuelVacance({ actif }: { actif: boolean }) {
 export function VisuelImpaye({ actif }: { actif: boolean }) {
   const etape = useSequence(actif, 3, 1100, 700);
   const statut = [
-    { label: "Attendu", classe: "border-papier/15 text-papier/70" },
+    { label: "Attendu", classe: "border-white/15 text-papier/70" },
     { label: "En retard", classe: "border-or/50 text-or-clair" },
     { label: "En retard · relance", classe: "border-or/50 text-or-clair" },
     { label: "Impayé", classe: "border-alerte/60 bg-alerte/10 text-alerte" },
@@ -100,9 +100,9 @@ export function VisuelImpaye({ actif }: { actif: boolean }) {
   return (
     <Cadre>
       <div className="relative flex h-full items-center justify-center p-6 sm:p-10">
-        <div className="w-full max-w-md rounded-2xl border border-papier/[0.08] bg-charbon/80 p-5 shadow-[0_40px_80px_-40px_rgb(35_12_31/0.18)] sm:p-6">
+        <div className="w-full max-w-md rounded-2xl border border-white/[0.08] bg-charbon/80 p-5 shadow-[0_40px_80px_-40px_rgb(0_0_0/0.9)] sm:p-6">
           <p className="surtitre text-papier/45">Loyers · Exemple</p>
-          <ul className="mt-4 divide-y divide-papier/[0.06] text-[0.9rem]">
+          <ul className="mt-4 divide-y divide-white/[0.06] text-[0.9rem]">
             {["Septembre", "Octobre"].map((m) => (
               <li key={m} className="flex items-center justify-between py-3">
                 <span className="text-papier/70">Loyer de {m.toLowerCase()}</span>
@@ -114,7 +114,7 @@ export function VisuelImpaye({ actif }: { actif: boolean }) {
               <span className={cn("rounded-full border px-2.5 py-1 text-[0.72rem] transition-all duration-500", statut.classe)}>{statut.label}</span>
             </li>
           </ul>
-          <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-papier/[0.06]">
+          <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
             <div className={cn("h-full rounded-full transition-all duration-[1600ms] ease-[var(--ease-cine)]", etape >= 3 ? "w-2/3 bg-alerte/70" : "w-full bg-ok/70")} />
           </div>
           <p className="mt-2 text-[0.72rem] text-papier/45">Loyers encaissés sur le trimestre</p>
@@ -143,7 +143,7 @@ export function VisuelRendement({ actif }: { actif: boolean }) {
             <p className="text-[0.84rem] text-papier/75">{c.label}</p>
             <div className="mt-2 space-y-1.5">
               {(["longue", "courte"] as const).map((k) => (
-                <div key={k} className="h-2 overflow-hidden rounded-full bg-papier/[0.05]">
+                <div key={k} className="h-2 overflow-hidden rounded-full bg-white/[0.05]">
                   <div
                     className={cn("h-full rounded-full transition-[width] duration-[1400ms] ease-[var(--ease-cine)]", k === "courte" ? "bg-or" : "bg-papier/35")}
                     style={{ width: actif ? `${c[k] * 25}%` : "0%", transitionDelay: `${300 + i * 150}ms` }}
@@ -172,7 +172,7 @@ export function VisuelMessages({ actif }: { actif: boolean }) {
   const etape = useSequence(actif, NOTIFICATIONS.length, 700);
   return (
     <Cadre>
-      <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_20%_20%,rgb(35_12_31/0.05),transparent)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_20%_20%,rgb(182_154_112/0.10),transparent)]" />
       <div className="relative flex h-full items-center justify-center p-5 sm:p-10">
         <ul className="w-full max-w-sm space-y-2.5">
           {NOTIFICATIONS.map((n, i) => {
@@ -181,7 +181,7 @@ export function VisuelMessages({ actif }: { actif: boolean }) {
               <li
                 key={i}
                 className={cn(
-                  "flex items-start gap-3 rounded-2xl border border-papier/[0.08] bg-charbon/85 p-3.5 shadow-[0_20px_40px_-24px_rgb(35_12_31/0.18)] backdrop-blur transition-all duration-700 ease-[var(--ease-cine)]",
+                  "flex items-start gap-3 rounded-2xl border border-white/[0.08] bg-charbon/85 p-3.5 shadow-[0_20px_40px_-24px_rgb(0_0_0/0.9)] backdrop-blur transition-all duration-700 ease-[var(--ease-cine)]",
                   etape > i ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
                 )}
                 style={{ marginLeft: `${(i % 2) * 18}px` }}
@@ -234,7 +234,7 @@ export function VisuelOperations({ actif }: { actif: boolean }) {
             <span
               key={t.label}
               className={cn(
-                "absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full border border-papier/10 bg-graphite-2/90 px-2.5 py-1.5 text-[0.68rem] whitespace-nowrap text-papier/80 transition-all duration-700 ease-[var(--ease-cine)] sm:text-[0.74rem]",
+                "absolute flex -translate-x-1/2 -translate-y-1/2 items-center gap-1.5 rounded-full border border-white/10 bg-graphite-2/90 px-2.5 py-1.5 text-[0.68rem] whitespace-nowrap text-papier/80 transition-all duration-700 ease-[var(--ease-cine)] sm:text-[0.74rem]",
                 etape > i ? "scale-100 opacity-100" : "scale-75 opacity-0",
               )}
               style={{ left: `${50 + Math.cos(angle) * 38}%`, top: `${50 + Math.sin(angle) * 36}%` }}
@@ -259,14 +259,14 @@ export function VisuelPortefeuille({ actif }: { actif: boolean }) {
             key={i}
             className={cn("w-1/3 max-w-44 transition-all duration-1000 ease-[var(--ease-cine)]", etape > i ? "translate-y-0 opacity-100" : "translate-y-6 opacity-0")}
           >
-            <div className="rounded-2xl border border-papier/[0.08] bg-charbon/80 p-3 sm:p-4">
+            <div className="rounded-2xl border border-white/[0.08] bg-charbon/80 p-3 sm:p-4">
               <div className="grid aspect-[4/3] place-items-center rounded-xl bg-graphite-2">
                 <BedDouble className="h-7 w-7 text-or/80" />
               </div>
               <p className="mt-3 text-[0.78rem] text-papier/80">Appartement {i + 1}</p>
               <div className="mt-2 flex flex-wrap gap-1">
                 {Array.from({ length: 6 + i * 3 }).map((_, k) => (
-                  <span key={k} className={cn("h-1.5 w-1.5 rounded-full transition-colors duration-700", etape > i ? (k % 4 === 0 ? "bg-alerte/80" : "bg-or/70") : "bg-papier/10")} style={{ transitionDelay: `${k * 60}ms` }} />
+                  <span key={k} className={cn("h-1.5 w-1.5 rounded-full transition-colors duration-700", etape > i ? (k % 4 === 0 ? "bg-alerte/80" : "bg-or/70") : "bg-white/10")} style={{ transitionDelay: `${k * 60}ms` }} />
                 ))}
               </div>
             </div>
@@ -288,13 +288,13 @@ export function VisuelPortefeuille({ actif }: { actif: boolean }) {
 export function VisuelDisponible({ actif }: { actif: boolean }) {
   return (
     <Cadre>
-      <div className="absolute inset-0 bg-[radial-gradient(60%_60%_at_70%_30%,rgb(35_12_31/0.05),transparent)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(60%_60%_at_70%_30%,rgb(217_205_189/0.16),transparent)]" />
       <div className="relative flex h-full items-center justify-center">
         <div className={cn("flex flex-col items-center gap-5 transition-all duration-[1400ms] ease-[var(--ease-cine)]", actif ? "opacity-100" : "translate-y-4 opacity-0")}>
           <span className="grid h-24 w-24 place-items-center rounded-full border border-or/50 bg-charbon">
             <Key className="h-10 w-10 text-or" />
           </span>
-          <span className="rounded-full border border-papier/10 px-4 py-2 text-[0.84rem] text-papier/75">Disponible · à exploiter</span>
+          <span className="rounded-full border border-white/10 px-4 py-2 text-[0.84rem] text-papier/75">Disponible · à exploiter</span>
         </div>
       </div>
     </Cadre>
@@ -305,7 +305,7 @@ export function VisuelStrategies({ actif }: { actif: boolean }) {
   return (
     <Cadre legende="Deux stratégies, une évaluation">
       <svg viewBox="0 0 400 260" className="absolute inset-0 h-full w-full" aria-hidden>
-        <g fill="none" stroke="#230c1f" strokeWidth="1.4" strokeOpacity="0.6">
+        <g fill="none" stroke="#b69a70" strokeWidth="1.4" strokeOpacity="0.6">
           <path d="M200 70 C200 130 100 120 100 180" strokeDasharray="200" strokeDashoffset={actif ? 0 : 200} style={{ transition: "stroke-dashoffset 1.6s var(--ease-cine) .3s" }} />
           <path d="M200 70 C200 130 300 120 300 180" strokeDasharray="200" strokeDashoffset={actif ? 0 : 200} style={{ transition: "stroke-dashoffset 1.6s var(--ease-cine) .5s" }} />
         </g>
@@ -317,7 +317,7 @@ export function VisuelStrategies({ actif }: { actif: boolean }) {
       ].map((b, i) => (
         <div
           key={b.t}
-          className={cn("absolute top-[66%] -translate-x-1/2 rounded-2xl border border-papier/10 bg-charbon/90 px-4 py-3 text-center transition-all duration-1000", actif ? "opacity-100" : "opacity-0")}
+          className={cn("absolute top-[66%] -translate-x-1/2 rounded-2xl border border-white/10 bg-charbon/90 px-4 py-3 text-center transition-all duration-1000", actif ? "opacity-100" : "opacity-0")}
           style={{ left: b.x, transitionDelay: `${1200 + i * 200}ms` }}
         >
           <p className="text-[0.86rem] text-papier">{b.t}</p>
@@ -336,8 +336,8 @@ export function VisuelPreparation({ actif }: { actif: boolean }) {
       <div className="relative flex h-full items-center justify-center p-6">
         <ul className="w-full max-w-xs space-y-3">
           {etapes.map((e, i) => (
-            <li key={e} className="flex items-center gap-3 rounded-xl border border-papier/[0.07] bg-charbon/70 px-4 py-3">
-              <span className={cn("grid h-6 w-6 place-items-center rounded-full border transition-all duration-500", etape > i ? "border-or bg-or text-charbon" : "border-papier/20")}>
+            <li key={e} className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-charbon/70 px-4 py-3">
+              <span className={cn("grid h-6 w-6 place-items-center rounded-full border transition-all duration-500", etape > i ? "border-or bg-or text-charbon" : "border-white/20")}>
                 {etape > i ? <Check className="h-3.5 w-3.5" /> : null}
               </span>
               <span className={cn("text-[0.88rem] transition-colors", etape > i ? "text-papier" : "text-papier/55")}>{e}</span>

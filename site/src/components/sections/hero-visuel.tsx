@@ -4,7 +4,7 @@
   Entièrement vectorielle : légère, nette sur tous les écrans, sans requête réseau.
 */
 export function HeroVisuel() {
-  const or = "#230c1f";
+  const or = "#b69a70";
   return (
     <div aria-hidden className="grain absolute inset-0 overflow-hidden bg-charbon">
       {/* Lumière chaude venue de la fenêtre */}
@@ -22,8 +22,8 @@ export function HeroVisuel() {
             <stop offset="1" stopColor="#f5f2ec" stopOpacity="0" />
           </linearGradient>
           <linearGradient id="sol" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0" stopColor="#efe8e0" stopOpacity="0" />
-            <stop offset="1" stopColor="#e6ddd2" stopOpacity="0.9" />
+            <stop offset="0" stopColor="#1c1f22" stopOpacity="0" />
+            <stop offset="1" stopColor="#26292d" stopOpacity="0.9" />
           </linearGradient>
         </defs>
 
@@ -49,19 +49,19 @@ export function HeroVisuel() {
           <path className="tracer" style={{ ["--longueur" as string]: 260, ["--delai" as string]: "1000ms" }} d="M915 280 Q960 245 1005 280 Z" />
         </g>
         {/* Halo de la suspension */}
-        <ellipse cx="960" cy="300" rx="90" ry="22" fill="#4b2742" opacity="0.14" />
+        <ellipse cx="960" cy="300" rx="90" ry="22" fill="#cdb58f" opacity="0.14" />
 
         {/* Mobilier en silhouette */}
-        <g fill="#efe8e0" stroke={or} strokeOpacity="0.35" strokeWidth="1" transform="translate(330 0)">
+        <g fill="#1c1f22" stroke={or} strokeOpacity="0.35" strokeWidth="1" transform="translate(330 0)">
           <path d="M360 640 h520 a24 24 0 0 1 24 24 v70 h-568 v-70 a24 24 0 0 1 24 -24Z" />
-          <path d="M380 590 h480 a20 20 0 0 1 20 20 v40 h-520 v-40 a20 20 0 0 1 20 -20Z" fill="#e6ddd2" />
+          <path d="M380 590 h480 a20 20 0 0 1 20 20 v40 h-520 v-40 a20 20 0 0 1 20 -20Z" fill="#26292d" />
           <rect x="700" y="760" width="250" height="18" rx="9" />
           <path d="M720 778 v40 M930 778 v40" />
-          <ellipse cx="830" cy="852" rx="330" ry="34" fill="#e6ddd2" stroke="none" opacity="0.7" />
+          <ellipse cx="830" cy="852" rx="330" ry="34" fill="#26292d" stroke="none" opacity="0.7" />
         </g>
         {/* Plante */}
         <g transform="translate(480 -20)">
-          <rect x="980" y="640" width="70" height="80" rx="8" fill="#e6ddd2" stroke={or} strokeOpacity="0.35" />
+          <rect x="980" y="640" width="70" height="80" rx="8" fill="#26292d" stroke={or} strokeOpacity="0.35" />
           <g fill="#3a3f37" opacity="0.9">
             <ellipse cx="1000" cy="600" rx="40" ry="70" transform="rotate(-25 1000 600)" />
             <ellipse cx="1040" cy="580" rx="36" ry="80" transform="rotate(18 1040 580)" />
@@ -79,7 +79,7 @@ export function HeroVisuel() {
 export function VoileHero() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0">
-      <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_70%_40%,transparent_40%,color-mix(in_srgb,var(--color-charbon)_85%,transparent))]" />
+      <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_70%_40%,transparent_40%,rgb(17_19_21/0.85))]" />
       <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-charbon via-charbon/70 to-transparent" />
       <div className="absolute inset-y-0 left-0 w-2/3 bg-gradient-to-r from-charbon/90 via-charbon/40 to-transparent" />
     </div>

@@ -75,7 +75,7 @@ export function Parcours() {
   return (
     <section id="parcours" aria-labelledby="titre-parcours" className="relative scroll-mt-20 bg-charbon">
       <div className="mx-auto max-w-[88rem] px-5 pt-20 md:px-10 md:pt-28">
-        <div className="flex flex-col gap-6 border-b border-papier/[0.07] pb-8 md:flex-row md:items-end md:justify-between">
+        <div className="flex flex-col gap-6 border-b border-white/[0.07] pb-8 md:flex-row md:items-end md:justify-between">
           <div>
             <Surtitre>Votre situation</Surtitre>
             <h2 id="titre-parcours" className="titre mt-4 text-[2.2rem] text-papier md:text-[3rem]">
@@ -91,7 +91,7 @@ export function Parcours() {
                 onClick={() => choisirProfil(p)}
                 className={cn(
                   "h-10 rounded-full border px-4 text-[0.84rem] transition-colors",
-                  profil === p ? "border-or bg-or text-charbon" : "border-papier/15 text-papier/70 hover:border-or/60 hover:text-papier",
+                  profil === p ? "border-or bg-or text-charbon" : "border-white/15 text-papier/70 hover:border-or/60 hover:text-papier",
                 )}
               >
                 {PROFILS[p].court}

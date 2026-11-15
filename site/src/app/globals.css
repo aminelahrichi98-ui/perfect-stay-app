@@ -1,28 +1,26 @@
 @import "tailwindcss";
 
 /*
-  Perfect Stay — système visuel du site vitrine, aligné sur la charte de la conciergerie :
-  fond blanc cassé chaud, aubergine #230C1F pour le texte, l'action et la donnée.
-  Les noms des jetons datent de la première version sombre : « charbon » = fond de page,
-  « graphite » = panneaux, « papier » = texte, « or » = couleur d'accent.
-  La classe .inverse bascule une section en aubergine plein (texte clair).
+  Perfect Stay — système visuel du site vitrine.
+  Architecture et lumière : charbon, graphite, blanc cassé chaud, beige architectural, or patiné.
+  Un seul accent (l'or), utilisé avec parcimonie pour ce qui compte : l'action et la donnée.
 */
 @theme {
-  --color-charbon: #f7f3ee;
-  --color-graphite: #efe8e0;
-  --color-graphite-2: #e6ddd2;
-  --color-filet: #d8ccc0;
-  --color-papier: #230c1f;
-  --color-papier-2: #ede5dc;
+  --color-charbon: #111315;
+  --color-graphite: #1c1f22;
+  --color-graphite-2: #26292d;
+  --color-filet: #34383d;
+  --color-papier: #f5f2ec;
+  --color-papier-2: #ece7de;
   --color-beige: #d9cdbd;
-  --color-or: #230c1f;
-  --color-or-clair: #4b2742;
-  --color-or-fonce: #230c1f;
-  --color-gris: #7a6e78;
-  --color-gris-fonce: #5a4f58;
-  --color-encre: #230c1f;
-  --color-ok: #3d7a52;
-  --color-alerte: #b0553a;
+  --color-or: #b69a70;
+  --color-or-clair: #cdb58f;
+  --color-or-fonce: #8c7350;
+  --color-gris: #8f9296;
+  --color-gris-fonce: #5c5f63;
+  --color-encre: #111315;
+  --color-ok: #7fa38a;
+  --color-alerte: #c98a6b;
 
   --font-sans: var(--font-corps), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-titre), ui-serif, Georgia, serif;
@@ -45,25 +43,6 @@ body {
 ::selection {
   background: var(--color-or);
   color: var(--color-charbon);
-}
-
-/* Section en aubergine plein : mêmes classes, couleurs inversées */
-.inverse {
-  --color-charbon: #230c1f;
-  --color-graphite: #2e1529;
-  --color-graphite-2: #3a1d34;
-  --color-filet: #4b2742;
-  --color-papier: #f7f3ee;
-  --color-papier-2: #2e1529;
-  --color-or: #e8d6e2;
-  --color-or-clair: #ffffff;
-  --color-or-fonce: #e8d6e2;
-  --color-gris: #c9b7c4;
-  --color-gris-fonce: #c9b7c4;
-  --color-ok: #8fc4a0;
-  --color-alerte: #e7a48c;
-  background-color: var(--color-charbon);
-  color: var(--color-papier);
 }
 :focus-visible {
   outline: 2px solid var(--color-or);
@@ -108,7 +87,7 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.035;
+  opacity: 0.06;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   mix-blend-mode: overlay;
 }
@@ -127,8 +106,8 @@ body {
   50% { transform: translateY(-6px); }
 }
 @keyframes pulse-or {
-  0% { box-shadow: 0 0 0 0 rgb(35 12 31 / 0.35); }
-  100% { box-shadow: 0 0 0 14px rgb(35 12 31 / 0); }
+  0% { box-shadow: 0 0 0 0 rgb(182 154 112 / 0.55); }
+  100% { box-shadow: 0 0 0 14px rgb(182 154 112 / 0); }
 }
 @keyframes entree-bas {
   from { opacity: 0; transform: translateY(14px); }
@@ -156,6 +135,6 @@ body {
 
 /* Données animées posées sur une séquence vidéo : le cadre laisse voir l'image */
 .sur-video .grain {
-  background-color: rgb(247 243 238 / 0.72);
-  border-color: rgb(35 12 31 / 0.1);
+  background-color: rgb(17 19 21 / 0.5);
+  border-color: rgb(255 255 255 / 0.1);
 }

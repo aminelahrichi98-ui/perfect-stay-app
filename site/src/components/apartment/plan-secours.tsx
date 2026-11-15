@@ -12,12 +12,12 @@ export function PlanSecours({ services, selection, onChoisir }: { services: Serv
   return (
     <div className="relative h-full w-full">
       <svg viewBox="0 0 600 420" className="absolute inset-0 h-full w-full" aria-hidden>
-        <g transform="translate(300 90) scale(1 0.58) rotate(45)" fill="none" stroke="#230c1f" strokeOpacity="0.55" strokeWidth="1.6">
-          <rect x="-180" y="-120" width="360" height="240" fill="#efe8e0" />
+        <g transform="translate(300 90) scale(1 0.58) rotate(45)" fill="none" stroke="#b69a70" strokeOpacity="0.55" strokeWidth="1.6">
+          <rect x="-180" y="-120" width="360" height="240" fill="#1c1f22" />
           <path d="M30 -120 V15 H180 M105 15 V120" />
-          <rect x="-170" y="-110" width="96" height="20" fill="#e6ddd2" />
-          <rect x="-110" y="40" width="80" height="26" fill="#e6ddd2" />
-          <rect x="60" y="-100" width="56" height="64" fill="#e6ddd2" />
+          <rect x="-170" y="-110" width="96" height="20" fill="#26292d" />
+          <rect x="-110" y="40" width="80" height="26" fill="#26292d" />
+          <rect x="60" y="-100" width="56" height="64" fill="#26292d" />
         </g>
       </svg>
       {services.map((s, i) => {
