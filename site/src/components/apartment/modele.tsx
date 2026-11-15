@@ -17,7 +17,7 @@ const C = {
   mur: "#ece7de",
   sol: "#b9a184",
   solBain: "#d9d4cc",
-  coupe: "#230c1f",
+  coupe: "#7a3e6c",
   tissu: "#d9cdbd",
   tissuFonce: "#230c1f",
   bois: "#7a6248",

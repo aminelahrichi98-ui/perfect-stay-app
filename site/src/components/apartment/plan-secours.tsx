@@ -12,7 +12,7 @@ export function PlanSecours({ services, selection, onChoisir }: { services: Serv
   return (
     <div className="relative h-full w-full">
       <svg viewBox="0 0 600 420" className="absolute inset-0 h-full w-full" aria-hidden>
-        <g transform="translate(300 90) scale(1 0.58) rotate(45)" fill="none" stroke="#230c1f" strokeOpacity="0.55" strokeWidth="1.6">
+        <g transform="translate(300 90) scale(1 0.58) rotate(45)" fill="none" stroke="#b98aac" strokeOpacity="0.55" strokeWidth="1.6">
           <rect x="-180" y="-120" width="360" height="240" fill="#1c1f22" />
           <path d="M30 -120 V15 H180 M105 15 V120" />
           <rect x="-170" y="-110" width="96" height="20" fill="#26292d" />
@@ -31,7 +31,7 @@ export function PlanSecours({ services, selection, onChoisir }: { services: Serv
             aria-pressed={selection === s.id}
             className={cn(
               "absolute grid h-9 w-9 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border text-[0.75rem] font-semibold",
-              selection === s.id ? "border-papier bg-or text-papier" : "border-or bg-charbon text-or",
+              selection === s.id ? "border-papier bg-bouton text-white" : "border-or bg-charbon text-or",
             )}
             style={{ left: `${p[0]}%`, top: `${p[1]}%` }}
           >

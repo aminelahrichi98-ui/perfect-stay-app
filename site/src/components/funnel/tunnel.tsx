@@ -295,7 +295,7 @@ export function Tunnel() {
                 {s.ville === "Casablanca" ? (
                   <div className="flex flex-wrap gap-2">
                     {QUARTIERS_CASABLANCA.slice(0, 8).map((q) => (
-                      <button key={q} type="button" onClick={() => maj("quartier", q)} className={cn("min-h-10 rounded-full border px-3.5 text-[0.84rem]", s.quartier === q ? "border-or bg-or/10 text-papier" : "border-white/12 text-papier/65 hover:border-white/30")}>
+                      <button key={q} type="button" onClick={() => maj("quartier", q)} className={cn("min-h-10 rounded-full border px-3.5 text-[0.84rem]", s.quartier === q ? "border-bouton bg-bouton/10 text-papier" : "border-white/12 text-papier/65 hover:border-white/30")}>
                         {q}
                       </button>
                     ))}
@@ -329,7 +329,7 @@ export function Tunnel() {
                         role="radio"
                         aria-checked={s.situation === p}
                         onClick={() => maj("situation", p)}
-                        className={cn("min-h-13 rounded-xl border px-4 py-3 text-left text-[0.9rem]", s.situation === p ? "border-or bg-or/10 text-papier" : "border-white/12 text-papier/75 hover:border-white/30")}
+                        className={cn("min-h-13 rounded-xl border px-4 py-3 text-left text-[0.9rem]", s.situation === p ? "border-bouton bg-bouton/10 text-papier" : "border-white/12 text-papier/75 hover:border-white/30")}
                       >
                         {PROFILS[p].court}
                       </button>
@@ -381,7 +381,7 @@ export function Tunnel() {
                 {/* Champ piège pour les robots : invisible et ignoré par les lecteurs d'écran */}
                 <input type="text" name="site" value={piege} onChange={(e) => setPiege(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-px w-px opacity-0" />
                 <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-charbon/40 p-4 text-[0.84rem] leading-relaxed text-papier/70">
-                  <input type="checkbox" checked={s.consentement} onChange={(e) => maj("consentement", e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#230c1f]" />
+                  <input type="checkbox" checked={s.consentement} onChange={(e) => maj("consentement", e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#b98aac]" />
                   <span>
                     J&apos;accepte que Perfect Stay utilise ces informations pour me recontacter au sujet de mon bien. Elles ne sont ni revendues ni partagées à des fins commerciales.{" "}
                     <a href="/confidentialite" target="_blank" className="underline underline-offset-4">

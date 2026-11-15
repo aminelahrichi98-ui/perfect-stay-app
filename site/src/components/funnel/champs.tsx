@@ -56,7 +56,7 @@ export function Choix<T extends string>({ label, options, valeur, onChange, erre
             onClick={() => onChange(o)}
             className={cn(
               "flex min-h-13 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-left text-[0.94rem] transition-colors",
-              valeur === o ? "border-or bg-or/10 text-papier" : "border-white/12 text-papier/75 hover:border-white/30",
+              valeur === o ? "border-bouton bg-bouton/10 text-papier" : "border-white/12 text-papier/75 hover:border-white/30",
             )}
           >
             {o}
@@ -87,7 +87,7 @@ export function ChoixMultiple<T extends string>({ label, options, valeurs, onCha
               onClick={() => onChange((coche ? valeurs.filter((v) => v !== o) : [...valeurs, o]) as T[])}
               className={cn(
                 "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-[0.88rem] transition-colors",
-                coche ? "border-or bg-or/10 text-papier" : "border-white/12 text-papier/70 hover:border-white/30",
+                coche ? "border-bouton bg-bouton/10 text-papier" : "border-white/12 text-papier/70 hover:border-white/30",
               )}
             >
               {coche ? <Check className="h-3.5 w-3.5 text-or" /> : null}

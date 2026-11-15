@@ -13,10 +13,14 @@
   --color-papier: #f5f2ec;
   --color-papier-2: #ece7de;
   --color-beige: #d9cdbd;
-  /* Couleur d'accent de la charte Perfect Stay (aubergine) */
-  --color-or: #230c1f;
-  --color-or-clair: #3a1832;
+  /* Charte Perfect Stay : l'aubergine #230C1F, déclinée en clarté selon l'endroit.
+     « or » = accent lisible sur fond sombre (textes, traits, icônes), « bouton » = aplats,
+     « or-fonce » = l'aubergine exacte, pour les sections claires. */
+  --color-or: #b98aac;
+  --color-or-clair: #d2b0c8;
   --color-or-fonce: #230c1f;
+  --color-bouton: #7a3e6c;
+  --color-bouton-clair: #8f4f80;
   --color-gris: #8f9296;
   --color-gris-fonce: #5c5f63;
   --color-encre: #111315;
@@ -107,8 +111,8 @@ body {
   50% { transform: translateY(-6px); }
 }
 @keyframes pulse-or {
-  0% { box-shadow: 0 0 0 0 rgb(35 12 31 / 0.6); }
-  100% { box-shadow: 0 0 0 14px rgb(35 12 31 / 0); }
+  0% { box-shadow: 0 0 0 0 rgb(185 138 172 / 0.55); }
+  100% { box-shadow: 0 0 0 14px rgb(185 138 172 / 0); }
 }
 @keyframes entree-bas {
   from { opacity: 0; transform: translateY(14px); }
