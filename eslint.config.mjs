@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Site vitrine : projet Next.js autonome, avec sa propre configuration
+    "site/**",
   ]),
 ]);
 
