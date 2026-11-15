@@ -255,19 +255,19 @@ export function Tunnel() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="titre-tunnel"
-        className="flex h-[100dvh] w-full max-w-2xl flex-col overflow-hidden bg-graphite shadow-2xl [animation:entree-bas_0.5s_var(--ease-cine)_both] md:h-auto md:max-h-[92vh] md:rounded-[1.75rem] md:border md:border-white/[0.08]"
+        className="flex h-[100dvh] w-full max-w-2xl flex-col overflow-hidden bg-graphite shadow-2xl [animation:entree-bas_0.5s_var(--ease-cine)_both] md:h-auto md:max-h-[92vh] md:rounded-[1.75rem] md:border md:border-papier/[0.08]"
       >
-        <header className="flex items-center gap-4 border-b border-white/[0.07] px-5 py-4 md:px-7">
+        <header className="flex items-center gap-4 border-b border-papier/[0.07] px-5 py-4 md:px-7">
           <Monogramme className="h-6 w-auto text-or" />
           <div className="min-w-0 flex-1">
             <p className="text-[0.72rem] tracking-[0.16em] text-papier/45 uppercase">
               {etape < 6 ? `Étape ${etape + 1} sur 6 · ${ETAPES[etape]}` : "Demande reçue"}
             </p>
-            <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.07]" role="progressbar" aria-valuemin={0} aria-valuemax={6} aria-valuenow={Math.min(etape, 6)} aria-label="Progression">
+            <div className="mt-2 h-1 overflow-hidden rounded-full bg-papier/[0.07]" role="progressbar" aria-valuemin={0} aria-valuemax={6} aria-valuenow={Math.min(etape, 6)} aria-label="Progression">
               <div className="h-full rounded-full bg-or transition-[width] duration-700 ease-[var(--ease-cine)]" style={{ width: `${Math.max(progression, 0.04) * 100}%` }} />
             </div>
           </div>
-          <button type="button" onClick={fermerTunnel} aria-label="Fermer" className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-white/10 text-papier/70 hover:text-papier">
+          <button type="button" onClick={fermerTunnel} aria-label="Fermer" className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-papier/10 text-papier/70 hover:text-papier">
             <X className="h-5 w-5" />
           </button>
         </header>
@@ -279,7 +279,7 @@ export function Tunnel() {
                 <Choix label="Ville" options={VILLES} valeur={s.ville} onChange={(v) => maj("ville", v)} erreur={erreurs.ville} colonnes={2} />
                 {s.ville === "Autre" ? <Champ label="Quelle ville ?" value={s.villeAutre} onChange={(e) => maj("villeAutre", e.target.value)} erreur={erreurs.villeAutre} autoComplete="address-level2" /> : null}
                 {s.ville && s.ville !== "Casablanca" ? (
-                  <p className="rounded-xl border border-white/10 bg-charbon/50 p-4 text-[0.86rem] text-papier/65">Nous opérons aujourd&apos;hui à Casablanca. Laissez-nous vos informations : nous étudions chaque demande pour nos prochaines villes.</p>
+                  <p className="rounded-xl border border-papier/10 bg-charbon/50 p-4 text-[0.86rem] text-papier/65">Nous opérons aujourd&apos;hui à Casablanca. Laissez-nous vos informations : nous étudions chaque demande pour nos prochaines villes.</p>
                 ) : null}
               </Etape>
             ) : null}
@@ -295,7 +295,7 @@ export function Tunnel() {
                 {s.ville === "Casablanca" ? (
                   <div className="flex flex-wrap gap-2">
                     {QUARTIERS_CASABLANCA.slice(0, 8).map((q) => (
-                      <button key={q} type="button" onClick={() => maj("quartier", q)} className={cn("min-h-10 rounded-full border px-3.5 text-[0.84rem]", s.quartier === q ? "border-or bg-or/10 text-papier" : "border-white/12 text-papier/65 hover:border-white/30")}>
+                      <button key={q} type="button" onClick={() => maj("quartier", q)} className={cn("min-h-10 rounded-full border px-3.5 text-[0.84rem]", s.quartier === q ? "border-or bg-or/10 text-papier" : "border-papier/12 text-papier/65 hover:border-papier/30")}>
                         {q}
                       </button>
                     ))}
@@ -329,7 +329,7 @@ export function Tunnel() {
                         role="radio"
                         aria-checked={s.situation === p}
                         onClick={() => maj("situation", p)}
-                        className={cn("min-h-13 rounded-xl border px-4 py-3 text-left text-[0.9rem]", s.situation === p ? "border-or bg-or/10 text-papier" : "border-white/12 text-papier/75 hover:border-white/30")}
+                        className={cn("min-h-13 rounded-xl border px-4 py-3 text-left text-[0.9rem]", s.situation === p ? "border-or bg-or/10 text-papier" : "border-papier/12 text-papier/75 hover:border-papier/30")}
                       >
                         {PROFILS[p].court}
                       </button>
@@ -380,8 +380,8 @@ export function Tunnel() {
                 <Champ label="E-mail" type="email" inputMode="email" value={s.email} onChange={(e) => maj("email", e.target.value)} erreur={erreurs.email} autoComplete="email" />
                 {/* Champ piège pour les robots : invisible et ignoré par les lecteurs d'écran */}
                 <input type="text" name="site" value={piege} onChange={(e) => setPiege(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-px w-px opacity-0" />
-                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-charbon/40 p-4 text-[0.84rem] leading-relaxed text-papier/70">
-                  <input type="checkbox" checked={s.consentement} onChange={(e) => maj("consentement", e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#b69a70]" />
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-papier/10 bg-charbon/40 p-4 text-[0.84rem] leading-relaxed text-papier/70">
+                  <input type="checkbox" checked={s.consentement} onChange={(e) => maj("consentement", e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#230c1f]" />
                   <span>
                     J&apos;accepte que Perfect Stay utilise ces informations pour me recontacter au sujet de mon bien. Elles ne sont ni revendues ni partagées à des fins commerciales.{" "}
                     <a href="/confidentialite" target="_blank" className="underline underline-offset-4">
@@ -434,7 +434,7 @@ export function Tunnel() {
         </div>
 
         {etape < 6 ? (
-          <footer className="border-t border-white/[0.07] px-5 py-4 md:px-7">
+          <footer className="border-t border-papier/[0.07] px-5 py-4 md:px-7">
             {envoi === "erreur" ? (
               <p role="alert" className="mb-3 text-[0.86rem] text-alerte">
                 {messageErreur}

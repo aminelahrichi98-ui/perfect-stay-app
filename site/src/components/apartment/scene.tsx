@@ -122,7 +122,7 @@ export default function SceneAppartement({
       <fog attach="fog" args={["#111315", 48, 90]} />
 
       {/* Lumière de fin d'après-midi : soleil bas par les fenêtres du séjour, ciel doux, lampes chaudes */}
-      <hemisphereLight args={["#f5f2ec", "#1c1f22", 0.55]} />
+      <hemisphereLight args={["#f5f2ec", "#efe8e0", 0.55]} />
       <ambientLight intensity={0.18} color="#f3e6d0" />
       <directionalLight
         position={[-14, 9, 4]}

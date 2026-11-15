@@ -31,7 +31,7 @@ export function Navigation() {
     <header
       className={cn(
         "fixed inset-x-0 top-0 z-40 transition-[background-color,border-color,backdrop-filter] duration-500",
-        defile || menu ? "border-b border-white/[0.06] bg-charbon/80 backdrop-blur-xl" : "border-b border-transparent",
+        defile || menu ? "border-b border-papier/[0.06] bg-charbon/80 backdrop-blur-xl" : "border-b border-transparent",
       )}
     >
       <div className="mx-auto flex h-[4.5rem] max-w-[88rem] items-center gap-8 px-5 md:px-10">
@@ -60,13 +60,13 @@ export function Navigation() {
           aria-expanded={menu}
           aria-controls="menu-mobile"
           aria-label={menu ? "Fermer le menu" : "Ouvrir le menu"}
-          className="ml-auto grid h-11 w-11 place-items-center rounded-full border border-white/15 sm:ml-0 lg:hidden"
+          className="ml-auto grid h-11 w-11 place-items-center rounded-full border border-papier/15 sm:ml-0 lg:hidden"
         >
           {menu ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
       {menu ? (
-        <nav id="menu-mobile" aria-label="Menu" className="border-t border-white/[0.06] px-5 pt-3 pb-7 lg:hidden">
+        <nav id="menu-mobile" aria-label="Menu" className="border-t border-papier/[0.06] px-5 pt-3 pb-7 lg:hidden">
           <ul className="space-y-1">
             {NAVIGATION.map((l) => (
               <li key={l.href}>

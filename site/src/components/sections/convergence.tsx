@@ -21,7 +21,7 @@ export function Convergence() {
       </MediaCinema>
       <div ref={ref} className="relative mx-auto flex min-h-[92svh] max-w-[88rem] flex-col items-center justify-center px-5 py-24 text-center md:px-10">
         <svg viewBox="0 0 1200 500" className="absolute inset-x-0 top-1/2 h-[60%] w-full -translate-y-1/2" aria-hidden preserveAspectRatio="none">
-          <g fill="none" stroke="#b69a70" strokeWidth="1.2">
+          <g fill="none" stroke="#230c1f" strokeWidth="1.2">
             {chemins.map((d, i) => (
               <path
                 key={d}
@@ -47,7 +47,7 @@ export function Convergence() {
         </svg>
 
         <div className={cn("relative transition-all duration-[1600ms] ease-[var(--ease-cine)]", actif ? "scale-100 opacity-100" : "scale-90 opacity-0")} style={{ transitionDelay: "1.4s" }}>
-          <span className="mx-auto grid h-24 w-24 place-items-center rounded-full border border-or/40 bg-charbon shadow-[0_0_80px_-10px_rgb(182_154_112/0.45)] md:h-28 md:w-28">
+          <span className="mx-auto grid h-24 w-24 place-items-center rounded-full border border-or/40 bg-charbon shadow-[0_0_80px_-10px_rgb(35_12_31/0.25)] md:h-28 md:w-28">
             <Monogramme className="h-12 w-auto text-or md:h-14" />
           </span>
         </div>

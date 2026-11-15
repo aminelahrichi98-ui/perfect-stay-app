@@ -98,7 +98,7 @@ export function SectionAppartement() {
                 setGroupe(g.id);
                 setSelection(null);
               }}
-              className={cn("h-11 shrink-0 rounded-full border px-5 text-[0.88rem] transition-colors", groupe === g.id ? "border-or bg-or text-charbon" : "border-white/15 text-papier/70 hover:border-or/60 hover:text-papier")}
+              className={cn("h-11 shrink-0 rounded-full border px-5 text-[0.88rem] transition-colors", groupe === g.id ? "border-or bg-or text-charbon" : "border-papier/15 text-papier/70 hover:border-or/60 hover:text-papier")}
             >
               {g.label}
             </button>
@@ -106,7 +106,7 @@ export function SectionAppartement() {
         </div>
 
         <div ref={refProche} className="relative mt-6 grid gap-4 lg:grid-cols-[minmax(0,1fr)_24rem]">
-          <div ref={refEcran} className="relative h-[62svh] min-h-[22rem] overflow-hidden rounded-[1.75rem] border border-white/[0.07] bg-graphite md:h-[40rem]">
+          <div ref={refEcran} className="relative h-[62svh] min-h-[22rem] overflow-hidden rounded-[1.75rem] border border-papier/[0.07] bg-graphite md:h-[40rem]">
             {webgl === false ? (
               secours
             ) : proche && webgl ? (
@@ -130,7 +130,7 @@ export function SectionAppartement() {
                       style={{ visibility: "hidden" }}
                       className={cn(
                         "group pointer-events-auto absolute top-0 left-0 grid h-10 w-10 place-items-center rounded-full border text-[0.78rem] font-semibold transition-[background-color,color,box-shadow] duration-300",
-                        selection === s.id ? "border-papier bg-or text-charbon shadow-[0_0_0_6px_rgb(182_154_112/0.25)]" : "border-or/80 bg-charbon/85 text-or backdrop-blur hover:bg-or hover:text-charbon",
+                        selection === s.id ? "border-papier bg-or text-charbon shadow-[0_0_0_6px_rgb(35_12_31/0.18)]" : "border-or/80 bg-charbon/85 text-or backdrop-blur hover:bg-or hover:text-charbon",
                       )}
                     >
                       {selection !== s.id ? <span className="absolute inset-0 rounded-full [animation:pulse-or_2.2s_ease-out_infinite]" /> : null}
@@ -160,7 +160,7 @@ export function SectionAppartement() {
           </div>
 
           {/* Panneau d'information du service choisi */}
-          <aside aria-live="polite" className="rounded-[1.75rem] border border-white/[0.07] bg-graphite p-6 md:p-7">
+          <aside aria-live="polite" className="rounded-[1.75rem] border border-papier/[0.07] bg-graphite p-6 md:p-7">
             {actif ? (
               <div key={actif.id} className="[animation:entree-bas_0.6s_var(--ease-cine)_both]">
                 <div className="flex items-start justify-between gap-4">
@@ -190,14 +190,14 @@ export function SectionAppartement() {
               </div>
             )}
 
-            <ul className="mt-7 space-y-1.5 border-t border-white/[0.07] pt-5">
+            <ul className="mt-7 space-y-1.5 border-t border-papier/[0.07] pt-5">
               {services.map((s, i) => (
                 <li key={s.id}>
                   <button
                     type="button"
                     onClick={() => choisir(s.id)}
                     aria-pressed={selection === s.id}
-                    className={cn("flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-[0.9rem] transition-colors", selection === s.id ? "bg-white/[0.06] text-papier" : "text-papier/65 hover:bg-white/[0.04] hover:text-papier")}
+                    className={cn("flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-[0.9rem] transition-colors", selection === s.id ? "bg-papier/[0.06] text-papier" : "text-papier/65 hover:bg-papier/[0.04] hover:text-papier")}
                   >
                     <span className={cn("grid h-6 w-6 shrink-0 place-items-center rounded-full border text-[0.7rem] font-semibold", selection === s.id ? "border-or bg-or text-charbon" : "border-or/50 text-or")}>{i + 1}</span>
                     {s.titre}
