@@ -1,0 +1,134 @@
+@import "tailwindcss";
+
+/*
+  Perfect Stay — système visuel du site vitrine.
+  Architecture et lumière : charbon, graphite, blanc cassé chaud, beige architectural, or patiné.
+  Un seul accent (l'or), utilisé avec parcimonie pour ce qui compte : l'action et la donnée.
+*/
+@theme {
+  --color-charbon: #111315;
+  --color-graphite: #1c1f22;
+  --color-graphite-2: #26292d;
+  --color-filet: #34383d;
+  --color-papier: #f5f2ec;
+  --color-papier-2: #ece7de;
+  --color-beige: #d9cdbd;
+  --color-or: #b69a70;
+  --color-or-clair: #cdb58f;
+  --color-or-fonce: #8c7350;
+  --color-gris: #8f9296;
+  --color-gris-fonce: #5c5f63;
+  --color-encre: #111315;
+  --color-ok: #7fa38a;
+  --color-alerte: #c98a6b;
+
+  --font-sans: var(--font-corps), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-titre), ui-serif, Georgia, serif;
+
+  --ease-cine: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-doux: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  background: var(--color-charbon);
+  color: var(--color-papier);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection {
+  background: var(--color-or);
+  color: var(--color-charbon);
+}
+:focus-visible {
+  outline: 2px solid var(--color-or);
+  outline-offset: 3px;
+}
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Titres éditoriaux : serif fine, interlignage serré */
+.titre {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+.surtitre {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+/* Apparition au défilement (pilotée par <Reveal>) */
+.revele {
+  opacity: 0;
+  transform: translate3d(0, 28px, 0);
+  transition:
+    opacity 1s var(--ease-cine),
+    transform 1.2s var(--ease-cine);
+  transition-delay: var(--delai, 0ms);
+}
+.revele[data-visible="true"] {
+  opacity: 1;
+  transform: none;
+}
+
+/* Grain de pellicule très léger : donne de la matière aux grands aplats sombres */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  mix-blend-mode: overlay;
+}
+
+/* Lumière de fenêtre qui glisse lentement sur le décor du hero */
+@keyframes lumiere {
+  0% { transform: translate3d(-6%, 0, 0) skewX(-18deg); opacity: 0.55; }
+  50% { opacity: 0.85; }
+  100% { transform: translate3d(6%, 0, 0) skewX(-18deg); opacity: 0.6; }
+}
+@keyframes trace {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes flotte {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes pulse-or {
+  0% { box-shadow: 0 0 0 0 rgb(182 154 112 / 0.55); }
+  100% { box-shadow: 0 0 0 14px rgb(182 154 112 / 0); }
+}
+@keyframes entree-bas {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+.tracer {
+  stroke-dasharray: var(--longueur, 1600);
+  stroke-dashoffset: var(--longueur, 1600);
+  animation: trace 3.2s var(--ease-cine) forwards;
+  animation-delay: var(--delai, 0ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+  .revele { opacity: 1; transform: none; }
+  .tracer { stroke-dashoffset: 0; }
+}
