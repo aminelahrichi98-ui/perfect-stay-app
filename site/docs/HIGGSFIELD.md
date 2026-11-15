@@ -1,6 +1,8 @@
 # Séquences cinématiques — manifeste de production Higgsfield
 
-Statut : **aucune séquence générée**. Le compte Higgsfield est relié, mais la génération consomme des crédits payants et nécessite votre accord explicite, scène par scène. En attendant, chaque emplacement affiche une composition graphique de remplacement (vectorielle, sans requête réseau).
+Statut (15/11/2026) : **séquences générées** avec Seedance 2.5, 16:9, sans audio — hero et ameublement en 1080p, les autres en 720p — à partir d'une image maître 2K (GPT Image 2.6) et de sa variante vide, pour garder la même architecture d'un plan à l'autre. Budget validé : 610 crédits pour les vidéos, plus environ 6 crédits d'images.
+
+Les vidéos sont servies directement depuis le CDN de Higgsfield (adresses dans `src/lib/medias.ts`). À faire avant la mise en ligne : les copier dans `public/media/` (ou un stockage maîtrisé), les recompresser au débit cible ci-dessous et produire les recadrages mobiles. Un environnement cloud `perfect-stay-app` autorisant ce téléchargement a été créé pour une prochaine session.
 
 ## Principes communs (cohérence architecturale entre les plans)
 

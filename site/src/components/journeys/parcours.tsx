@@ -22,7 +22,7 @@ function SceneParcours({ scene, index }: { scene: Scene; index: number }) {
       <div className={cn("md:col-span-7", inverse && "md:order-2")}>
         <div className={cn("transition-all duration-[1400ms] ease-[var(--ease-cine)]", actif ? "scale-100 opacity-100" : "scale-[0.97] opacity-0")}>
           {media ? (
-            <MediaCinema scene={media} className="aspect-[16/11] rounded-[1.75rem]">
+            <MediaCinema scene={media} superposer className="h-full w-full object-cover">
               <Visuel actif={actif} />
             </MediaCinema>
           ) : (

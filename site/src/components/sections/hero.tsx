@@ -4,18 +4,20 @@ import { ArrowDown } from "lucide-react";
 import { bouton } from "@/components/ui/bouton";
 import { MediaCinema } from "@/components/ui/media-cinema";
 import { CTA, HERO, MARQUE } from "@/lib/content";
+import { MEDIAS } from "@/lib/medias";
 import { useExperience } from "@/lib/experience";
 import { ChoixProfil } from "./choix-profil";
-import { HeroVisuel } from "./hero-visuel";
+import { HeroVisuel, VoileHero } from "./hero-visuel";
 
 export function Hero() {
   const { ouvrirTunnel } = useExperience();
   return (
     <section id="haut" aria-labelledby="titre-hero" className="relative isolate flex min-h-[100svh] flex-col overflow-hidden">
       <div className="absolute inset-0 -z-10">
-        <MediaCinema scene="hero">
+        <MediaCinema scene="hero" className="absolute inset-0">
           <HeroVisuel />
         </MediaCinema>
+        {MEDIAS.hero.video ? <VoileHero /> : null}
       </div>
 
       <div className="mx-auto flex w-full max-w-[88rem] flex-1 flex-col justify-end px-5 pt-32 pb-10 md:px-10 md:pb-14">

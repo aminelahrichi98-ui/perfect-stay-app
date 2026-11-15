@@ -132,3 +132,9 @@ body {
   .revele { opacity: 1; transform: none; }
   .tracer { stroke-dashoffset: 0; }
 }
+
+/* Données animées posées sur une séquence vidéo : le cadre laisse voir l'image */
+.sur-video .grain {
+  background-color: rgb(17 19 21 / 0.5);
+  border-color: rgb(255 255 255 / 0.1);
+}

@@ -70,7 +70,15 @@ export function HeroVisuel() {
         </g>
       </svg>
 
-      {/* Vignettage cinéma et fondu vers le contenu */}
+      <VoileHero />
+    </div>
+  );
+}
+
+/** Vignettage cinéma et fondus : garantit la lisibilité du titre, sur le dessin comme sur la vidéo. */
+export function VoileHero() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0">
       <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_70%_40%,transparent_40%,rgb(17_19_21/0.85))]" />
       <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-charbon via-charbon/70 to-transparent" />
       <div className="absolute inset-y-0 left-0 w-2/3 bg-gradient-to-r from-charbon/90 via-charbon/40 to-transparent" />

@@ -8,7 +8,18 @@ import { cn } from "@/lib/cn";
  * Séquence vidéo si elle est livrée (lecture muette en boucle, pause hors écran et si
  * l'utilisateur préfère moins d'animations), sinon la composition graphique de remplacement.
  */
-export function MediaCinema({ scene, children, className }: { scene: string; children: ReactNode; className?: string }) {
+export function MediaCinema({
+  scene,
+  children,
+  className,
+  superposer = false,
+}: {
+  scene: string;
+  children: ReactNode;
+  className?: string;
+  /** La vidéo passe en fond et le contenu (données animées) reste par-dessus */
+  superposer?: boolean;
+}) {
   const media = MEDIAS[scene];
   const ref = useRef<HTMLVideoElement>(null);
   const [mobile, setMobile] = useState(false);
@@ -33,7 +44,7 @@ export function MediaCinema({ scene, children, className }: { scene: string; chi
   const src = media && (mobile ? media.videoMobile ?? media.video : media.video);
   // Pas de vidéo livrée : la composition de remplacement garde sa propre mise en page
   if (!src) return <>{children}</>;
-  return (
+  const video = (
     <video
       ref={ref}
       key={src}
@@ -46,5 +57,12 @@ export function MediaCinema({ scene, children, className }: { scene: string; chi
       preload="metadata"
       aria-hidden="true"
     />
+  );
+  if (!superposer) return video;
+  return (
+    <div className="sur-video relative overflow-hidden rounded-[1.75rem]">
+      <div className="absolute inset-0">{video}</div>
+      <div className="relative">{children}</div>
+    </div>
   );
 }
