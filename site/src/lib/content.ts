@@ -44,7 +44,7 @@ export const HERO = {
 export const PROFILS: Record<Profil, { titre: string; texte: string; court: string }> = {
   longue: { titre: "Location longue durée", texte: "Je loue avec un bail classique ou cherche un locataire.", court: "Longue durée" },
   courte: { titre: "Location courte durée", texte: "Je loue sur Airbnb, Booking ou d'autres plateformes.", court: "Courte durée" },
-  vacant: { titre: "Appartement vacant", texte: "Mon appartement est vacant ou bientôt disponible.", court: "Vacant" },
+  vacant: { titre: "Mon logement est vacant", texte: "Je n'ai pas encore meublé mon logement ou je ne trouve pas de locataire.", court: "Vacant" },
 };
 
 export type Scene = { id: string; surtitre: string; titre: string; texte: string };
