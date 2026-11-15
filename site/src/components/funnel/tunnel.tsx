@@ -381,7 +381,7 @@ export function Tunnel() {
                 {/* Champ piège pour les robots : invisible et ignoré par les lecteurs d'écran */}
                 <input type="text" name="site" value={piege} onChange={(e) => setPiege(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-px w-px opacity-0" />
                 <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-charbon/40 p-4 text-[0.84rem] leading-relaxed text-papier/70">
-                  <input type="checkbox" checked={s.consentement} onChange={(e) => maj("consentement", e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#b69a70]" />
+                  <input type="checkbox" checked={s.consentement} onChange={(e) => maj("consentement", e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#230c1f]" />
                   <span>
                     J&apos;accepte que Perfect Stay utilise ces informations pour me recontacter au sujet de mon bien. Elles ne sont ni revendues ni partagées à des fins commerciales.{" "}
                     <a href="/confidentialite" target="_blank" className="underline underline-offset-4">

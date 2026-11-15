@@ -91,7 +91,7 @@ export function Parcours() {
                 onClick={() => choisirProfil(p)}
                 className={cn(
                   "h-10 rounded-full border px-4 text-[0.84rem] transition-colors",
-                  profil === p ? "border-or bg-or text-charbon" : "border-white/15 text-papier/70 hover:border-or/60 hover:text-papier",
+                  profil === p ? "border-or bg-or text-papier" : "border-white/15 text-papier/70 hover:border-or/60 hover:text-papier",
                 )}
               >
                 {PROFILS[p].court}

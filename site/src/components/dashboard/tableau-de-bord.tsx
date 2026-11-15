@@ -56,12 +56,12 @@ function Performance() {
           <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
             <defs>
               <linearGradient id="aire" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stopColor="#b69a70" stopOpacity="0.35" />
-                <stop offset="1" stopColor="#b69a70" stopOpacity="0" />
+                <stop offset="0" stopColor="#230c1f" stopOpacity="0.35" />
+                <stop offset="1" stopColor="#230c1f" stopOpacity="0" />
               </linearGradient>
             </defs>
             <path d={`${ligne} L100 100 L0 100Z`} fill="url(#aire)" />
-            <path d={ligne} fill="none" stroke="#b69a70" strokeWidth="1.4" vectorEffect="non-scaling-stroke" />
+            <path d={ligne} fill="none" stroke="#230c1f" strokeWidth="1.4" vectorEffect="non-scaling-stroke" />
             <line x1={points[choisi][0]} x2={points[choisi][0]} y1="0" y2="100" stroke="#f5f2ec" strokeOpacity="0.25" vectorEffect="non-scaling-stroke" />
           </svg>
           <span className="pointer-events-none absolute h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-charbon bg-or" style={{ left: `${points[choisi][0]}%`, top: `${points[choisi][1]}%` }} />
@@ -156,7 +156,7 @@ function Patrimoine() {
   return (
     <div className="grid gap-3 lg:grid-cols-[15rem_1fr]">
       <div className="rounded-2xl border border-white/[0.06] bg-charbon/60 p-4">
-        <div className="aspect-[4/3] rounded-xl bg-[linear-gradient(135deg,#d9cdbd,#8c7350)]" />
+        <div className="aspect-[4/3] rounded-xl bg-[linear-gradient(135deg,#d9cdbd,#230c1f)]" />
         <p className="mt-3 text-[0.92rem] text-papier">{l.nom}</p>
         <p className="text-[0.75rem] text-papier/50">
           {l.quartier} · {l.chambres} chambres
@@ -189,7 +189,7 @@ export function TableauDeBord() {
 
   return (
     <section id="application" aria-labelledby="titre-application" className="relative scroll-mt-20 overflow-hidden bg-graphite py-20 md:py-28">
-      <div aria-hidden className="absolute top-0 left-1/2 h-[30rem] w-[60rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(182_154_112/0.12),transparent)]" />
+      <div aria-hidden className="absolute top-0 left-1/2 h-[30rem] w-[60rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(35_12_31/0.12),transparent)]" />
       <div className="relative mx-auto max-w-[88rem] px-5 md:px-10">
         <Revele className="mx-auto max-w-3xl text-center">
           <Surtitre className="justify-center">Technologie propriétaire</Surtitre>

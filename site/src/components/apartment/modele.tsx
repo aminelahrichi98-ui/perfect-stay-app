@@ -17,9 +17,9 @@ const C = {
   mur: "#ece7de",
   sol: "#b9a184",
   solBain: "#d9d4cc",
-  coupe: "#b69a70",
+  coupe: "#230c1f",
   tissu: "#d9cdbd",
-  tissuFonce: "#8c7350",
+  tissuFonce: "#230c1f",
   bois: "#7a6248",
   boisClair: "#c4ab8a",
   noir: "#1c1f22",
@@ -174,7 +174,7 @@ export function Appartement() {
       <Boite p={[-4.2, 0.94, -2.2]} s={[2.0, 0.05, 0.85]} c={C.pierre} r={0.35} />
       {[-4.8, -4.2, -3.6].map((x) => (
         <group key={x}>
-          <Cylindre p={[x, 1.9, -2.2]} r={0.11} h={0.16} c={C.coupe} emissif={0.8} />
+          <Cylindre p={[x, 1.9, -2.2]} r={0.11} h={0.16} c={C.linge} emissif={0.8} />
           <Boite p={[x, 2.3, -2.2]} s={[0.01, 0.65, 0.01]} c={C.noir} ombre={false} />
         </group>
       ))}

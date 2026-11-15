@@ -9,26 +9,26 @@ import { useExperience } from "@/lib/experience";
 function IllustrationLongue() {
   return (
     <svg viewBox="0 0 200 120" className="h-full w-full" aria-hidden>
-      <rect x="62" y="14" width="76" height="98" rx="3" fill="#26292d" stroke="#b69a70" strokeOpacity="0.5" />
+      <rect x="62" y="14" width="76" height="98" rx="3" fill="#26292d" stroke="#230c1f" strokeOpacity="0.5" />
       <rect x="74" y="28" width="52" height="58" rx="2" fill="#1c1f22" />
-      <circle cx="126" cy="66" r="3" fill="#b69a70" />
+      <circle cx="126" cy="66" r="3" fill="#230c1f" />
       <g stroke="#d9cdbd" strokeOpacity="0.5" strokeWidth="2" strokeLinecap="round">
         <path d="M150 40h34M150 50h26M150 60h30" />
       </g>
       <rect x="146" y="30" width="44" height="44" rx="3" fill="none" stroke="#d9cdbd" strokeOpacity="0.35" />
-      <path d="M156 84 l6 6 l12 -14" fill="none" stroke="#b69a70" strokeWidth="2" />
+      <path d="M156 84 l6 6 l12 -14" fill="none" stroke="#230c1f" strokeWidth="2" />
     </svg>
   );
 }
 function IllustrationCourte() {
   return (
     <svg viewBox="0 0 200 120" className="h-full w-full" aria-hidden>
-      <rect x="30" y="16" width="140" height="92" rx="6" fill="#26292d" stroke="#b69a70" strokeOpacity="0.45" />
+      <rect x="30" y="16" width="140" height="92" rx="6" fill="#26292d" stroke="#230c1f" strokeOpacity="0.45" />
       {Array.from({ length: 21 }).map((_, i) => {
         const x = 40 + (i % 7) * 18;
         const y = 34 + Math.floor(i / 7) * 22;
         const reserve = [2, 3, 4, 8, 9, 10, 11, 15, 16, 19].includes(i);
-        return <rect key={i} x={x} y={y} width="14" height="16" rx="2.5" fill={reserve ? "#b69a70" : "#1c1f22"} fillOpacity={reserve ? 0.85 : 1} />;
+        return <rect key={i} x={x} y={y} width="14" height="16" rx="2.5" fill={reserve ? "#230c1f" : "#1c1f22"} fillOpacity={reserve ? 0.85 : 1} />;
       })}
     </svg>
   );
@@ -75,7 +75,7 @@ export function ChoixProfil() {
                 <span className="block text-[1.02rem] font-semibold text-papier">{PROFILS[id].titre}</span>
                 <span className="mt-1 block text-[0.86rem] leading-snug text-papier/60">{PROFILS[id].texte}</span>
               </span>
-              <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-full border transition-colors", actif ? "border-or bg-or text-charbon" : "border-white/15 text-papier/70 group-hover:border-or group-hover:text-or")}>
+              <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-full border transition-colors", actif ? "border-or bg-or text-papier" : "border-white/15 text-papier/70 group-hover:border-or group-hover:text-or")}>
                 {actif ? <Check className="h-4 w-4" /> : <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />}
               </span>
             </button>

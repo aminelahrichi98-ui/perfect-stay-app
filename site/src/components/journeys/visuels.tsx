@@ -172,7 +172,7 @@ export function VisuelMessages({ actif }: { actif: boolean }) {
   const etape = useSequence(actif, NOTIFICATIONS.length, 700);
   return (
     <Cadre>
-      <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_20%_20%,rgb(182_154_112/0.10),transparent)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_20%_20%,rgb(35_12_31/0.10),transparent)]" />
       <div className="relative flex h-full items-center justify-center p-5 sm:p-10">
         <ul className="w-full max-w-sm space-y-2.5">
           {NOTIFICATIONS.map((n, i) => {
@@ -305,7 +305,7 @@ export function VisuelStrategies({ actif }: { actif: boolean }) {
   return (
     <Cadre legende="Deux stratégies, une évaluation">
       <svg viewBox="0 0 400 260" className="absolute inset-0 h-full w-full" aria-hidden>
-        <g fill="none" stroke="#b69a70" strokeWidth="1.4" strokeOpacity="0.6">
+        <g fill="none" stroke="#230c1f" strokeWidth="1.4" strokeOpacity="0.6">
           <path d="M200 70 C200 130 100 120 100 180" strokeDasharray="200" strokeDashoffset={actif ? 0 : 200} style={{ transition: "stroke-dashoffset 1.6s var(--ease-cine) .3s" }} />
           <path d="M200 70 C200 130 300 120 300 180" strokeDasharray="200" strokeDashoffset={actif ? 0 : 200} style={{ transition: "stroke-dashoffset 1.6s var(--ease-cine) .5s" }} />
         </g>
@@ -337,7 +337,7 @@ export function VisuelPreparation({ actif }: { actif: boolean }) {
         <ul className="w-full max-w-xs space-y-3">
           {etapes.map((e, i) => (
             <li key={e} className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-charbon/70 px-4 py-3">
-              <span className={cn("grid h-6 w-6 place-items-center rounded-full border transition-all duration-500", etape > i ? "border-or bg-or text-charbon" : "border-white/20")}>
+              <span className={cn("grid h-6 w-6 place-items-center rounded-full border transition-all duration-500", etape > i ? "border-or bg-or text-papier" : "border-white/20")}>
                 {etape > i ? <Check className="h-3.5 w-3.5" /> : null}
               </span>
               <span className={cn("text-[0.88rem] transition-colors", etape > i ? "text-papier" : "text-papier/55")}>{e}</span>
