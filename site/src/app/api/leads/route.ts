@@ -5,9 +5,9 @@ import { erreursParChamp, qualifier, schemaLead } from "@/lib/funnel";
   Réception des demandes d'estimation.
   - Validation complète côté serveur (mêmes règles que le navigateur).
   - Anti-spam : champ piège, durée minimale de remplissage, limite de fréquence par adresse IP.
-  - Transmission : si LEAD_WEBHOOK_URL est défini (CRM, Zapier, Make, webhook de l'application),
-    la demande y est envoyée en JSON. Sinon, le site est en MODE DÉMONSTRATION : rien n'est
-    transmis et la réponse le dit explicitement.
+  - Transmission : la demande est envoyée en JSON à LEAD_WEBHOOK_URL (l'application de gestion
+    Perfect Stay, route /api/prospects). Si cette adresse n'est pas configurée, la demande est
+    REFUSÉE avec un message clair : on n'affiche jamais un succès pour une demande non transmise.
 */
 
 const DUREE_MIN_MS = 4000;
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
   const lead = resultat.data;
 
   // Robot probable : on répond comme si tout allait bien, sans rien transmettre
-  if (lead.site || lead.dureeMs < DUREE_MIN_MS) return NextResponse.json({ ok: true, mode: "demo" });
+  if (lead.site || lead.dureeMs < DUREE_MIN_MS) return NextResponse.json({ ok: true, mode: "ignore" });
 
   const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "inconnue";
   if (tropDeDemandes(ip)) return NextResponse.json({ ok: false, erreur: "Trop de demandes. Réessayez dans quelques minutes." }, { status: 429 });
@@ -54,8 +54,8 @@ export async function POST(request: Request) {
 
   const webhook = process.env.LEAD_WEBHOOK_URL;
   if (!webhook) {
-    if (process.env.NODE_ENV !== "production") console.info("[leads] mode démonstration, demande non transmise :", JSON.stringify(charge));
-    return NextResponse.json({ ok: true, mode: "demo", niveau: qualification.niveau });
+    console.error("[leads] LEAD_WEBHOOK_URL n'est pas configuré : demande refusée.");
+    return NextResponse.json({ ok: false, erreur: "Notre formulaire est momentanément indisponible. Merci de réessayer un peu plus tard." }, { status: 503 });
   }
 
   try {

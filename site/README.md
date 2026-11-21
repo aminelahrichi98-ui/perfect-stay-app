@@ -87,3 +87,18 @@ docs/HIGGSFIELD.md     prompts, cadrages, formats des 8 séquences cinématiques
 2. Balises GTM / GA4 / Meta Pixel conditionnées au consentement.
 3. Vidéos Higgsfield (après accord sur les crédits).
 4. Numéro WhatsApp et e-mail publics (`CONTACT`), domaine et mise en ligne (projet Vercel distinct, dossier racine `site/`).
+
+## Réception des demandes d'audit
+
+Le formulaire envoie chaque demande à l'application de gestion, qui la crée dans le CRM (source « Site internet »).
+
+Variables à définir dans Vercel :
+
+- projet du **site** : `LEAD_WEBHOOK_URL` = `https://<adresse de l'application>/api/site/leads` et `LEAD_WEBHOOK_SECRET` = une longue suite de caractères ;
+- projet de l'**application** : `SITE_LEADS_SECRET` = la même suite de caractères.
+
+Tant que `LEAD_WEBHOOK_URL` n'est pas défini, le formulaire refuse l'envoi et affiche un message d'indisponibilité : il n'affiche jamais un succès pour une demande non transmise.
+
+## Études de cas
+
+Les fiches se remplissent dans `src/lib/content.ts`, tableau `ETUDES_DE_CAS`. Tant qu'il est vide, le site n'affiche aucun chiffre.

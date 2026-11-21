@@ -8,8 +8,8 @@ export type Profil = "longue" | "courte" | "vacant";
 
 export const MARQUE = {
   nom: "Perfect Stay",
-  signature: "La location courte durée, version investisseur.",
-  promesse: "Vous restez investisseur. Nous pilotons l'exploitation.",
+  signature: "Optimisez vos revenus. Nous nous occupons du reste.",
+  promesse: "Votre appartement a un potentiel de revenus. Nous savons comment l'exploiter.",
   ville: "Casablanca",
   villesAVenir: ["Marrakech", "Rabat"],
 };
@@ -22,107 +22,168 @@ export const CONTACT = {
 };
 
 export const CTA = {
-  principal: "Estimer le potentiel de mon appartement",
-  secondaire: "Découvrir notre gestion",
+  principal: "Découvrir le potentiel de mon appartement",
+  secondaire: "Comment fonctionne Perfect Stay ?",
+  audit: "Recevoir mon audit de rentabilité offert",
+  court: "Mon audit offert",
 };
 
 export const NAVIGATION = [
-  { href: "#parcours", label: "Votre situation" },
-  { href: "#appartement", label: "Notre gestion" },
-  { href: "#application", label: "L'application" },
-  { href: "#methode", label: "Méthode" },
-  { href: "#faq", label: "Questions" },
+  { href: "/methode", label: "Notre méthode" },
+  { href: "/etudes-de-cas", label: "Études de cas" },
+  { href: "/tarifs", label: "Tarifs" },
+  { href: "/a-propos", label: "Notre expertise" },
+  { href: "/audit", label: "Revenue Audit" },
 ];
 
 export const HERO = {
-  surtitre: "Gestion locative courte durée · Casablanca",
-  titre: "Votre appartement mérite une meilleure stratégie.",
-  texte: "Optimisez les revenus de votre bien grâce à une gestion courte durée professionnelle, pilotée par la technologie.",
-  question: "Comment exploitez-vous votre appartement aujourd'hui ?",
+  surtitre: "Location courte durée · Casablanca",
+  titre: "Votre appartement vous rapporte-t-il vraiment tout ce qu'il pourrait ?",
+  texte: "Découvrez le véritable potentiel locatif de votre bien à Casablanca grâce à notre expertise en location courte durée, optimisation des revenus et gestion immobilière.",
+  question: "Quelle est la situation actuelle de votre appartement ?",
 };
 
 export const PROFILS: Record<Profil, { titre: string; texte: string; court: string }> = {
-  longue: { titre: "Location longue durée", texte: "Je loue avec un bail classique ou cherche un locataire.", court: "Longue durée" },
-  courte: { titre: "Location courte durée", texte: "Je loue sur Airbnb, Booking ou d'autres plateformes.", court: "Courte durée" },
-  vacant: { titre: "Mon logement est vacant", texte: "Je n'ai pas encore meublé mon logement ou je ne trouve pas de locataire.", court: "Vacant" },
+  longue: { titre: "Mon appartement est loué en longue durée", texte: "Vous louez actuellement votre bien à un locataire avec un bail classique.", court: "Longue durée" },
+  vacant: { titre: "Mon appartement est actuellement vide", texte: "Votre bien est inoccupé ou vous envisagez de commencer à le louer.", court: "Vacant" },
+  courte: { titre: "Je loue déjà sur Airbnb ou Booking", texte: "Votre logement est déjà exploité en courte durée, seul ou avec une conciergerie.", court: "Courte durée" },
 };
 
 export type Scene = { id: string; surtitre: string; titre: string; texte: string };
 
-export const PARCOURS: Record<Profil, { intro: string; scenes: Scene[]; conclusion: { titre: string; cta: string } }> = {
+export type Probleme = { titre: string; texte: string };
+export type ParcoursProfil = {
+  usp: string;
+  sousTitre: string;
+  titreProblemes: string;
+  problemes: Probleme[];
+  solution: { titre: string; intro?: string; points: string[]; ordonne?: boolean; mention?: string };
+  cta: string;
+};
+
+export const PARCOURS: Record<Profil, ParcoursProfil> = {
   longue: {
-    intro: "Le bail classique, vu sous l'angle de l'investisseur.",
-    scenes: [
-      {
-        id: "vacance",
-        surtitre: "La vacance",
-        titre: "Chaque mois sans locataire est un manque à gagner.",
-        texte: "Un appartement vacant continue de générer des charges, sans produire de revenus locatifs.",
-      },
-      {
-        id: "impaye",
-        surtitre: "L'impayé",
-        titre: "Un loyer prévu n'est pas toujours un loyer encaissé.",
-        texte: "Les impayés peuvent fragiliser la rentabilité et la prévisibilité de votre investissement.",
-      },
-      {
-        id: "rendement",
-        surtitre: "Le rendement",
-        titre: "Votre appartement exploite-t-il réellement son potentiel ?",
-        texte: "Selon son emplacement, ses caractéristiques et la demande, une autre stratégie locative peut être intéressante.",
-      },
+    usp: "Vous connaissez le loyer de votre appartement. Mais connaissez-vous son véritable potentiel locatif ?",
+    sousTitre: "Découvrez si la location courte durée pourrait vous permettre d'améliorer la rentabilité de votre bien, sans avoir à gérer les voyageurs et les réservations.",
+    titreProblemes: "Votre investissement immobilier pourrait-il travailler davantage pour vous ?",
+    problemes: [
+      { titre: "Vacance locative", texte: "Chaque mois sans locataire représente un revenu potentiel perdu, alors que les charges continuent." },
+      { titre: "Loyers impayés", texte: "Un seul locataire qui ne paie plus peut fragiliser les revenus de votre investissement pendant plusieurs mois." },
+      { titre: "Dégradations", texte: "Certains incidents peuvent entraîner des réparations coûteuses, des litiges et une immobilisation prolongée du logement." },
+      { titre: "Rentabilité limitée", texte: "Votre loyer est généralement fixé pour une période prolongée, alors que la demande et les prix du marché évoluent." },
     ],
-    conclusion: { titre: "Et si vous repensiez l'exploitation de votre patrimoine ?", cta: "Découvrir le potentiel de mon bien" },
-  },
-  courte: {
-    intro: "Vous connaissez déjà la courte durée. Et sa charge de travail.",
-    scenes: [
-      {
-        id: "messages",
-        surtitre: "Les voyageurs",
-        titre: "Votre appartement génère des revenus. Mais combien de temps vous demande-t-il ?",
-        texte: "Questions d'arrivée, demandes de check-in, ménage, petites pannes : chaque séjour sollicite votre téléphone.",
-      },
-      {
-        id: "operations",
-        surtitre: "L'exploitation",
-        titre: "Une réservation n'est que le début du travail.",
-        texte: "Chaque séjour implique une succession d'opérations qui doivent être exécutées et contrôlées.",
-      },
-      {
-        id: "portefeuille",
-        surtitre: "Le portefeuille",
-        titre: "Plus votre portefeuille grandit, plus la gestion devient complexe.",
-        texte: "Deux, trois appartements : les opérations ne s'additionnent pas, elles se multiplient.",
-      },
-    ],
-    conclusion: { titre: "Passez de la gestion quotidienne au pilotage de votre investissement.", cta: "Découvrir notre solution de gestion" },
+    solution: {
+      titre: "Et si votre appartement pouvait générer davantage de revenus grâce à une autre stratégie locative ?",
+      intro: "Le Perfect Stay Investor Program compare les deux stratégies, chiffres à l'appui, avant toute décision.",
+      points: ["Analyse comparative longue durée / courte durée", "Étude de la demande locative", "Optimisation du positionnement du bien", "Stratégie tarifaire dynamique", "Gestion complète de l'exploitation", "Reporting transparent"],
+      mention: "La courte durée n'est pas toujours la stratégie la plus rentable : l'audit vous le dit pour votre bien.",
+    },
+    cta: "Comparer mes revenus en longue durée et courte durée",
   },
   vacant: {
-    intro: "Un bien disponible est une décision à prendre, pas un problème.",
-    scenes: [
-      {
-        id: "disponible",
-        surtitre: "Aujourd'hui",
-        titre: "Votre appartement est disponible. Donnons-lui une stratégie.",
-        texte: "Vacant aujourd'hui ou libéré bientôt : c'est le meilleur moment pour choisir la façon dont il sera exploité.",
-      },
-      {
-        id: "strategies",
-        surtitre: "Le choix",
-        titre: "Longue ou courte durée : comparez avant de décider.",
-        texte: "Nous évaluons le potentiel locatif de votre bien selon son emplacement, sa configuration et la demande du quartier.",
-      },
-      {
-        id: "preparation",
-        surtitre: "La suite",
-        titre: "Une préparation soignée, puis une mise en ligne maîtrisée.",
-        texte: "Ameublement, photos, annonce, procédures : nous préparons votre bien avant le premier voyageur.",
-      },
+    usp: "Chaque mois où votre appartement reste vide, son potentiel de revenus reste inexploité.",
+    sousTitre: "Transformez votre appartement inutilisé en investissement locatif opérationnel grâce à un accompagnement complet, de sa préparation à sa gestion quotidienne.",
+    titreProblemes: "Un appartement vide continue de coûter.",
+    problemes: [
+      { titre: "Revenus inexistants", texte: "Votre appartement ne génère aucun revenu pendant qu'il reste inoccupé." },
+      { titre: "Charges permanentes", texte: "Charges de copropriété, entretien et autres dépenses continuent même lorsque votre logement est vide." },
+      { titre: "Manque de temps", texte: "Préparer un appartement, publier des annonces et gérer des voyageurs demande du temps et de l'organisation." },
+      { titre: "Manque d'expertise", texte: "Sans connaissance du marché, du pricing et des attentes des voyageurs, il est difficile d'exploiter pleinement le potentiel du logement." },
     ],
-    conclusion: { titre: "Donnez à votre bien une stratégie d'exploitation.", cta: "Évaluer mon appartement" },
+    solution: {
+      titre: "De votre appartement vide à un investissement locatif prêt à accueillir ses premiers voyageurs.",
+      points: ["Analyse du potentiel locatif", "Audit du logement", "Recommandations d'ameublement et de design", "Préparation du logement", "Photographie professionnelle", "Création des annonces", "Stratégie tarifaire", "Mise en ligne et ouverture des réservations", "Gestion complète"],
+      ordonne: true,
+    },
+    cta: "Découvrir le potentiel de mon appartement vide",
+  },
+  courte: {
+    usp: "Votre Airbnb vous rapporte de l'argent. Mais combien vous coûte-t-il en temps et en revenus manqués ?",
+    sousTitre: "Nous analysons vos tarifs, votre taux d'occupation, votre annonce et votre positionnement pour identifier les opportunités d'amélioration de votre rentabilité.",
+    titreProblemes: "Ce qui freine la performance d'une annonce.",
+    problemes: [
+      { titre: "Pricing inefficace", texte: "Un tarif trop élevé peut réduire les réservations. Un tarif trop faible peut vous faire perdre des revenus." },
+      { titre: "Mauvaise connaissance du marché", texte: "La saisonnalité, les événements, les périodes de forte demande et la concurrence influencent directement les performances." },
+      { titre: "Annonce peu attractive", texte: "Des photographies moyennes, un design peu différenciant ou une annonce mal optimisée peuvent réduire votre attractivité." },
+      { titre: "Gestion chronophage", texte: "Messages, arrivées, départs, ménage, maintenance et incidents demandent une disponibilité permanente." },
+      { titre: "Expérience voyageur insuffisante", texte: "Une mauvaise expérience peut affecter les avis, la visibilité et les réservations futures." },
+    ],
+    solution: {
+      titre: "Votre appartement est déjà sur Airbnb. Passons maintenant à l'optimisation de sa performance.",
+      points: ["Audit des performances existantes", "Benchmark concurrentiel", "Optimisation du prix moyen par nuit", "Analyse du taux d'occupation", "Optimisation des annonces OTA", "Recommandations de design et de photographie", "Gestion de l'expérience voyageur", "Automatisation et gestion opérationnelle", "Reporting mensuel"],
+    },
+    cta: "Auditer les performances de mon Airbnb",
   },
 };
+
+export const PROGRAMME = {
+  surtitre: "Perfect Stay Investor Program",
+  titre: "Une méthode complète pour exploiter le potentiel de votre investissement immobilier.",
+  piliers: [
+    { id: "audit", nom: "Revenue Audit", accroche: "Savoir avant de décider.", texte: "Analyse du bien, de son marché, de son potentiel locatif et de ses perspectives de revenus.", details: ["Étude du quartier et de la demande", "Potentiel de chiffre d'affaires et d'occupation", "Comparaison avec la longue durée lorsque pertinente", "Estimation du revenu net propriétaire"] },
+    { id: "upgrade", nom: "Property Upgrade", accroche: "Un logement qui donne envie de réserver.", texte: "Valorisation du logement : design d'intérieur, équipements, décoration, photographies et optimisation de la présentation.", details: ["Recommandations de design et d'ameublement", "Équipements attendus par les voyageurs", "Photographie professionnelle", "Présentation de l'annonce"] },
+    { id: "optimisation", nom: "Revenue Optimization", accroche: "Le bon prix, chaque nuit.", texte: "Pricing dynamique, optimisation des annonces, stratégie de distribution et suivi des indicateurs de performance.", details: ["Pricing dynamique selon saison et événements", "Optimisation des annonces Airbnb et Booking", "Stratégie de distribution", "Suivi du prix moyen et de l'occupation"] },
+    { id: "gestion", nom: "Performance Management", accroche: "L'exploitation, sans vous.", texte: "Gestion des voyageurs, ménage, maintenance, contrôle qualité et rapports propriétaires.", details: ["Sélection et accueil des voyageurs", "Ménage professionnel et contrôles qualité", "Maintenance coordonnée", "Rapport propriétaire mensuel"] },
+  ],
+};
+
+export const AUDIT = {
+  nom: "Perfect Stay Revenue Audit",
+  titre: "Combien votre appartement pourrait-il réellement vous rapporter ?",
+  texte: "Recevez une analyse personnalisée du potentiel locatif de votre appartement à Casablanca, réalisée par notre équipe.",
+  contenu: [
+    "Le potentiel de chiffre d'affaires en courte durée",
+    "Une estimation du taux d'occupation",
+    "Le prix moyen par nuit envisageable",
+    "Une comparaison avec la location longue durée lorsque pertinente",
+    "Une estimation des charges d'exploitation",
+    "Une estimation du revenu net propriétaire",
+    "Les opportunités de valorisation de votre appartement",
+    "Les recommandations pour améliorer votre positionnement sur Airbnb et Booking",
+  ],
+  /** L'audit est réellement facturé 500 MAD (confirmé par Perfect Stay) : le prix barré est légitime. */
+  prixHabituel: 500,
+  prixActuel: 0,
+  description: "Une analyse personnalisée pour comprendre le potentiel locatif de votre appartement et identifier les opportunités d'amélioration de sa rentabilité.",
+};
+
+/** Tarifs confirmés par Perfect Stay. Ne rien ajouter ici qui n'ait été validé. */
+export const TARIFS = {
+  commissions: [
+    { bien: "Appartements", taux: "20 % HT" },
+    { bien: "Villas et riads", taux: "15 % HT" },
+  ],
+  base: "La commission est calculée sur les revenus locatifs après déduction des frais de plateforme (Airbnb, Booking).",
+  /** Postes non encore chiffrés publiquement : présentés tels quels, sans montant inventé. */
+  autresPostes: [
+    { titre: "Frais de ménage", texte: "Selon le logement, ils sont réglés par le voyageur à chaque séjour. Leur montant et leur affectation sont fixés avec vous et figurent sur votre relevé." },
+    { titre: "Préparation et mise en service", texte: "Ameublement, équipements, photos : les besoins sont chiffrés dans votre audit, avant tout engagement." },
+    { titre: "Maintenance et prestations complémentaires", texte: "Les interventions sont réalisées avec votre accord et détaillées ligne par ligne sur votre relevé." },
+  ],
+};
+
+/*
+  Études de cas RÉELLES. Laisser le tableau vide tant qu'aucune donnée validée n'est disponible :
+  le site affiche alors un état d'attente, sans aucun chiffre. `nature` distingue un résultat
+  observé d'une estimation ou d'une projection.
+*/
+export type EtudeDeCas = {
+  id: string;
+  quartier: string;
+  typologie: string;
+  surface: number;
+  chambres: number;
+  periode: string;
+  nature: "reel" | "estimation" | "projection";
+  loyerLongueDuree: number; // MAD / mois, référence
+  chiffreAffairesMensuel: number; // MAD / mois, courte durée
+  tauxOccupation: number; // %
+  adr: number; // MAD / nuit
+  chargesMensuelles: number; // MAD / mois
+  revenuNetMensuel: number; // MAD / mois
+  commentaire?: string;
+};
+export const ETUDES_DE_CAS: EtudeDeCas[] = [];
 
 export const CONVERGENCE = {
   titre: "Perfect Stay.",
@@ -243,7 +304,7 @@ export const METHODE = [
 export const OFFRE = {
   titre: "Confiez-nous votre appartement. Gardez le contrôle.",
   offre: "Votre premier mois de gestion offert pour tout nouveau mandat éligible.",
-  cta: "Estimer mon potentiel locatif",
+  cta: "Recevoir mon audit de rentabilité offert",
   /** Conditions d'éligibilité : texte à valider par Perfect Stay avant publication. */
   conditions: "",
 };
@@ -296,6 +357,6 @@ export const FAQ: Question[] = [
 ];
 
 export const PREUVES = {
-  titre: "La preuve par l'exploitation.",
+  titre: "La preuve par les chiffres.",
   texte: "Témoignages vérifiés, études de cas et exemples de rapports : cette section accueillera uniquement des éléments réels et validés.",
 };

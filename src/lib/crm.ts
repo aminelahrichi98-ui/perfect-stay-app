@@ -23,6 +23,7 @@ export const RESULTATS_APPEL = [
 
 export const SOURCES = [
   { value: "meta", label: "Meta (formulaire)" },
+  { value: "site", label: "Site internet (audit)" },
   { value: "manuel", label: "Saisie manuelle" },
   { value: "import", label: "Import CSV" },
   { value: "recommandation", label: "Recommandation" },

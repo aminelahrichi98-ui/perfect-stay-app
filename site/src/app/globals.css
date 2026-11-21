@@ -6,10 +6,10 @@
   Un seul accent (l'or), utilisé avec parcimonie pour ce qui compte : l'action et la donnée.
 */
 @theme {
-  --color-charbon: #111315;
-  --color-graphite: #1c1f22;
-  --color-graphite-2: #26292d;
-  --color-filet: #34383d;
+  --color-charbon: #160813;
+  --color-graphite: #230c1f;
+  --color-graphite-2: #2e1429;
+  --color-filet: #452540;
   --color-papier: #f5f2ec;
   --color-papier-2: #ece7de;
   --color-beige: #d9cdbd;
@@ -23,7 +23,7 @@
   --color-bouton-clair: #8f4f80;
   --color-gris: #8f9296;
   --color-gris-fonce: #5c5f63;
-  --color-encre: #111315;
+  --color-encre: #160813;
   --color-ok: #7fa38a;
   --color-alerte: #c98a6b;
 
@@ -142,4 +142,11 @@ body {
 .sur-video .grain {
   background-color: rgb(17 19 21 / 0.5);
   border-color: rgb(255 255 255 / 0.1);
+}
+
+/* Aucun défilement horizontal, même si un décor dépasse (sinon, sur téléphone, toute la page s'élargit) */
+html,
+body {
+  overflow-x: hidden;
+  overflow-x: clip;
 }

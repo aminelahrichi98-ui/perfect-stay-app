@@ -47,8 +47,8 @@ function IllustrationVacant() {
 
 const ORDRE: { id: Profil; Illustration: () => React.JSX.Element }[] = [
   { id: "longue", Illustration: IllustrationLongue },
-  { id: "courte", Illustration: IllustrationCourte },
   { id: "vacant", Illustration: IllustrationVacant },
+  { id: "courte", Illustration: IllustrationCourte },
 ];
 
 /** Les trois situations locatives, chacune dans sa carte à coins arrondis. */
@@ -64,9 +64,13 @@ export function ChoixProfil() {
             key={id}
             type="button"
             aria-pressed={actif}
-            onClick={() => choisirProfil(id)}
+            onClick={() => {
+              choisirProfil(id);
+              // Laisse le parcours s'afficher, puis y amène le visiteur
+              window.setTimeout(() => document.getElementById("parcours-detail")?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+            }}
             className={cn(
-              "group relative flex items-center gap-4 overflow-hidden rounded-[1.5rem] border p-3 pr-5 text-left transition-[border-color,background-color,transform,box-shadow] duration-500 ease-[var(--ease-cine)]",
+              "group relative flex h-full items-center gap-4 overflow-hidden rounded-[1.5rem] border p-3 pr-5 text-left transition-[border-color,background-color,transform,box-shadow] duration-500 ease-[var(--ease-cine)]",
               "hover:-translate-y-1 hover:shadow-[0_24px_60px_-28px_rgb(0_0_0/0.9)] focus-visible:-translate-y-1",
               actif ? "border-or bg-graphite" : "border-white/10 bg-graphite/70 backdrop-blur hover:border-or/60 hover:bg-graphite",
             )}
