@@ -185,8 +185,8 @@ export function Hero() {
           aria-hidden
           className={
             scrub
-              ? "absolute inset-0 bg-[linear-gradient(90deg,rgb(22_8_19/0.86)_0%,rgb(22_8_19/0.58)_36%,rgb(22_8_19/0)_66%),linear-gradient(180deg,rgb(22_8_19/0.5),rgb(22_8_19/0)_22%)]"
-              : "absolute inset-0 bg-[linear-gradient(180deg,rgb(22_8_19/0.45)_0%,rgb(22_8_19/0.2)_30%,rgb(22_8_19/0.94)_72%)]"
+              ? "absolute inset-0 bg-[linear-gradient(90deg,rgb(17_19_21/0.86)_0%,rgb(17_19_21/0.58)_36%,rgb(17_19_21/0)_66%),linear-gradient(180deg,rgb(17_19_21/0.5),rgb(17_19_21/0)_22%)]"
+              : "absolute inset-0 bg-[linear-gradient(180deg,rgb(17_19_21/0.45)_0%,rgb(17_19_21/0.2)_30%,rgb(17_19_21/0.94)_72%)]"
           }
         />
 

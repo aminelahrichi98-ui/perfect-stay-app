@@ -390,12 +390,12 @@ export function Tunnel() {
                 {/* Champ piège pour les robots : invisible et ignoré par les lecteurs d'écran */}
                 <input type="text" name="site" value={piege} onChange={(e) => setPiege(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-px w-px opacity-0" />
                 <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-charbon/40 p-4 text-[0.9rem] leading-relaxed text-papier/85">
-                  <input type="checkbox" checked={s.rendezVous} onChange={(e) => maj("rendezVous", e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#b98aac]" />
+                  <input type="checkbox" checked={s.rendezVous} onChange={(e) => maj("rendezVous", e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#b69a70]" />
                   <span>Je souhaite un rendez-vous avec un expert Perfect Stay pour parcourir mon audit.</span>
                 </label>
                 {s.rendezVous ? <Choix label="Quand préférez-vous être appelé ?" options={CRENEAUX} valeur={s.creneau} onChange={(v) => maj("creneau", v)} erreur={erreurs.creneau} colonnes={3} /> : null}
                 <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-charbon/40 p-4 text-[0.84rem] leading-relaxed text-papier/70">
-                  <input type="checkbox" checked={s.consentement} onChange={(e) => maj("consentement", e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#b98aac]" />
+                  <input type="checkbox" checked={s.consentement} onChange={(e) => maj("consentement", e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#b69a70]" />
                   <span>
                     J&apos;accepte que Perfect Stay utilise ces informations pour me recontacter au sujet de mon bien. Elles ne sont ni revendues ni partagées à des fins commerciales.{" "}
                     <a href="/confidentialite" target="_blank" className="underline underline-offset-4">

@@ -130,7 +130,7 @@ export function SectionAppartement() {
                       style={{ visibility: "hidden" }}
                       className={cn(
                         "group pointer-events-auto absolute top-0 left-0 grid h-10 w-10 place-items-center rounded-full border text-[0.78rem] font-semibold transition-[background-color,color,box-shadow] duration-300",
-                        selection === s.id ? "border-papier bg-bouton text-sur-accent shadow-[0_0_0_6px_rgb(185_138_172/0.25)]" : "border-or/80 bg-charbon/85 text-or backdrop-blur hover:bg-or hover:text-charbon",
+                        selection === s.id ? "border-papier bg-bouton text-sur-accent shadow-[0_0_0_6px_rgb(182_154_112/0.25)]" : "border-or/80 bg-charbon/85 text-or backdrop-blur hover:bg-or hover:text-charbon",
                       )}
                     >
                       {selection !== s.id ? <span className="absolute inset-0 rounded-full [animation:pulse-or_2.2s_ease-out_infinite]" /> : null}

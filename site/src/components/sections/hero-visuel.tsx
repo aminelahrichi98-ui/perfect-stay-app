@@ -4,7 +4,7 @@
   Entièrement vectorielle : légère, nette sur tous les écrans, sans requête réseau.
 */
 export function HeroVisuel() {
-  const or = "#b98aac";
+  const or = "#b69a70";
   return (
     <div aria-hidden className="grain absolute inset-0 overflow-hidden bg-charbon">
       {/* Lumière chaude venue de la fenêtre */}
@@ -49,7 +49,7 @@ export function HeroVisuel() {
           <path className="tracer" style={{ ["--longueur" as string]: 260, ["--delai" as string]: "1000ms" }} d="M915 280 Q960 245 1005 280 Z" />
         </g>
         {/* Halo de la suspension */}
-        <ellipse cx="960" cy="300" rx="90" ry="22" fill="#d2b0c8" opacity="0.14" />
+        <ellipse cx="960" cy="300" rx="90" ry="22" fill="#cdb58f" opacity="0.14" />
 
         {/* Mobilier en silhouette */}
         <g fill="#1c1f22" stroke={or} strokeOpacity="0.35" strokeWidth="1" transform="translate(330 0)">

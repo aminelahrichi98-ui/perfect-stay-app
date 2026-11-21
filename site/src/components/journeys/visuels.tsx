@@ -172,7 +172,7 @@ export function VisuelMessages({ actif }: { actif: boolean }) {
   const etape = useSequence(actif, NOTIFICATIONS.length, 700);
   return (
     <Cadre>
-      <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_20%_20%,rgb(185_138_172/0.10),transparent)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(70%_60%_at_20%_20%,rgb(182_154_112/0.10),transparent)]" />
       <div className="relative flex h-full items-center justify-center p-5 sm:p-10">
         <ul className="w-full max-w-sm space-y-2.5">
           {NOTIFICATIONS.map((n, i) => {
@@ -305,7 +305,7 @@ export function VisuelStrategies({ actif }: { actif: boolean }) {
   return (
     <Cadre legende="Deux stratégies, une évaluation">
       <svg viewBox="0 0 400 260" className="absolute inset-0 h-full w-full" aria-hidden>
-        <g fill="none" stroke="#b98aac" strokeWidth="1.4" strokeOpacity="0.6">
+        <g fill="none" stroke="#b69a70" strokeWidth="1.4" strokeOpacity="0.6">
           <path d="M200 70 C200 130 100 120 100 180" strokeDasharray="200" strokeDashoffset={actif ? 0 : 200} style={{ transition: "stroke-dashoffset 1.6s var(--ease-cine) .3s" }} />
           <path d="M200 70 C200 130 300 120 300 180" strokeDasharray="200" strokeDashoffset={actif ? 0 : 200} style={{ transition: "stroke-dashoffset 1.6s var(--ease-cine) .5s" }} />
         </g>

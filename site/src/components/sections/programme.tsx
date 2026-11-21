@@ -38,7 +38,7 @@ export function Programme() {
                 onClick={() => setActif(i)}
                 className={cn(
                   "relative flex flex-col rounded-[1.5rem] border p-6 text-left transition-[background-color,border-color,color,transform,box-shadow] duration-500 ease-[var(--ease-cine)]",
-                  on ? "-translate-y-1 border-or-fonce bg-or-fonce text-papier shadow-[0_30px_60px_-30px_rgb(35_12_31/0.8)]" : "border-charbon/15 bg-eclat/50 hover:-translate-y-1 hover:border-or-fonce/60",
+                  on ? "-translate-y-1 border-or-fonce bg-or-fonce text-papier shadow-[0_30px_60px_-30px_rgb(17_19_21/0.8)]" : "border-charbon/15 bg-eclat/50 hover:-translate-y-1 hover:border-or-fonce/60",
                 )}
               >
                 <span className="flex items-center justify-between">

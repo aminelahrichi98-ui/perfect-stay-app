@@ -8,7 +8,7 @@
 import { Camera, FileCheck2, Headphones, Key, Sparkles, Wrench, Hammer, ShieldCheck, CalendarCheck, LogOut, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 
-const or = "#b98aac";
+const or = "#b69a70";
 
 export function TransformationAppartement({ actif }: { actif: boolean }) {
   const meuble = (i: number) => ({
@@ -43,12 +43,12 @@ export function TransformationAppartement({ actif }: { actif: boolean }) {
         <g {...meuble(1)} fill="#d9cdbd">
           <path d="M190 320 h300 a14 14 0 0 1 14 14 v46 h-328 v-46 a14 14 0 0 1 14 -14Z" opacity="0.9" />
           <path d="M200 290 h280 a12 12 0 0 1 12 12 v26 h-304 v-26 a12 12 0 0 1 12 -12Z" fill="#ece7de" />
-          <rect x="230" y="300" width="60" height="30" rx="8" fill="#b98aac" />
-          <rect x="400" y="300" width="60" height="30" rx="8" fill="#b98aac" />
+          <rect x="230" y="300" width="60" height="30" rx="8" fill="#b69a70" />
+          <rect x="400" y="300" width="60" height="30" rx="8" fill="#b69a70" />
         </g>
         <g {...meuble(2)}>
-          <rect x="330" y="405" width="140" height="10" rx="5" fill="#b98aac" />
-          <path d="M345 415 v24 M455 415 v24" stroke="#b98aac" strokeWidth="4" />
+          <rect x="330" y="405" width="140" height="10" rx="5" fill="#b69a70" />
+          <path d="M345 415 v24 M455 415 v24" stroke="#b69a70" strokeWidth="4" />
         </g>
         <g {...meuble(3)}>
           <rect x="200" y="140" width="130" height="95" fill="#1c1f22" stroke={or} strokeOpacity="0.6" />
@@ -57,7 +57,7 @@ export function TransformationAppartement({ actif }: { actif: boolean }) {
         <g {...meuble(4)}>
           <path d="M420 30 V150" stroke={or} strokeOpacity="0.7" />
           <path d="M392 150 Q420 125 448 150Z" fill={or} />
-          <ellipse cx="420" cy="165" rx="70" ry="18" fill="#d2b0c8" opacity="0.18" />
+          <ellipse cx="420" cy="165" rx="70" ry="18" fill="#cdb58f" opacity="0.18" />
         </g>
         <g {...meuble(5)}>
           <rect x="520" y="330" width="40" height="45" rx="6" fill="#26292d" stroke={or} strokeOpacity="0.4" />

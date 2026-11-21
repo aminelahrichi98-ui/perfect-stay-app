@@ -189,7 +189,7 @@ export function TableauDeBord() {
 
   return (
     <section id="application" aria-labelledby="titre-application" className="relative scroll-mt-20 overflow-hidden bg-graphite py-20 md:py-28">
-      <div aria-hidden className="absolute top-0 left-1/2 h-[30rem] w-[60rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(185_138_172/0.12),transparent)]" />
+      <div aria-hidden className="absolute top-0 left-1/2 h-[30rem] w-[60rem] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(182_154_112/0.12),transparent)]" />
       <div className="relative mx-auto max-w-[88rem] px-5 md:px-10">
         <Revele className="mx-auto max-w-3xl text-center">
           <Surtitre className="justify-center">Technologie propriétaire</Surtitre>
