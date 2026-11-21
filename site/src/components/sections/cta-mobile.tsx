@@ -23,7 +23,7 @@ export function CtaMobile() {
       )}
     >
       <button type="button" onClick={() => ouvrirTunnel("barre-mobile")} className={bouton("or", "md", "w-full")} tabIndex={visible ? 0 : -1}>
-        Estimer mon potentiel locatif
+        Recevoir mon audit offert
       </button>
     </div>
   );

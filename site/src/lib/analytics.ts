@@ -7,6 +7,7 @@
 export type Evenement =
   | "PageView"
   | "RentalProfileSelected"
+  | "CtaClicked"
   | "CinematicJourneyStarted"
   | "ServiceHotspotClicked"
   | "InvestorDashboardViewed"

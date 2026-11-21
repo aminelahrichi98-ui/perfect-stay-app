@@ -44,11 +44,11 @@ export function TransformationAppartement({ actif }: { actif: boolean }) {
           <path d="M190 320 h300 a14 14 0 0 1 14 14 v46 h-328 v-46 a14 14 0 0 1 14 -14Z" opacity="0.9" />
           <path d="M200 290 h280 a12 12 0 0 1 12 12 v26 h-304 v-26 a12 12 0 0 1 12 -12Z" fill="#ece7de" />
           <rect x="230" y="300" width="60" height="30" rx="8" fill="#b69a70" />
-          <rect x="400" y="300" width="60" height="30" rx="8" fill="#8c7350" />
+          <rect x="400" y="300" width="60" height="30" rx="8" fill="#b69a70" />
         </g>
         <g {...meuble(2)}>
-          <rect x="330" y="405" width="140" height="10" rx="5" fill="#8c7350" />
-          <path d="M345 415 v24 M455 415 v24" stroke="#8c7350" strokeWidth="4" />
+          <rect x="330" y="405" width="140" height="10" rx="5" fill="#b69a70" />
+          <path d="M345 415 v24 M455 415 v24" stroke="#b69a70" strokeWidth="4" />
         </g>
         <g {...meuble(3)}>
           <rect x="200" y="140" width="130" height="95" fill="#1c1f22" stroke={or} strokeOpacity="0.6" />
