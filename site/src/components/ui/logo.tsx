@@ -15,10 +15,11 @@ export function Monogramme({ className }: { className?: string }) {
   );
 }
 
-export function Logo({ className }: { className?: string }) {
+/** `blanc` : monogramme et nom entièrement blancs (au-dessus de l'image d'accueil). */
+export function Logo({ className, blanc = false }: { className?: string; blanc?: boolean }) {
   return (
-    <span className={cn("inline-flex items-center gap-2.5", className)}>
-      <Monogramme className="h-7 w-auto text-or" />
+    <span className={cn("inline-flex items-center gap-2.5", blanc && "text-white", className)}>
+      <Monogramme className={cn("h-7 w-auto", blanc ? "text-white" : "text-or")} />
       <span className="titre text-[1.45rem] leading-none tracking-tight whitespace-nowrap">Perfect Stay</span>
     </span>
   );
