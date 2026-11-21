@@ -94,6 +94,48 @@ body.paused *,body.paused *::before,body.paused *::after{animation-play-state:pa
 .static p{margin-top:14px;color:var(--text-secondary);max-width:36ch}
 .static .btn{margin-top:26px;text-shadow:none;align-self:flex-start}
 
+/* le choix de situation */
+.band.wide{width:min(600px,48vw)}
+.band .q{font-size:clamp(2rem,3.6vw,3.3rem)}
+.choix{display:grid;gap:12px;margin-top:26px;pointer-events:auto}
+.choix button{display:grid;gap:3px;text-align:left;padding:18px 54px 18px 22px;border-radius:20px;border:1px solid rgba(210,176,200,.55);background:rgba(35,12,31,.72);backdrop-filter:blur(10px);color:var(--text-primary);font:inherit;cursor:pointer;position:relative;text-shadow:none;transition:background .4s var(--ease-soft),border-color .4s var(--ease-soft),transform .4s var(--ease)}
+.choix button::after{content:"";position:absolute;right:22px;top:50%;width:9px;height:9px;border-right:2px solid var(--accent);border-top:2px solid var(--accent);transform:translateY(-50%) rotate(45deg);transition:transform .4s var(--ease)}
+.choix button:hover,.choix button[aria-pressed=true]{background:var(--accent-muted);border-color:var(--accent);transform:translateX(6px)}
+.choix button:hover::after{transform:translate(5px,-50%) rotate(45deg)}
+.choix b{font-family:var(--display);font-weight:500;font-size:1.5rem;line-height:1.1}
+.choix span{font-size:.88rem;color:var(--text-secondary)}
+.question{display:none;padding:70px 0 30px}
+.question h2{font-size:clamp(2rem,8vw,3rem);margin-top:12px}
+@media (max-width: 720px){.question{display:block}}
+@media (orientation: portrait) and (max-width: 1024px){.question{display:block}}
+@media (orientation: portrait) and (pointer: coarse){.question{display:block}}
+@media (orientation: landscape) and (pointer: coarse) and (max-height: 560px){.question{display:block}}
+@media (prefers-reduced-motion: reduce){.question{display:block}}
+.situation{background:var(--stone);color:var(--ink);scroll-margin-top:60px}
+.situation[hidden]{display:none}
+.situation .kicker{color:var(--accent-muted)}
+.switch{display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap}
+.switch button{background:none;border:0;border-bottom:1px solid currentColor;color:var(--accent-muted);font:inherit;font-size:.86rem;cursor:pointer;padding:4px 0}
+.parcours{display:none}
+.parcours.on{display:block;animation:pagein .9s var(--ease) both}
+.parcours>h2{font-size:clamp(2.3rem,5.2vw,4.4rem);max-width:17ch;margin-top:16px}
+.pbs{list-style:none;padding:0;margin-top:56px}
+.pbs li{display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:baseline;padding:34px 0;border-top:1px solid rgba(35,12,31,.18);opacity:0;transform:translateY(26px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+.pbs li.in{opacity:1;transform:none}
+.pbs li>span{font-family:var(--mono);font-size:.76rem;letter-spacing:.15em;color:var(--accent-muted)}
+.pbs h3{font-size:clamp(1.6rem,3vw,2.5rem);line-height:1.15;max-width:24ch}
+.pbs p{margin-top:10px;max-width:52ch;color:rgba(35,12,31,.78)}
+.solution{margin-top:70px;background:var(--panel);color:var(--text-primary);border-radius:28px;padding:clamp(30px,5vw,64px);position:relative;overflow:hidden;opacity:0;transform:translateY(30px);transition:opacity 1s var(--ease),transform 1s var(--ease)}
+.solution.in{opacity:1;transform:none}
+.solution::before{content:"";position:absolute;right:-60px;top:-60px;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(210,176,200,.3),transparent 70%);animation:glow 6s var(--ease-soft) infinite alternate -3s;pointer-events:none}
+.solution .kicker{color:var(--accent)}
+.solution h2{font-size:clamp(2.1rem,4.4vw,3.6rem);margin-top:14px;max-width:18ch}
+.solution ul{list-style:none;padding:0;margin:30px 0 34px;display:grid;gap:14px}
+.solution li{padding-left:34px;position:relative;font-size:1.06rem;color:var(--text-secondary)}
+.solution li::before{content:"";position:absolute;left:0;top:.72em;width:20px;height:2px;background:var(--accent);transform:rotate(-60deg)}
+@media (max-width:560px){.pbs li{grid-template-columns:44px 1fr}}
+@media (prefers-reduced-motion: reduce){.pbs li,.solution{opacity:1;transform:none}}
+
 /* sections */
 section{position:relative;padding:clamp(80px,12vw,150px) 0}
 .reveal>*{opacity:0;transform:translateY(22px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
@@ -228,16 +270,22 @@ footer p{color:var(--text-secondary);font-size:.86rem}
     <video id="hero" preload="none" muted playsinline aria-hidden="true" tabindex="-1"></video>
     <div class="scrim" aria-hidden="true"></div>
 
-    <div class="band rise" data-a="0" data-b="0.21"><h1 data-split>Un appartement vide ne rapporte rien.</h1></div>
+    <div class="band rise" data-a="0" data-b="0.21"><p class="kicker late" style="--ks:1">Gestion locative courte durée · Maroc</p><h1 data-split style="margin-top:14px">Votre appartement mérite une meilleure stratégie.</h1><p class="sub late">Perfect Stay gère votre bien de A à Z, et vous montre chaque dirham.</p></div>
     <div class="band depth" data-a="0.27" data-b="0.48"><p class="big" data-split>On le prépare. On l'ouvre. On le fait vivre.</p></div>
     <div class="band driftx" data-a="0.54" data-b="0.75"><p class="big" data-split>Vous savez ce qu'il gagne. Ligne par ligne.</p></div>
-    <div class="band rise" data-a="0.81" data-b="1"><p class="kicker late" style="--ks:1">Perfect Stay Conciergerie</p><p class="big" data-split style="margin-top:14px">Votre bien, prêt à recevoir.</p><p class="sub late">Ménage, accueil, annonces et prix. Et un relevé clair chaque mois.</p><a class="btn late" href="#estimation">Recevoir mon estimation gratuite</a></div>
+    <div class="band rise wide" data-a="0.81" data-b="1"><p class="kicker late" style="--ks:1">Votre situation</p><p class="big q" data-split style="margin-top:14px">Comment exploitez-vous votre logement aujourd'hui ?</p>
+      <div class="choix late" role="group" aria-label="Votre situation">
+        <button type="button" data-profil="longue"><b>Location longue durée</b><span>Mon logement est loué à l'année.</span></button>
+        <button type="button" data-profil="courte"><b>Location courte durée</b><span>Je le loue déjà sur Airbnb ou Booking.</span></button>
+        <button type="button" data-profil="vacant"><b>Logement non meublé et vacant</b><span>Il est vide, ou pas encore meublé.</span></button>
+      </div>
+    </div>
 
     <div class="static">
       <p class="kicker">Perfect Stay Conciergerie</p>
-      <h1 style="margin-top:12px">Votre bien, prêt à recevoir.</h1>
-      <p>Perfect Stay gère votre logement de A à Z, et vous montre chaque dirham.</p>
-      <a class="btn" href="#estimation">Recevoir mon estimation gratuite</a>
+      <h1 style="margin-top:12px">Votre appartement mérite une meilleure stratégie.</h1>
+      <p>Perfect Stay gère votre bien de A à Z, et vous montre chaque dirham.</p>
+      <a class="btn" href="#question">Commencer</a>
     </div>
 
     <svg class="ring" viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="126" style="stroke-dashoffset:var(--ld,126)"/></svg>
@@ -245,19 +293,52 @@ footer p{color:var(--text-secondary);font-size:.86rem}
   </div>
 </header>
 
-<section class="constat">
+<section class="question" id="question">
+  <div class="wrap">
+    <p class="kicker">Votre situation</p>
+    <h2>Comment exploitez-vous votre logement aujourd'hui ?</h2>
+    <div class="choix" role="group" aria-label="Votre situation">
+      <button type="button" data-profil="longue"><b>Location longue durée</b><span>Mon logement est loué à l'année.</span></button>
+      <button type="button" data-profil="courte"><b>Location courte durée</b><span>Je le loue déjà sur Airbnb ou Booking.</span></button>
+      <button type="button" data-profil="vacant"><b>Logement non meublé et vacant</b><span>Il est vide, ou pas encore meublé.</span></button>
+    </div>
+  </div>
+</section>
+
+<section class="situation" id="situation" hidden>
   <div class="wrap">
     <svg class="stripes" viewBox="0 0 400 70" preserveAspectRatio="xMinYMid meet" aria-hidden="true"><line x1="10" y1="66" x2="46" y2="4" pathLength="100"/><line x1="34" y1="66" x2="70" y2="4" pathLength="100"/><line x1="58" y1="66" x2="94" y2="4" pathLength="100"/><line x1="82" y1="66" x2="118" y2="4" pathLength="100"/></svg>
-    <div class="reveal">
-      <p class="kicker">Ce que vivent les propriétaires</p>
-      <h2>Louer devrait être simple.</h2>
+    <div class="switch"><p class="kicker" id="sitLabel"></p><button type="button" id="changer">Changer de situation</button></div>
+
+    <div class="parcours" data-p="longue">
+      <h2>Le bail classique a un coût qu'on ne voit pas.</h2>
+      <ol class="pbs">
+        <li><span>01</span><div><h3>Chaque mois sans locataire est un manque à gagner.</h3><p>Un appartement vacant continue de générer des charges, sans produire de revenus.</p></div></li>
+        <li><span>02</span><div><h3>Un loyer prévu n'est pas toujours un loyer encaissé.</h3><p>Les impayés fragilisent la rentabilité de votre investissement.</p></div></li>
+        <li><span>03</span><div><h3>Votre appartement exploite-t-il vraiment son potentiel ?</h3><p>Selon son emplacement et la demande, une autre façon de louer peut rapporter plus.</p></div></li>
+      </ol>
+      <div class="solution"><p class="kicker">La solution Perfect Stay</p><h2>Et si vous repensiez l'exploitation de votre bien ?</h2><ul><li>On étudie le potentiel de votre logement en courte durée.</li><li>On le prépare et on le met en ligne.</li><li>On le gère chaque jour, vous recevez vos revenus et votre relevé.</li></ul><a class="btn" href="#estimation">Découvrir le potentiel de mon bien</a></div>
     </div>
-    <ul class="quotes reveal">
-      <li><span>01</span>Vous pensez céder 20 %. Vous en cédez 30.</li>
-      <li><span>02</span>Vous recevez vos versements, sans savoir dans quel état est votre bien.</li>
-      <li><span>03</span>Vous courez après votre conciergerie.</li>
-    </ul>
-    <p class="chute reveal"><span>Chez nous, c'est l'inverse.</span></p>
+
+    <div class="parcours" data-p="courte">
+      <h2>Vous connaissez la courte durée. Et tout le travail qu'elle demande.</h2>
+      <ol class="pbs">
+        <li><span>01</span><div><h3>Votre appartement rapporte. Mais combien de temps vous prend-il ?</h3><p>Questions d'arrivée, ménage, petites pannes : chaque séjour fait sonner votre téléphone.</p></div></li>
+        <li><span>02</span><div><h3>Une réservation n'est que le début du travail.</h3><p>Chaque séjour demande une suite de tâches à faire et à contrôler.</p></div></li>
+        <li><span>03</span><div><h3>Plus vous avez de biens, plus c'est compliqué.</h3><p>Deux, trois appartements : le travail ne s'additionne pas, il se multiplie.</p></div></li>
+      </ol>
+      <div class="solution"><p class="kicker">La solution Perfect Stay</p><h2>Gardez les revenus. Laissez-nous le quotidien.</h2><ul><li>On répond aux voyageurs, du premier message au départ.</li><li>On organise le ménage, le linge et les contrôles.</li><li>Vous suivez tout, sans rien gérer.</li></ul><a class="btn" href="#estimation">Confier la gestion de mon bien</a></div>
+    </div>
+
+    <div class="parcours" data-p="vacant">
+      <h2>Un logement vide coûte chaque mois.</h2>
+      <ol class="pbs">
+        <li><span>01</span><div><h3>Les charges continuent, les revenus n'arrivent pas.</h3><p>Syndic, taxes, entretien : un bien vide se paie quand même.</p></div></li>
+        <li><span>02</span><div><h3>Meubler, c'est un budget et des choix.</h3><p>Sans savoir ce que le logement peut rapporter, difficile de décider quoi acheter.</p></div></li>
+        <li><span>03</span><div><h3>Longue ou courte durée : comment choisir ?</h3><p>Chaque quartier et chaque logement a sa meilleure façon d'être loué.</p></div></li>
+      </ol>
+      <div class="solution"><p class="kicker">La solution Perfect Stay</p><h2>Donnons une stratégie à votre logement.</h2><ul><li>On évalue ce qu'il peut rapporter, avant toute dépense.</li><li>On vous accompagne pour le meubler et le préparer.</li><li>On le met en ligne et on le gère pour vous.</li></ul><a class="btn" href="#estimation">Évaluer mon logement</a></div>
+    </div>
   </div>
 </section>
 
@@ -336,6 +417,7 @@ footer p{color:var(--text-secondary);font-size:.86rem}
       <label>Votre nom<input name="nom" autocomplete="name" required></label>
       <label>Téléphone (WhatsApp)<input name="tel" type="tel" autocomplete="tel" inputmode="tel" placeholder="06 00 00 00 00" required></label>
       <label>Ville du logement<input name="ville" autocomplete="address-level2" required></label>
+      <label>Votre situation<select name="situation" id="fSit"><option value="">Choisir</option><option value="longue">Location longue durée</option><option value="courte">Location courte durée</option><option value="vacant">Logement non meublé et vacant</option></select></label>
       <label>Type de logement<select name="type"><option>Studio</option><option>Appartement 2 pièces</option><option>Appartement 3 pièces et plus</option><option>Villa ou riad</option></select></label>
       <button class="btn" type="submit">Recevoir mon estimation gratuite</button>
       <small id="formMsg">Vos coordonnées servent uniquement à vous rappeler.</small>
@@ -485,9 +567,28 @@ form.addEventListener('submit', e => {
   e.preventDefault();
   const d = new FormData(form), nom = d.get('nom').trim(), tel = d.get('tel').trim(), ville = d.get('ville').trim();
   if (!nom || !ville || tel.replace(/\D/g, '').length < 9) { msg.textContent = 'Merci de remplir votre nom, votre téléphone et la ville.'; msg.style.color = '#f0b8b8'; return; }
-  if (WHATSAPP) window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent('Bonjour Perfect Stay, je souhaite une estimation gratuite.\nNom : ' + nom + '\nTéléphone : ' + tel + '\nVille : ' + ville + '\nLogement : ' + d.get('type')), '_blank', 'noopener');
+  if (WHATSAPP) window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent('Bonjour Perfect Stay, je souhaite une estimation gratuite.\nNom : ' + nom + '\nTéléphone : ' + tel + '\nVille : ' + ville + '\nLogement : ' + d.get('type') + '\nSituation : ' + (LABELS[d.get('situation')] || 'non précisée')), '_blank', 'noopener');
   form.classList.add('sent');
 });
+
+/* le choix de situation */
+const LABELS = { longue: 'Location longue durée', courte: 'Location courte durée', vacant: 'Logement non meublé et vacant' };
+const sit = $('#situation');
+const pio = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); pio.unobserve(e.target); } }), { threshold: 0.3 });
+function choisir(id, go) {
+  sit.hidden = false;
+  $$('.parcours').forEach(el => el.classList.toggle('on', el.dataset.p === id));
+  $$('[data-profil]').forEach(b => b.setAttribute('aria-pressed', b.dataset.profil === id));
+  $('#sitLabel').textContent = LABELS[id];
+  $('#fSit').value = id;
+  $$('.parcours.on .pbs li, .parcours.on .solution').forEach(el => { el.classList.remove('in'); pio.observe(el); });
+  try { sessionStorage.setItem('ps-profil', id); } catch (e) {}
+  drawStripes();
+  if (go) sit.scrollIntoView({ behavior: RM.matches ? 'auto' : 'smooth', block: 'start' });
+}
+$$('[data-profil]').forEach(b => b.addEventListener('click', () => choisir(b.dataset.profil, true)));
+$('#changer').addEventListener('click', () => { const q = $('#question'); if (getComputedStyle(q).display !== 'none') q.scrollIntoView({ behavior: 'smooth' }); else scrollTo({ top: hero.offsetTop + hero.offsetHeight - innerHeight, behavior: 'smooth' }); });
+try { const saved = sessionStorage.getItem('ps-profil'); if (saved && LABELS[saved]) choisir(saved, false); } catch (e) {}
 
 if (RM.matches) pin();
 applyHeroMode(); drawStripes(); requestAnimationFrame(loadRamp);
