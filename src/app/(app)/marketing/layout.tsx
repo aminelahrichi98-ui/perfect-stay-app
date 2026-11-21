@@ -6,12 +6,13 @@ export default async function LayoutMarketing({ children }: { children: React.Re
   await exigerAcces("marketing");
   return (
     <>
-      <PageHeader titre="Marketing" description="Budget publicitaire, coût par lead et calendrier des publications." />
+      <PageHeader titre="Marketing" description="Budget publicitaire, coût par lead, calendrier des publications et publicités Meta." />
       <Onglets
         libelle="Sections du marketing"
         items={[
           { href: "/marketing", label: "Dépenses publicitaires", exact: true },
           { href: "/marketing/publications", label: "Publications" },
+          { href: "/marketing/creative", label: "Creative Intelligence" },
         ]}
       />
       {children}
