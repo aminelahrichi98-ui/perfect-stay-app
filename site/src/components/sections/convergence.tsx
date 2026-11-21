@@ -3,6 +3,7 @@
 /*
   Le moment de convergence : les trois parcours se rejoignent. Trois filets d'or (longue durée,
   courte durée, bien vacant) convergent vers le monogramme, puis la marque se révèle.
+  La section reste sombre dans les deux thèmes : la séquence vidéo de l'arc en est le fond.
   La composition finale reprend l'angle isométrique de la maquette 3D qui suit (raccord de plan).
 */
 import { Monogramme } from "@/components/ui/logo";
@@ -15,14 +16,10 @@ export function Convergence() {
   const [ref, actif] = useVisible<HTMLDivElement>({ seuil: 0.45 });
   const chemins = ["M0 80 C260 80 420 210 600 250", "M0 250 C240 250 400 250 600 250", "M0 420 C260 420 420 290 600 250"];
   return (
-    <section id="perfect-stay" aria-labelledby="titre-convergence" className="relative scroll-mt-16 overflow-hidden bg-charbon">
-      {/* La séquence vidéo est sombre : elle n'est montrée que sur le thème sombre */}
-      <div className="seulement-sombre">
-        <MediaCinema scene="convergence" className="absolute inset-0 opacity-60">
-          <div aria-hidden className="absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_45%,rgb(182_154_112/0.14),transparent_70%)]" />
-        </MediaCinema>
-      </div>
-      <div aria-hidden className="seulement-clair absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_45%,rgb(182_154_112/0.12),transparent_70%)]" />
+    <section id="perfect-stay" aria-labelledby="titre-convergence" className="zone-sombre relative scroll-mt-16 overflow-hidden bg-charbon">
+      <MediaCinema scene="convergence" className="absolute inset-0 opacity-60">
+        <div aria-hidden className="absolute inset-0 bg-[radial-gradient(60%_50%_at_50%_45%,rgb(182_154_112/0.14),transparent_70%)]" />
+      </MediaCinema>
       <div ref={ref} className="relative mx-auto flex min-h-[92svh] max-w-[88rem] flex-col items-center justify-center px-5 py-24 text-center md:px-10">
         <svg viewBox="0 0 1200 500" className="absolute inset-x-0 top-1/2 h-[60%] w-full -translate-y-1/2" aria-hidden preserveAspectRatio="none">
           <g fill="none" stroke="var(--color-or)" strokeWidth="1.2">
