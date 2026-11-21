@@ -22,7 +22,7 @@ export default function PageAPropos() {
   return (
     <Coquille>
       <EntetePage surtitre="Notre expertise" titre="Plus qu'une conciergerie : un expert de la rentabilité immobilière." texte={MARQUE.promesse} />
-      <section aria-labelledby="titre-expertises" className="bg-papier-2 py-20 text-charbon md:py-28">
+      <section aria-labelledby="titre-expertises" className="zone-contraste bg-papier-2 py-20 text-charbon md:py-28">
         <div className="mx-auto max-w-[88rem] px-5 md:px-10">
           <Revele className="max-w-3xl">
             <Surtitre className="text-or-fonce">Ce que nous faisons</Surtitre>

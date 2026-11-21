@@ -9,7 +9,7 @@ function Carte({ e }: { e: EtudeDeCas }) {
   const max = Math.max(e.loyerLongueDuree, e.revenuNetMensuel, 1);
   const ecart = e.revenuNetMensuel - e.loyerLongueDuree;
   return (
-    <article className="flex h-full flex-col rounded-[1.75rem] border border-charbon/15 bg-white/60 p-6 md:p-8">
+    <article className="flex h-full flex-col rounded-[1.75rem] border border-charbon/15 bg-eclat/60 p-6 md:p-8">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="titre text-[1.7rem]">{e.quartier}</p>
         <span className={`rounded-full px-3 py-1 text-[0.72rem] ${e.nature === "reel" ? "bg-or-fonce text-papier" : "border border-charbon/25 text-gris-fonce"}`}>{NATURE[e.nature]}</span>
@@ -58,7 +58,7 @@ function Carte({ e }: { e: EtudeDeCas }) {
 export function Etudes({ complet = false }: { complet?: boolean }) {
   const cas = complet ? ETUDES_DE_CAS : ETUDES_DE_CAS.slice(0, 3);
   return (
-    <section id="etudes" aria-labelledby="titre-etudes" className="scroll-mt-20 bg-papier-2 py-20 text-charbon md:py-28">
+    <section id="etudes" aria-labelledby="titre-etudes" className="zone-contraste scroll-mt-20 bg-papier-2 py-20 text-charbon md:py-28">
       <div className="mx-auto max-w-[88rem] px-5 md:px-10">
         <Revele className="max-w-3xl">
           <Surtitre className="text-or-fonce">Études de cas</Surtitre>

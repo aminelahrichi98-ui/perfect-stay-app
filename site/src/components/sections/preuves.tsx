@@ -16,7 +16,7 @@ const EMPLACEMENTS = [
 
 export function Preuves() {
   return (
-    <section aria-labelledby="titre-preuves" className="bg-papier-2 py-20 text-charbon md:py-24">
+    <section aria-labelledby="titre-preuves" className="zone-contraste bg-papier-2 py-20 text-charbon md:py-24">
       <div className="mx-auto max-w-[88rem] px-5 md:px-10">
         <Revele className="max-w-2xl">
           <Surtitre className="text-or-fonce">Preuves</Surtitre>

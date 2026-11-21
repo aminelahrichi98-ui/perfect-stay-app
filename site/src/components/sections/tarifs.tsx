@@ -21,7 +21,7 @@ export function Tarifs() {
   const { ouvrirTunnel } = useExperience();
   return (
     <>
-      <section aria-labelledby="titre-prestations" className="bg-papier-2 py-20 text-charbon md:py-24">
+      <section aria-labelledby="titre-prestations" className="zone-contraste bg-papier-2 py-20 text-charbon md:py-24">
         <div className="mx-auto max-w-[88rem] px-5 md:px-10">
           <Revele>
             <Surtitre className="text-or-fonce">Nos prestations</Surtitre>
@@ -31,7 +31,7 @@ export function Tarifs() {
           </Revele>
           <div className="mt-10 grid gap-4 md:grid-cols-2">
             {TARIFS.commissions.map((c, i) => (
-              <Revele key={c.bien} delai={i * 100} className="rounded-[1.75rem] border border-charbon/15 bg-white/60 p-8 md:p-10">
+              <Revele key={c.bien} delai={i * 100} className="rounded-[1.75rem] border border-charbon/15 bg-eclat/60 p-8 md:p-10">
                 <p className="text-[0.95rem] text-gris-fonce">{c.bien}</p>
                 <p className="titre mt-3 text-[4rem] leading-none text-or-fonce md:text-[5rem]">{c.taux}</p>
                 <p className="mt-4 text-[0.92rem] text-gris-fonce">des revenus locatifs, après frais de plateforme</p>
@@ -77,7 +77,7 @@ export function Tarifs() {
         </div>
       </section>
 
-      <section aria-labelledby="titre-valeur" className="bg-papier py-20 text-charbon md:py-28">
+      <section aria-labelledby="titre-valeur" className="zone-contraste bg-papier py-20 text-charbon md:py-28">
         <div className="mx-auto grid max-w-[88rem] gap-12 px-5 md:px-10 lg:grid-cols-2">
           <Revele>
             <Surtitre className="text-or-fonce">Comprendre</Surtitre>

@@ -98,7 +98,7 @@ export function SectionAppartement() {
                 setGroupe(g.id);
                 setSelection(null);
               }}
-              className={cn("h-11 shrink-0 rounded-full border px-5 text-[0.88rem] transition-colors", groupe === g.id ? "border-or bg-bouton text-white" : "border-white/15 text-papier/70 hover:border-or/60 hover:text-papier")}
+              className={cn("h-11 shrink-0 rounded-full border px-5 text-[0.88rem] transition-colors", groupe === g.id ? "border-or bg-bouton text-sur-accent" : "border-white/15 text-papier/70 hover:border-or/60 hover:text-papier")}
             >
               {g.label}
             </button>
@@ -130,7 +130,7 @@ export function SectionAppartement() {
                       style={{ visibility: "hidden" }}
                       className={cn(
                         "group pointer-events-auto absolute top-0 left-0 grid h-10 w-10 place-items-center rounded-full border text-[0.78rem] font-semibold transition-[background-color,color,box-shadow] duration-300",
-                        selection === s.id ? "border-papier bg-bouton text-white shadow-[0_0_0_6px_rgb(185_138_172/0.25)]" : "border-or/80 bg-charbon/85 text-or backdrop-blur hover:bg-or hover:text-charbon",
+                        selection === s.id ? "border-papier bg-bouton text-sur-accent shadow-[0_0_0_6px_rgb(185_138_172/0.25)]" : "border-or/80 bg-charbon/85 text-or backdrop-blur hover:bg-or hover:text-charbon",
                       )}
                     >
                       {selection !== s.id ? <span className="absolute inset-0 rounded-full [animation:pulse-or_2.2s_ease-out_infinite]" /> : null}
@@ -199,7 +199,7 @@ export function SectionAppartement() {
                     aria-pressed={selection === s.id}
                     className={cn("flex min-h-11 w-full items-center gap-3 rounded-xl px-3 text-left text-[0.9rem] transition-colors", selection === s.id ? "bg-white/[0.06] text-papier" : "text-papier/65 hover:bg-white/[0.04] hover:text-papier")}
                   >
-                    <span className={cn("grid h-6 w-6 shrink-0 place-items-center rounded-full border text-[0.7rem] font-semibold", selection === s.id ? "border-or bg-bouton text-white" : "border-or/50 text-or")}>{i + 1}</span>
+                    <span className={cn("grid h-6 w-6 shrink-0 place-items-center rounded-full border text-[0.7rem] font-semibold", selection === s.id ? "border-or bg-bouton text-sur-accent" : "border-or/50 text-or")}>{i + 1}</span>
                     {s.titre}
                   </button>
                 </li>

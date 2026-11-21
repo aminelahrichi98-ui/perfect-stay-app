@@ -5,7 +5,6 @@
   L'accroche est visible dès l'arrivée, sans défiler. Sur téléphone, tablette en portrait et
   « mouvement réduit », on sert une image fixe composée : la vidéo n'est alors jamais téléchargée.
 */
-import Link from "next/link";
 import { ArrowDown } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { bouton } from "@/components/ui/bouton";
@@ -176,7 +175,7 @@ export function Hero() {
   const bande = "absolute top-1/2 left-5 w-[min(38rem,46vw)] -translate-y-1/2 md:left-12 lg:left-20";
 
   return (
-    <section ref={section} id="haut" aria-labelledby="titre-hero" className="relative" style={{ height: scrub ? "380vh" : undefined }}>
+    <section ref={section} id="haut" aria-labelledby="titre-hero" className="zone-sombre relative" style={{ height: scrub ? "380vh" : undefined }}>
       <div className={scrub ? "sticky top-0 h-[100svh] overflow-hidden bg-charbon" : "relative flex min-h-[100svh] flex-col justify-end overflow-hidden bg-charbon"}>
         <div aria-hidden className="absolute inset-0 bg-cover bg-[position:78%_center] md:bg-center" style={{ backgroundImage: `url(${scrub ? POSTER : FIXE})` }} />
         {scrub ? (
@@ -209,9 +208,9 @@ export function Hero() {
               >
                 {CTA.principal}
               </button>
-              <Link href="/methode" onClick={() => track("CtaClicked", { cta: "hero-secondaire" })} className={bouton("contour", "lg")}>
+              <a href="#programme" onClick={() => track("CtaClicked", { cta: "hero-secondaire" })} className={bouton("contour", "lg")}>
                 {CTA.secondaire}
-              </Link>
+              </a>
             </div>
           </div>
         </div>

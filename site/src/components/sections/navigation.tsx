@@ -2,6 +2,7 @@
 
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { bouton } from "@/components/ui/bouton";
 import { Logo } from "@/components/ui/logo";
@@ -13,6 +14,8 @@ export function Navigation() {
   const { ouvrirTunnel } = useExperience();
   const [defile, setDefile] = useState(false);
   const [menu, setMenu] = useState(false);
+  // En haut de l'accueil, la barre est transparente sur la vidéo : elle garde des textes clairs
+  const surVideo = usePathname() === "/" && !defile && !menu;
 
   useEffect(() => {
     const surDefilement = () => setDefile(window.scrollY > 40);
@@ -32,6 +35,7 @@ export function Navigation() {
     <header
       className={cn(
         "fixed inset-x-0 top-0 z-40 transition-[background-color,border-color,backdrop-filter] duration-500",
+        surVideo && "zone-sombre",
         defile || menu ? "border-b border-white/[0.06] bg-charbon/80 backdrop-blur-xl" : "border-b border-transparent",
       )}
     >
@@ -41,7 +45,7 @@ export function Navigation() {
         </Link>
         <nav aria-label="Sections" className="ml-auto hidden lg:block">
           <ul className="flex items-center gap-7 text-[0.88rem] text-papier/70">
-            {NAVIGATION.filter((l) => l.href !== "/audit").map((l) => (
+            {NAVIGATION.map((l) => (
               <li key={l.href}>
                 <Link href={l.href} className="transition-colors hover:text-papier">
                   {l.label}

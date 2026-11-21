@@ -337,7 +337,7 @@ export function VisuelPreparation({ actif }: { actif: boolean }) {
         <ul className="w-full max-w-xs space-y-3">
           {etapes.map((e, i) => (
             <li key={e} className="flex items-center gap-3 rounded-xl border border-white/[0.07] bg-charbon/70 px-4 py-3">
-              <span className={cn("grid h-6 w-6 place-items-center rounded-full border transition-all duration-500", etape > i ? "border-or bg-bouton text-white" : "border-white/20")}>
+              <span className={cn("grid h-6 w-6 place-items-center rounded-full border transition-all duration-500", etape > i ? "border-or bg-bouton text-sur-accent" : "border-white/20")}>
                 {etape > i ? <Check className="h-3.5 w-3.5" /> : null}
               </span>
               <span className={cn("text-[0.88rem] transition-colors", etape > i ? "text-papier" : "text-papier/55")}>{e}</span>

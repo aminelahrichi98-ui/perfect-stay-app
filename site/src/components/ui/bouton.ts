@@ -6,8 +6,8 @@ const BASE =
   "group inline-flex select-none items-center justify-center gap-2.5 rounded-full font-medium whitespace-nowrap transition-[background-color,color,border-color,transform,box-shadow] duration-300 ease-[var(--ease-cine)] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50";
 
 const VARIANTES: Record<Variante, string> = {
-  or: "bg-bouton text-white hover:bg-bouton-clair shadow-[0_10px_30px_-12px_rgb(122_62_108/0.7)]",
-  clair: "bg-papier text-charbon hover:bg-white",
+  or: "bg-bouton text-sur-accent hover:bg-bouton-clair shadow-[0_10px_30px_-12px_rgb(122_62_108/0.7)]",
+  clair: "bg-papier text-charbon hover:bg-papier-2",
   contour: "border border-papier/25 text-papier hover:border-or hover:text-or-clair",
   lien: "text-papier/80 underline decoration-papier/30 underline-offset-[6px] hover:text-papier hover:decoration-or",
 };

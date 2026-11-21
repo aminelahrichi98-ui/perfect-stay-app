@@ -29,11 +29,12 @@ export const CTA = {
 };
 
 export const NAVIGATION = [
-  { href: "/methode", label: "Notre méthode" },
-  { href: "/etudes-de-cas", label: "Études de cas" },
+  { href: "/#parcours", label: "Votre situation" },
+  { href: "/#programme", label: "Notre méthode" },
+  { href: "/#application", label: "L'application" },
+  { href: "/#audit", label: "Revenue Audit" },
   { href: "/tarifs", label: "Tarifs" },
-  { href: "/a-propos", label: "Notre expertise" },
-  { href: "/audit", label: "Revenue Audit" },
+  { href: "/#faq", label: "Questions" },
 ];
 
 export const HERO = {
@@ -44,75 +45,85 @@ export const HERO = {
 };
 
 export const PROFILS: Record<Profil, { titre: string; texte: string; court: string }> = {
-  longue: { titre: "Mon appartement est loué en longue durée", texte: "Vous louez actuellement votre bien à un locataire avec un bail classique.", court: "Longue durée" },
-  vacant: { titre: "Mon appartement est actuellement vide", texte: "Votre bien est inoccupé ou vous envisagez de commencer à le louer.", court: "Vacant" },
-  courte: { titre: "Je loue déjà sur Airbnb ou Booking", texte: "Votre logement est déjà exploité en courte durée, seul ou avec une conciergerie.", court: "Courte durée" },
+  longue: { titre: "Location longue durée", texte: "Je loue avec un bail classique ou cherche un locataire.", court: "Longue durée" },
+  courte: { titre: "Location courte durée", texte: "Je loue sur Airbnb, Booking ou d'autres plateformes.", court: "Courte durée" },
+  vacant: { titre: "Mon logement est vacant", texte: "Je n'ai pas encore meublé mon logement ou je ne trouve pas de locataire.", court: "Vacant" },
 };
 
 export type Scene = { id: string; surtitre: string; titre: string; texte: string };
 
-export type Probleme = { titre: string; texte: string };
-export type ParcoursProfil = {
-  usp: string;
-  sousTitre: string;
-  titreProblemes: string;
-  problemes: Probleme[];
-  solution: { titre: string; intro?: string; points: string[]; ordonne?: boolean; mention?: string };
-  cta: string;
-};
-
-export const PARCOURS: Record<Profil, ParcoursProfil> = {
+export const PARCOURS: Record<Profil, { intro: string; scenes: Scene[]; conclusion: { titre: string; cta: string } }> = {
   longue: {
-    usp: "Vous connaissez le loyer de votre appartement. Mais connaissez-vous son véritable potentiel locatif ?",
-    sousTitre: "Découvrez si la location courte durée pourrait vous permettre d'améliorer la rentabilité de votre bien, sans avoir à gérer les voyageurs et les réservations.",
-    titreProblemes: "Votre investissement immobilier pourrait-il travailler davantage pour vous ?",
-    problemes: [
-      { titre: "Vacance locative", texte: "Chaque mois sans locataire représente un revenu potentiel perdu, alors que les charges continuent." },
-      { titre: "Loyers impayés", texte: "Un seul locataire qui ne paie plus peut fragiliser les revenus de votre investissement pendant plusieurs mois." },
-      { titre: "Dégradations", texte: "Certains incidents peuvent entraîner des réparations coûteuses, des litiges et une immobilisation prolongée du logement." },
-      { titre: "Rentabilité limitée", texte: "Votre loyer est généralement fixé pour une période prolongée, alors que la demande et les prix du marché évoluent." },
+    intro: "Le bail classique, vu sous l'angle de l'investisseur.",
+    scenes: [
+      {
+        id: "vacance",
+        surtitre: "La vacance",
+        titre: "Chaque mois sans locataire est un manque à gagner.",
+        texte: "Un appartement vacant continue de générer des charges, sans produire de revenus locatifs.",
+      },
+      {
+        id: "impaye",
+        surtitre: "L'impayé",
+        titre: "Un loyer prévu n'est pas toujours un loyer encaissé.",
+        texte: "Les impayés peuvent fragiliser la rentabilité et la prévisibilité de votre investissement.",
+      },
+      {
+        id: "rendement",
+        surtitre: "Le rendement",
+        titre: "Votre appartement exploite-t-il réellement son potentiel ?",
+        texte: "Selon son emplacement, ses caractéristiques et la demande, une autre stratégie locative peut être intéressante.",
+      },
     ],
-    solution: {
-      titre: "Et si votre appartement pouvait générer davantage de revenus grâce à une autre stratégie locative ?",
-      intro: "Le Perfect Stay Investor Program compare les deux stratégies, chiffres à l'appui, avant toute décision.",
-      points: ["Analyse comparative longue durée / courte durée", "Étude de la demande locative", "Optimisation du positionnement du bien", "Stratégie tarifaire dynamique", "Gestion complète de l'exploitation", "Reporting transparent"],
-      mention: "La courte durée n'est pas toujours la stratégie la plus rentable : l'audit vous le dit pour votre bien.",
-    },
-    cta: "Comparer mes revenus en longue durée et courte durée",
-  },
-  vacant: {
-    usp: "Chaque mois où votre appartement reste vide, son potentiel de revenus reste inexploité.",
-    sousTitre: "Transformez votre appartement inutilisé en investissement locatif opérationnel grâce à un accompagnement complet, de sa préparation à sa gestion quotidienne.",
-    titreProblemes: "Un appartement vide continue de coûter.",
-    problemes: [
-      { titre: "Revenus inexistants", texte: "Votre appartement ne génère aucun revenu pendant qu'il reste inoccupé." },
-      { titre: "Charges permanentes", texte: "Charges de copropriété, entretien et autres dépenses continuent même lorsque votre logement est vide." },
-      { titre: "Manque de temps", texte: "Préparer un appartement, publier des annonces et gérer des voyageurs demande du temps et de l'organisation." },
-      { titre: "Manque d'expertise", texte: "Sans connaissance du marché, du pricing et des attentes des voyageurs, il est difficile d'exploiter pleinement le potentiel du logement." },
-    ],
-    solution: {
-      titre: "De votre appartement vide à un investissement locatif prêt à accueillir ses premiers voyageurs.",
-      points: ["Analyse du potentiel locatif", "Audit du logement", "Recommandations d'ameublement et de design", "Préparation du logement", "Photographie professionnelle", "Création des annonces", "Stratégie tarifaire", "Mise en ligne et ouverture des réservations", "Gestion complète"],
-      ordonne: true,
-    },
-    cta: "Découvrir le potentiel de mon appartement vide",
+    conclusion: { titre: "Et si vous repensiez l'exploitation de votre patrimoine ?", cta: "Découvrir le potentiel de mon bien" },
   },
   courte: {
-    usp: "Votre Airbnb vous rapporte de l'argent. Mais combien vous coûte-t-il en temps et en revenus manqués ?",
-    sousTitre: "Nous analysons vos tarifs, votre taux d'occupation, votre annonce et votre positionnement pour identifier les opportunités d'amélioration de votre rentabilité.",
-    titreProblemes: "Ce qui freine la performance d'une annonce.",
-    problemes: [
-      { titre: "Pricing inefficace", texte: "Un tarif trop élevé peut réduire les réservations. Un tarif trop faible peut vous faire perdre des revenus." },
-      { titre: "Mauvaise connaissance du marché", texte: "La saisonnalité, les événements, les périodes de forte demande et la concurrence influencent directement les performances." },
-      { titre: "Annonce peu attractive", texte: "Des photographies moyennes, un design peu différenciant ou une annonce mal optimisée peuvent réduire votre attractivité." },
-      { titre: "Gestion chronophage", texte: "Messages, arrivées, départs, ménage, maintenance et incidents demandent une disponibilité permanente." },
-      { titre: "Expérience voyageur insuffisante", texte: "Une mauvaise expérience peut affecter les avis, la visibilité et les réservations futures." },
+    intro: "Vous connaissez déjà la courte durée. Et sa charge de travail.",
+    scenes: [
+      {
+        id: "messages",
+        surtitre: "Les voyageurs",
+        titre: "Votre appartement génère des revenus. Mais combien de temps vous demande-t-il ?",
+        texte: "Questions d'arrivée, demandes de check-in, ménage, petites pannes : chaque séjour sollicite votre téléphone.",
+      },
+      {
+        id: "operations",
+        surtitre: "L'exploitation",
+        titre: "Une réservation n'est que le début du travail.",
+        texte: "Chaque séjour implique une succession d'opérations qui doivent être exécutées et contrôlées.",
+      },
+      {
+        id: "portefeuille",
+        surtitre: "Le portefeuille",
+        titre: "Plus votre portefeuille grandit, plus la gestion devient complexe.",
+        texte: "Deux, trois appartements : les opérations ne s'additionnent pas, elles se multiplient.",
+      },
     ],
-    solution: {
-      titre: "Votre appartement est déjà sur Airbnb. Passons maintenant à l'optimisation de sa performance.",
-      points: ["Audit des performances existantes", "Benchmark concurrentiel", "Optimisation du prix moyen par nuit", "Analyse du taux d'occupation", "Optimisation des annonces OTA", "Recommandations de design et de photographie", "Gestion de l'expérience voyageur", "Automatisation et gestion opérationnelle", "Reporting mensuel"],
-    },
-    cta: "Auditer les performances de mon Airbnb",
+    conclusion: { titre: "Passez de la gestion quotidienne au pilotage de votre investissement.", cta: "Découvrir notre solution de gestion" },
+  },
+  vacant: {
+    intro: "Un bien disponible est une décision à prendre, pas un problème.",
+    scenes: [
+      {
+        id: "disponible",
+        surtitre: "Aujourd'hui",
+        titre: "Votre appartement est disponible. Donnons-lui une stratégie.",
+        texte: "Vacant aujourd'hui ou libéré bientôt : c'est le meilleur moment pour choisir la façon dont il sera exploité.",
+      },
+      {
+        id: "strategies",
+        surtitre: "Le choix",
+        titre: "Longue ou courte durée : comparez avant de décider.",
+        texte: "Nous évaluons le potentiel locatif de votre bien selon son emplacement, sa configuration et la demande du quartier.",
+      },
+      {
+        id: "preparation",
+        surtitre: "La suite",
+        titre: "Une préparation soignée, puis une mise en ligne maîtrisée.",
+        texte: "Ameublement, photos, annonce, procédures : nous préparons votre bien avant le premier voyageur.",
+      },
+    ],
+    conclusion: { titre: "Donnez à votre bien une stratégie d'exploitation.", cta: "Évaluer mon appartement" },
   },
 };
 

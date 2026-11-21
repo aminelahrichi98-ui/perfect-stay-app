@@ -14,7 +14,7 @@ export function Programme() {
   const [actif, setActif] = useState(0);
   const pilier = PROGRAMME.piliers[actif];
   return (
-    <section id="programme" aria-labelledby="titre-programme" className="scroll-mt-20 bg-papier-2 py-20 text-charbon md:py-28">
+    <section id="programme" aria-labelledby="titre-programme" className="zone-contraste scroll-mt-20 bg-papier-2 py-20 text-charbon md:py-28">
       <div className="mx-auto max-w-[88rem] px-5 md:px-10">
         <Revele className="max-w-3xl">
           <Surtitre className="text-or-fonce">{PROGRAMME.surtitre}</Surtitre>
@@ -38,7 +38,7 @@ export function Programme() {
                 onClick={() => setActif(i)}
                 className={cn(
                   "relative flex flex-col rounded-[1.5rem] border p-6 text-left transition-[background-color,border-color,color,transform,box-shadow] duration-500 ease-[var(--ease-cine)]",
-                  on ? "-translate-y-1 border-or-fonce bg-or-fonce text-papier shadow-[0_30px_60px_-30px_rgb(35_12_31/0.8)]" : "border-charbon/15 bg-white/50 hover:-translate-y-1 hover:border-or-fonce/60",
+                  on ? "-translate-y-1 border-or-fonce bg-or-fonce text-papier shadow-[0_30px_60px_-30px_rgb(35_12_31/0.8)]" : "border-charbon/15 bg-eclat/50 hover:-translate-y-1 hover:border-or-fonce/60",
                 )}
               >
                 <span className="flex items-center justify-between">
@@ -52,7 +52,7 @@ export function Programme() {
           })}
         </div>
 
-        <div id="panneau-pilier" role="tabpanel" aria-labelledby={`onglet-${pilier.id}`} key={pilier.id} className="mt-4 grid gap-8 rounded-[1.75rem] border border-charbon/15 bg-white/60 p-7 [animation:entree-bas_0.7s_var(--ease-cine)_both] md:grid-cols-2 md:p-10">
+        <div id="panneau-pilier" role="tabpanel" aria-labelledby={`onglet-${pilier.id}`} key={pilier.id} className="mt-4 grid gap-8 rounded-[1.75rem] border border-charbon/15 bg-eclat/60 p-7 [animation:entree-bas_0.7s_var(--ease-cine)_both] md:grid-cols-2 md:p-10">
           <div>
             <p className="titre text-[1.9rem] md:text-[2.3rem]">{pilier.nom}</p>
             <p className="mt-4 max-w-md text-[1.02rem] leading-relaxed text-gris-fonce">{pilier.texte}</p>
