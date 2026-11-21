@@ -8,8 +8,8 @@ export type Profil = "longue" | "courte" | "vacant";
 
 export const MARQUE = {
   nom: "Perfect Stay",
-  signature: "La location courte durée, version investisseur.",
-  promesse: "Vous restez investisseur. Nous pilotons l'exploitation.",
+  signature: "Optimisez vos revenus. Nous nous occupons du reste.",
+  promesse: "Votre appartement a un potentiel de revenus. Nous savons comment l'exploiter.",
   ville: "Casablanca",
   villesAVenir: ["Marrakech", "Rabat"],
 };
@@ -22,29 +22,32 @@ export const CONTACT = {
 };
 
 export const CTA = {
-  principal: "Estimer le potentiel de mon appartement",
-  secondaire: "Découvrir notre gestion",
+  principal: "Découvrir le potentiel de mon appartement",
+  secondaire: "Comment fonctionne Perfect Stay ?",
+  audit: "Recevoir mon audit de rentabilité offert",
+  court: "Mon audit offert",
 };
 
 export const NAVIGATION = [
-  { href: "#parcours", label: "Votre situation" },
-  { href: "#appartement", label: "Notre gestion" },
-  { href: "#application", label: "L'application" },
-  { href: "#methode", label: "Méthode" },
-  { href: "#faq", label: "Questions" },
+  { href: "/#parcours", label: "Votre situation" },
+  { href: "/#programme", label: "Notre méthode" },
+  { href: "/#application", label: "L'application" },
+  { href: "/#audit", label: "Revenue Audit" },
+  { href: "/tarifs", label: "Tarifs" },
+  { href: "/#faq", label: "Questions" },
 ];
 
 export const HERO = {
-  surtitre: "Gestion locative courte durée · Casablanca",
-  titre: "Votre appartement mérite une meilleure stratégie.",
-  texte: "Optimisez les revenus de votre bien grâce à une gestion courte durée professionnelle, pilotée par la technologie.",
-  question: "Comment exploitez-vous votre appartement aujourd'hui ?",
+  surtitre: "Location courte durée · Casablanca",
+  titre: "Votre appartement vous rapporte-t-il vraiment tout ce qu'il pourrait ?",
+  texte: "Découvrez le véritable potentiel locatif de votre bien à Casablanca grâce à notre expertise en location courte durée, optimisation des revenus et gestion immobilière.",
+  question: "Quelle est la situation actuelle de votre appartement ?",
 };
 
 export const PROFILS: Record<Profil, { titre: string; texte: string; court: string }> = {
   longue: { titre: "Location longue durée", texte: "Je loue avec un bail classique ou cherche un locataire.", court: "Longue durée" },
   courte: { titre: "Location courte durée", texte: "Je loue sur Airbnb, Booking ou d'autres plateformes.", court: "Courte durée" },
-  vacant: { titre: "Appartement vacant", texte: "Mon appartement est vacant ou bientôt disponible.", court: "Vacant" },
+  vacant: { titre: "Mon logement est vacant", texte: "Je n'ai pas encore meublé mon logement ou je ne trouve pas de locataire.", court: "Vacant" },
 };
 
 export type Scene = { id: string; surtitre: string; titre: string; texte: string };
@@ -123,6 +126,75 @@ export const PARCOURS: Record<Profil, { intro: string; scenes: Scene[]; conclusi
     conclusion: { titre: "Donnez à votre bien une stratégie d'exploitation.", cta: "Évaluer mon appartement" },
   },
 };
+
+export const PROGRAMME = {
+  surtitre: "Perfect Stay Investor Program",
+  titre: "Une méthode complète pour exploiter le potentiel de votre investissement immobilier.",
+  piliers: [
+    { id: "audit", nom: "Revenue Audit", accroche: "Savoir avant de décider.", texte: "Analyse du bien, de son marché, de son potentiel locatif et de ses perspectives de revenus.", details: ["Étude du quartier et de la demande", "Potentiel de chiffre d'affaires et d'occupation", "Comparaison avec la longue durée lorsque pertinente", "Estimation du revenu net propriétaire"] },
+    { id: "upgrade", nom: "Property Upgrade", accroche: "Un logement qui donne envie de réserver.", texte: "Valorisation du logement : design d'intérieur, équipements, décoration, photographies et optimisation de la présentation.", details: ["Recommandations de design et d'ameublement", "Équipements attendus par les voyageurs", "Photographie professionnelle", "Présentation de l'annonce"] },
+    { id: "optimisation", nom: "Revenue Optimization", accroche: "Le bon prix, chaque nuit.", texte: "Pricing dynamique, optimisation des annonces, stratégie de distribution et suivi des indicateurs de performance.", details: ["Pricing dynamique selon saison et événements", "Optimisation des annonces Airbnb et Booking", "Stratégie de distribution", "Suivi du prix moyen et de l'occupation"] },
+    { id: "gestion", nom: "Performance Management", accroche: "L'exploitation, sans vous.", texte: "Gestion des voyageurs, ménage, maintenance, contrôle qualité et rapports propriétaires.", details: ["Sélection et accueil des voyageurs", "Ménage professionnel et contrôles qualité", "Maintenance coordonnée", "Rapport propriétaire mensuel"] },
+  ],
+};
+
+export const AUDIT = {
+  nom: "Perfect Stay Revenue Audit",
+  titre: "Combien votre appartement pourrait-il réellement vous rapporter ?",
+  texte: "Recevez une analyse personnalisée du potentiel locatif de votre appartement à Casablanca, réalisée par notre équipe.",
+  contenu: [
+    "Le potentiel de chiffre d'affaires en courte durée",
+    "Une estimation du taux d'occupation",
+    "Le prix moyen par nuit envisageable",
+    "Une comparaison avec la location longue durée lorsque pertinente",
+    "Une estimation des charges d'exploitation",
+    "Une estimation du revenu net propriétaire",
+    "Les opportunités de valorisation de votre appartement",
+    "Les recommandations pour améliorer votre positionnement sur Airbnb et Booking",
+  ],
+  /** L'audit est réellement facturé 500 MAD (confirmé par Perfect Stay) : le prix barré est légitime. */
+  prixHabituel: 500,
+  prixActuel: 0,
+  description: "Une analyse personnalisée pour comprendre le potentiel locatif de votre appartement et identifier les opportunités d'amélioration de sa rentabilité.",
+};
+
+/** Tarifs confirmés par Perfect Stay. Ne rien ajouter ici qui n'ait été validé. */
+export const TARIFS = {
+  commissions: [
+    { bien: "Appartements", taux: "20 % HT" },
+    { bien: "Villas et riads", taux: "15 % HT" },
+  ],
+  base: "La commission est calculée sur les revenus locatifs après déduction des frais de plateforme (Airbnb, Booking).",
+  /** Postes non encore chiffrés publiquement : présentés tels quels, sans montant inventé. */
+  autresPostes: [
+    { titre: "Frais de ménage", texte: "Selon le logement, ils sont réglés par le voyageur à chaque séjour. Leur montant et leur affectation sont fixés avec vous et figurent sur votre relevé." },
+    { titre: "Préparation et mise en service", texte: "Ameublement, équipements, photos : les besoins sont chiffrés dans votre audit, avant tout engagement." },
+    { titre: "Maintenance et prestations complémentaires", texte: "Les interventions sont réalisées avec votre accord et détaillées ligne par ligne sur votre relevé." },
+  ],
+};
+
+/*
+  Études de cas RÉELLES. Laisser le tableau vide tant qu'aucune donnée validée n'est disponible :
+  le site affiche alors un état d'attente, sans aucun chiffre. `nature` distingue un résultat
+  observé d'une estimation ou d'une projection.
+*/
+export type EtudeDeCas = {
+  id: string;
+  quartier: string;
+  typologie: string;
+  surface: number;
+  chambres: number;
+  periode: string;
+  nature: "reel" | "estimation" | "projection";
+  loyerLongueDuree: number; // MAD / mois, référence
+  chiffreAffairesMensuel: number; // MAD / mois, courte durée
+  tauxOccupation: number; // %
+  adr: number; // MAD / nuit
+  chargesMensuelles: number; // MAD / mois
+  revenuNetMensuel: number; // MAD / mois
+  commentaire?: string;
+};
+export const ETUDES_DE_CAS: EtudeDeCas[] = [];
 
 export const CONVERGENCE = {
   titre: "Perfect Stay.",
@@ -243,7 +315,7 @@ export const METHODE = [
 export const OFFRE = {
   titre: "Confiez-nous votre appartement. Gardez le contrôle.",
   offre: "Votre premier mois de gestion offert pour tout nouveau mandat éligible.",
-  cta: "Estimer mon potentiel locatif",
+  cta: "Recevoir mon audit de rentabilité offert",
   /** Conditions d'éligibilité : texte à valider par Perfect Stay avant publication. */
   conditions: "",
 };
@@ -296,6 +368,6 @@ export const FAQ: Question[] = [
 ];
 
 export const PREUVES = {
-  titre: "La preuve par l'exploitation.",
+  titre: "La preuve par les chiffres.",
   texte: "Témoignages vérifiés, études de cas et exemples de rapports : cette section accueillera uniquement des éléments réels et validés.",
 };

@@ -4,7 +4,7 @@ import { METHODE } from "@/lib/content";
 
 export function Methode() {
   return (
-    <section id="methode" aria-labelledby="titre-methode" className="scroll-mt-20 bg-papier py-20 text-charbon md:py-28">
+    <section id="methode" aria-labelledby="titre-methode" className="zone-contraste scroll-mt-20 bg-papier py-20 text-charbon md:py-28">
       <div className="mx-auto max-w-[88rem] px-5 md:px-10">
         <div className="grid gap-8 md:grid-cols-12">
           <Revele className="md:col-span-5">

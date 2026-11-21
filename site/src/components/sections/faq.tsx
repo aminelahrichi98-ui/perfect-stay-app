@@ -5,7 +5,7 @@ import { FAQ } from "@/lib/content";
 
 export function Faq() {
   return (
-    <section id="faq" aria-labelledby="titre-faq" className="scroll-mt-20 bg-papier py-20 text-charbon md:py-28">
+    <section id="faq" aria-labelledby="titre-faq" className="zone-contraste scroll-mt-20 bg-papier py-20 text-charbon md:py-28">
       <div className="mx-auto grid max-w-[88rem] gap-10 px-5 md:grid-cols-12 md:px-10">
         <Revele className="md:col-span-4">
           <Surtitre className="text-or-fonce">Questions fréquentes</Surtitre>

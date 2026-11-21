@@ -27,7 +27,7 @@ export function Offre() {
           </div>
           {/* Conditions d'éligibilité : à renseigner dans content.ts une fois validées */}
           <p className="relative mx-auto mt-6 max-w-xl text-[0.78rem] leading-relaxed text-papier/45">
-            {OFFRE.conditions || "Offre soumise à conditions d'éligibilité, précisées lors de l'évaluation de votre bien."}
+            {OFFRE.conditions || "Offre réservée aux nouveaux mandats de gestion éligibles. Les frais de plateforme, de ménage et les dépenses engagées pour le logement restent dus. Conditions précisées dans votre audit."}
           </p>
         </Revele>
       </div>

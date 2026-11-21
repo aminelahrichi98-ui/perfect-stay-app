@@ -17,7 +17,7 @@ export function Pied() {
             <p className="titre mt-5 max-w-md text-[1.7rem] text-papier/85">{MARQUE.promesse}</p>
           </div>
           <button type="button" onClick={() => ouvrirTunnel("pied-de-page")} className={bouton("or", "lg")}>
-            {CTA.principal}
+            {CTA.audit}
           </button>
         </div>
         <div className="mt-14 flex flex-col gap-6 border-t border-white/[0.06] pt-8 text-[0.84rem] text-papier/50 md:flex-row md:items-center md:justify-between">

@@ -59,7 +59,7 @@ export const MODULES: ModuleDef[] = [
   { key: "dashboard", label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, phase: 8, description: "Chiffres clés du jour" },
   { key: "taches", label: "Tâches", href: "/taches", icon: CheckSquare, phase: 6, description: "To-do par pôle, semaine et Kanban" },
   { key: "strategie", label: "Stratégie entreprise", href: "/strategie", icon: Compass, phase: 8, description: "Décisions et avancement par pôle" },
-  { key: "marketing", label: "Marketing", href: "/marketing", icon: Megaphone, phase: 7, description: "Dépenses pub et publications" },
+  { key: "marketing", label: "Marketing", href: "/marketing", icon: Megaphone, phase: 7, description: "Dépenses pub, publications et publicités Meta" },
   { key: "crm", label: "CRM", href: "/crm", icon: Users, phase: 7, description: "Prospects propriétaires" },
   { key: "estimateur", label: "Estimateur", href: "/estimateur", icon: Calculator, phase: 8, description: "Estimation de revenus en PDF pour un propriétaire prospect" },
   { key: "onboarding", label: "Onboarding", href: "/onboarding", icon: Rocket, phase: 5, description: "Intégration d'un nouveau logement" },

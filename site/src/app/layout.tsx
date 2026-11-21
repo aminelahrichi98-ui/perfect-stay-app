@@ -5,6 +5,11 @@ import "./globals.css";
 const titre = Instrument_Serif({ subsets: ["latin"], weight: "400", style: ["normal", "italic"], variable: "--font-titre", display: "swap" });
 const corps = Manrope({ subsets: ["latin"], variable: "--font-corps", display: "swap" });
 
+/** Thème affiché par défaut : "clair" (fond blanc) ou "sombre" (fond anthracite). */
+const THEME_PAR_DEFAUT: "clair" | "sombre" = "clair";
+/* Pour comparer sans rien modifier : ajouter ?theme=sombre ou ?theme=clair à l'adresse (retenu le temps de la visite). */
+const CHOIX_THEME = `(function(){try{var p=new URLSearchParams(location.search).get("theme");if(p==="sombre"||p==="clair")sessionStorage.setItem("ps_theme",p);var t=sessionStorage.getItem("ps_theme");if(t==="sombre"||t==="clair")document.documentElement.dataset.theme=t}catch(e){}})()`;
+
 const URL_SITE = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 export const metadata: Metadata = {
@@ -26,7 +31,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#111315",
+  themeColor: THEME_PAR_DEFAUT === "clair" ? "#ffffff" : "#111315",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -34,7 +39,10 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${titre.variable} ${corps.variable}`}>
+    <html lang="fr" data-theme={THEME_PAR_DEFAUT} suppressHydrationWarning className={`${titre.variable} ${corps.variable}`}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: CHOIX_THEME }} />
+      </head>
       <body>{children}</body>
     </html>
   );

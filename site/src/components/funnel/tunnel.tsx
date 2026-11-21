@@ -10,6 +10,7 @@ import { cn } from "@/lib/cn";
 import { CONTACT, PROFILS, type Profil } from "@/lib/content";
 import { useExperience } from "@/lib/experience";
 import {
+  CRENEAUX,
   AMEUBLEMENT,
   CHAMBRES,
   DEFIS,
@@ -34,6 +35,9 @@ import {
 import { Champ, Choix, ChoixMultiple, Erreur } from "./champs";
 
 type Saisie = {
+  rendezVous: boolean;
+  creneau: string;
+  lienAnnonce: string;
   ville: string;
   villeAutre: string;
   quartier: string;
@@ -87,6 +91,9 @@ const VIDE: Saisie = {
   telephone: "",
   email: "",
   consentement: false,
+  rendezVous: true,
+  creneau: "",
+  lienAnnonce: "",
 };
 
 const CLE = "ps_tunnel";
@@ -97,7 +104,7 @@ function blocs(s: Saisie) {
     s.situation === "longue"
       ? { situation: "longue", loyer: s.loyer, occupation: s.occupation, disponibilite: s.disponibilite }
       : s.situation === "courte"
-        ? { situation: "courte", revenuMensuel: s.revenuMensuel, tauxOccupation: s.tauxOccupation, gestionActuelle: s.gestionActuelle, defi: s.defi }
+        ? { situation: "courte", revenuMensuel: s.revenuMensuel, tauxOccupation: s.tauxOccupation, gestionActuelle: s.gestionActuelle, defi: s.defi, lienAnnonce: s.lienAnnonce }
         : { situation: s.situation, disponibilite: s.disponibilite, ameublementPrevu: s.ameublementPrevu, strategie: s.strategie };
   return {
     ville: { ville: s.ville, villeAutre: s.villeAutre },
@@ -105,7 +112,7 @@ function blocs(s: Saisie) {
     bien: { typeBien: s.typeBien, surface: s.surface, chambres: s.chambres, capacite: s.capacite, ameublement: s.ameublement, equipements: s.equipements },
     situation,
     objectif: { objectifs: s.objectifs },
-    contact: { prenom: s.prenom, nom: s.nom, telephone: s.telephone, email: s.email, consentement: s.consentement },
+    contact: { prenom: s.prenom, nom: s.nom, telephone: s.telephone, email: s.email, consentement: s.consentement, rendezVous: s.rendezVous, creneau: s.creneau },
   };
 }
 
@@ -228,8 +235,9 @@ export function Tunnel() {
       const r = await fetch("/api/leads", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corps) });
       const json = (await r.json()) as { ok: boolean; mode?: string; niveau?: string; erreur?: string };
       if (!r.ok || !json.ok) throw new Error(json.erreur ?? "Envoi impossible.");
-      setResultat({ mode: json.mode ?? "demo", niveau: json.niveau });
-      track("LeadSubmitted", { mode: json.mode ?? "demo", profil: s.situation });
+      setResultat({ mode: json.mode ?? "transmis", niveau: json.niveau });
+      track("LeadSubmitted", { mode: json.mode ?? "transmis", profil: s.situation });
+      if (s.rendezVous) track("AppointmentRequested", { canal: "rappel", creneau: s.creneau || "indifférent" });
       if (json.niveau === "prioritaire") track("QualifiedLead", { profil: s.situation });
       setEnvoi("repos");
       setEtape(6);
@@ -295,7 +303,7 @@ export function Tunnel() {
                 {s.ville === "Casablanca" ? (
                   <div className="flex flex-wrap gap-2">
                     {QUARTIERS_CASABLANCA.slice(0, 8).map((q) => (
-                      <button key={q} type="button" onClick={() => maj("quartier", q)} className={cn("min-h-10 rounded-full border px-3.5 text-[0.84rem]", s.quartier === q ? "border-or bg-or/10 text-papier" : "border-white/12 text-papier/65 hover:border-white/30")}>
+                      <button key={q} type="button" onClick={() => maj("quartier", q)} className={cn("min-h-10 rounded-full border px-3.5 text-[0.84rem]", s.quartier === q ? "border-bouton bg-bouton/10 text-papier" : "border-white/12 text-papier/65 hover:border-white/30")}>
                         {q}
                       </button>
                     ))}
@@ -329,7 +337,7 @@ export function Tunnel() {
                         role="radio"
                         aria-checked={s.situation === p}
                         onClick={() => maj("situation", p)}
-                        className={cn("min-h-13 rounded-xl border px-4 py-3 text-left text-[0.9rem]", s.situation === p ? "border-or bg-or/10 text-papier" : "border-white/12 text-papier/75 hover:border-white/30")}
+                        className={cn("min-h-13 rounded-xl border px-4 py-3 text-left text-[0.9rem]", s.situation === p ? "border-bouton bg-bouton/10 text-papier" : "border-white/12 text-papier/75 hover:border-white/30")}
                       >
                         {PROFILS[p].court}
                       </button>
@@ -352,6 +360,7 @@ export function Tunnel() {
                     </div>
                     <Choix label="Gestion actuelle" options={GESTION_ACTUELLE} valeur={s.gestionActuelle} onChange={(v) => maj("gestionActuelle", v)} erreur={erreurs.gestionActuelle} />
                     <Choix label="Votre principal défi" options={DEFIS} valeur={s.defi} onChange={(v) => maj("defi", v)} erreur={erreurs.defi} />
+                    <Champ label="Lien de votre annonce Airbnb ou Booking" aide="Facultatif, il nous permet de préparer votre audit" type="url" inputMode="url" value={s.lienAnnonce} onChange={(e) => maj("lienAnnonce", e.target.value)} erreur={erreurs.lienAnnonce} placeholder="https://www.airbnb.com/rooms/..." />
                   </>
                 ) : null}
                 {s.situation === "vacant" ? (
@@ -371,7 +380,7 @@ export function Tunnel() {
             ) : null}
 
             {etape === 5 ? (
-              <Etape titre="Où vous envoyer votre évaluation ?" refTitre={titre}>
+              <Etape titre="Où vous envoyer votre audit ?" refTitre={titre}>
                 <div className="grid grid-cols-2 gap-4">
                   <Champ label="Prénom" value={s.prenom} onChange={(e) => maj("prenom", e.target.value)} erreur={erreurs.prenom} autoComplete="given-name" />
                   <Champ label="Nom" value={s.nom} onChange={(e) => maj("nom", e.target.value)} erreur={erreurs.nom} autoComplete="family-name" />
@@ -380,6 +389,11 @@ export function Tunnel() {
                 <Champ label="E-mail" type="email" inputMode="email" value={s.email} onChange={(e) => maj("email", e.target.value)} erreur={erreurs.email} autoComplete="email" />
                 {/* Champ piège pour les robots : invisible et ignoré par les lecteurs d'écran */}
                 <input type="text" name="site" value={piege} onChange={(e) => setPiege(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-px w-px opacity-0" />
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-charbon/40 p-4 text-[0.9rem] leading-relaxed text-papier/85">
+                  <input type="checkbox" checked={s.rendezVous} onChange={(e) => maj("rendezVous", e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#b69a70]" />
+                  <span>Je souhaite un rendez-vous avec un expert Perfect Stay pour parcourir mon audit.</span>
+                </label>
+                {s.rendezVous ? <Choix label="Quand préférez-vous être appelé ?" options={CRENEAUX} valeur={s.creneau} onChange={(v) => maj("creneau", v)} erreur={erreurs.creneau} colonnes={3} /> : null}
                 <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-white/10 bg-charbon/40 p-4 text-[0.84rem] leading-relaxed text-papier/70">
                   <input type="checkbox" checked={s.consentement} onChange={(e) => maj("consentement", e.target.checked)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#b69a70]" />
                   <span>
@@ -403,19 +417,14 @@ export function Tunnel() {
                   Merci {s.prenom}.
                 </h2>
                 <p className="mx-auto mt-4 max-w-md text-[1rem] leading-relaxed text-papier/70">
-                  Votre demande d&apos;évaluation pour votre {s.typeBien.toLowerCase() || "bien"} {s.quartier ? `à ${s.quartier}` : ""} est bien préparée. Un conseiller Perfect Stay étudie votre situation et vous propose une
-                  évaluation personnalisée de son potentiel locatif.
+                  Votre demande de Perfect Stay Revenue Audit pour votre {s.typeBien.toLowerCase() || "bien"} {s.quartier ? `à ${s.quartier}` : ""} est bien enregistrée.
+                  {s.rendezVous ? ` Un expert Perfect Stay vous appelle${s.creneau ? ` ${s.creneau.toLowerCase()}` : ""} pour fixer votre rendez-vous.` : " Notre équipe étudie votre appartement et revient vers vous avec votre audit."}
                 </p>
                 <p className="mx-auto mt-3 max-w-md text-[0.84rem] text-papier/45">Nous ne communiquons aucune projection chiffrée sans avoir étudié votre bien.</p>
-                {resultat.mode === "demo" ? (
-                  <p className="mx-auto mt-6 max-w-md rounded-xl border border-or/30 bg-or/10 p-3 text-[0.8rem] text-or-clair">
-                    Mode démonstration : aucun outil de suivi des demandes n&apos;est encore branché, cette demande n&apos;a été transmise à personne.
-                  </p>
-                ) : null}
                 <div className="mt-8 flex flex-col items-center gap-3">
                   {tel ? (
                     <a
-                      href={`https://wa.me/${tel}?text=${encodeURIComponent(`Bonjour, je viens de demander une évaluation pour mon bien à ${s.quartier}. Je souhaite planifier un appel.`)}`}
+                      href={`https://wa.me/${tel}?text=${encodeURIComponent(`Bonjour, je viens de demander un Revenue Audit pour mon bien à ${s.quartier}. Je souhaite planifier un appel.`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={() => track("AppointmentRequested", { canal: "whatsapp" })}
@@ -448,7 +457,7 @@ export function Tunnel() {
               ) : null}
               <button type="button" onClick={suivant} disabled={envoi === "envoi"} className={bouton("or", "md", "ml-auto flex-1 sm:flex-none")}>
                 {envoi === "envoi" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                {etape === 5 ? "Recevoir mon évaluation" : "Continuer"}
+                {etape === 5 ? "Recevoir mon audit offert" : "Continuer"}
                 {etape < 5 ? <ArrowRight className="h-4 w-4" /> : null}
               </button>
             </div>

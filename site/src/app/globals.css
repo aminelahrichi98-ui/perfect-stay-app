@@ -13,12 +13,19 @@
   --color-papier: #f5f2ec;
   --color-papier-2: #ece7de;
   --color-beige: #d9cdbd;
+  /* Accent or (version d'origine). « or » = accent lisible sur le fond de la page (textes, traits,
+     icônes), « bouton » = aplats, « or-fonce » = accent posé sur les sections beiges. */
   --color-or: #b69a70;
   --color-or-clair: #cdb58f;
   --color-or-fonce: #8c7350;
+  --color-bouton: #b69a70;
+  --color-bouton-clair: #cdb58f;
   --color-gris: #8f9296;
   --color-gris-fonce: #5c5f63;
   --color-encre: #111315;
+  /* Texte posé sur un aplat d'accent (boutons) et panneau plus clair que sa section : identiques dans les deux thèmes */
+  --color-sur-accent: #111315;
+  --color-eclat: #ffffff;
   --color-ok: #7fa38a;
   --color-alerte: #c98a6b;
 
@@ -137,4 +144,74 @@ body {
 .sur-video .grain {
   background-color: rgb(17 19 21 / 0.5);
   border-color: rgb(255 255 255 / 0.1);
+}
+
+/* Aucun défilement horizontal, même si un décor dépasse (sinon, sur téléphone, toute la page s'élargit) */
+html,
+body {
+  overflow-x: hidden;
+  overflow-x: clip;
+}
+
+/* ============================================================================
+   THÈMES. Le site existe en deux versions : « sombre » (valeurs ci-dessus, fond anthracite)
+   et « clair » (fond blanc). Le thème se choisit avec l'attribut data-theme de <html>,
+   défini dans app/layout.tsx (THEME_PAR_DEFAUT). Les anciennes sections claires deviennent
+   alors des bandes aubergine : le contraste entre sections est conservé.
+   ============================================================================ */
+html[data-theme="clair"] {
+  --color-charbon: #ffffff;
+  --color-graphite: #f8f6f2;
+  --color-graphite-2: #f0ece5;
+  --color-filet: #ddd6ca;
+  --color-papier: #111315;
+  --color-papier-2: #1c1f22;
+  --color-beige: #8c7f6c;
+  --color-or: #7d6540; /* l'or d'origine, foncé pour rester lisible sur du blanc */
+  --color-or-clair: #65522f;
+  --color-or-fonce: #cdb58f;
+  --color-gris: #7a7d81;
+  --color-gris-fonce: #c9c5bd;
+  --color-encre: #111315;
+  --color-white: #111315; /* filets et voiles très légers : sombres sur fond blanc */
+  --color-eclat: #2a2d31;
+  --color-ok: #4f8a63;
+  --color-alerte: #b0603c;
+}
+
+/* Sections « contraste » (méthode, questions, programme) : beige dans les deux thèmes, texte foncé */
+html[data-theme="clair"] .zone-contraste {
+  --color-papier: #f5f2ec;
+  --color-papier-2: #ece7de;
+  --color-charbon: #111315;
+  --color-or-clair: #ead9bd;
+  --color-or-fonce: #7d6540;
+  --color-gris-fonce: #5c5f63;
+  --color-eclat: #ffffff;
+}
+
+/* Zone qui reste sombre dans les deux thèmes : le hero vidéo et les « écrans » animés */
+.zone-sombre {
+  --color-charbon: #111315;
+  --color-graphite: #1c1f22;
+  --color-graphite-2: #26292d;
+  --color-filet: #34383d;
+  --color-papier: #f5f2ec;
+  --color-papier-2: #ece7de;
+  --color-beige: #d9cdbd;
+  --color-or: #b69a70;
+  --color-or-clair: #cdb58f;
+  --color-or-fonce: #8c7350;
+  --color-gris: #8f9296;
+  --color-gris-fonce: #5c5f63;
+  --color-encre: #111315;
+  --color-white: #ffffff;
+  --color-eclat: #ffffff;
+  --color-ok: #7fa38a;
+  --color-alerte: #c98a6b;
+  color: var(--color-papier);
+}
+html[data-theme="clair"] .seulement-sombre,
+html[data-theme="sombre"] .seulement-clair {
+  display: none;
 }

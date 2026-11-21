@@ -6,9 +6,10 @@ import { MediaCinema } from "@/components/ui/media-cinema";
 import { Revele } from "@/components/ui/revele";
 import { Surtitre } from "@/components/ui/surtitre";
 import { cn } from "@/lib/cn";
-import { PARCOURS, PROFILS, type Profil, type Scene } from "@/lib/content";
+import { PARCOURS, type Profil, type Scene } from "@/lib/content";
 import { useExperience } from "@/lib/experience";
 import { useVisible } from "@/lib/use-visible";
+import { ChoixProfil } from "@/components/sections/choix-profil";
 import { TransformationAppartement, TransformationSysteme } from "./transformations";
 import { SCENE_MEDIA, VISUELS } from "./visuels";
 
@@ -20,7 +21,7 @@ function SceneParcours({ scene, index }: { scene: Scene; index: number }) {
   return (
     <article ref={ref} className="grid items-center gap-8 py-14 md:grid-cols-12 md:gap-14 md:py-24">
       <div className={cn("md:col-span-7", inverse && "md:order-2")}>
-        <div className={cn("transition-all duration-[1400ms] ease-[var(--ease-cine)]", actif ? "scale-100 opacity-100" : "scale-[0.97] opacity-0")}>
+        <div className={cn("zone-sombre overflow-hidden rounded-[1.75rem] bg-charbon transition-all duration-[1400ms] ease-[var(--ease-cine)]", actif ? "scale-100 opacity-100" : "scale-[0.97] opacity-0")}>
           {media ? (
             <MediaCinema scene={media} superposer className="h-full w-full object-cover">
               <Visuel actif={actif} />
@@ -52,7 +53,7 @@ function Conclusion({ profil }: { profil: Profil }) {
         <Surtitre className="justify-center">La bascule</Surtitre>
         <h3 className="titre mt-5 text-[2.3rem] text-papier md:text-[3.4rem]">{c.titre}</h3>
       </Revele>
-      <div className="mx-auto mt-10 max-w-5xl md:mt-14">
+      <div className="zone-sombre mx-auto mt-10 max-w-5xl overflow-hidden rounded-[1.75rem] bg-charbon md:mt-14">
         <MediaCinema scene="transformation" className="aspect-[16/10] rounded-[1.75rem]">
           {profil === "courte" ? <TransformationSysteme actif={actif} /> : <TransformationAppartement actif={actif} />}
         </MediaCinema>
@@ -70,34 +71,20 @@ function Conclusion({ profil }: { profil: Profil }) {
 }
 
 export function Parcours() {
-  const { profil, choisirProfil } = useExperience();
+  const { profil } = useExperience();
 
   return (
     <section id="parcours" aria-labelledby="titre-parcours" className="relative scroll-mt-20 bg-charbon">
       <div className="mx-auto max-w-[88rem] px-5 pt-20 md:px-10 md:pt-28">
-        <div className="flex flex-col gap-6 border-b border-white/[0.07] pb-8 md:flex-row md:items-end md:justify-between">
-          <div>
-            <Surtitre>Votre situation</Surtitre>
-            <h2 id="titre-parcours" className="titre mt-4 text-[2.2rem] text-papier md:text-[3rem]">
-              {profil ? PARCOURS[profil].intro : "Chaque stratégie locative a ses angles morts."}
-            </h2>
+        <div className="border-b border-white/[0.07] pb-10">
+          <Surtitre>Votre situation</Surtitre>
+          <h2 id="titre-parcours" className="titre mt-4 text-[2.2rem] text-papier md:text-[3rem]">
+            Comment exploitez-vous votre appartement aujourd&apos;hui ?
+          </h2>
+          <div className="mt-8">
+            <ChoixProfil />
           </div>
-          <div role="group" aria-label="Choisir votre situation" className="flex shrink-0 flex-wrap gap-2">
-            {(Object.keys(PROFILS) as Profil[]).map((p) => (
-              <button
-                key={p}
-                type="button"
-                aria-pressed={profil === p}
-                onClick={() => choisirProfil(p)}
-                className={cn(
-                  "h-10 rounded-full border px-4 text-[0.84rem] transition-colors",
-                  profil === p ? "border-or bg-or text-charbon" : "border-white/15 text-papier/70 hover:border-or/60 hover:text-papier",
-                )}
-              >
-                {PROFILS[p].court}
-              </button>
-            ))}
-          </div>
+          {profil ? <p className="mt-8 text-[1.05rem] text-papier/65">{PARCOURS[profil].intro}</p> : null}
         </div>
 
         {profil ? (
@@ -109,7 +96,7 @@ export function Parcours() {
           </div>
         ) : (
           <p className="max-w-xl py-12 text-[1.05rem] leading-relaxed text-papier/60 md:py-16">
-            Choisissez votre situation ci-dessus pour un parcours adapté à votre bien, ou poursuivez directement vers notre façon de gérer.
+            Choisissez votre situation pour découvrir un parcours adapté à votre bien, ou poursuivez directement vers notre façon de gérer.
           </p>
         )}
       </div>

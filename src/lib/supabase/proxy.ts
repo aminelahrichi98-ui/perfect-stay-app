@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { COOKIE_RESTER, optionsSession, veutRester } from "./session";
 
-const ROUTES_PUBLIQUES = ["/api/meta", "/hors-ligne", "/connexion", "/auth", "/mot-de-passe-oublie", "/api/cron"];
+const ROUTES_PUBLIQUES = ["/api/meta", "/api/site", "/api/creative", "/hors-ligne", "/connexion", "/auth", "/mot-de-passe-oublie", "/api/cron"];
 
 /** Rafraîchit la session à chaque requête et renvoie les visiteurs non connectés vers /connexion. */
 export async function updateSession(request: NextRequest) {

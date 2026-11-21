@@ -18,6 +18,8 @@ export const DEFIS = ["Le temps que cela me prend", "La communication avec les v
 export const STRATEGIES = ["Courte durée", "Longue durée", "Je ne sais pas encore"] as const;
 export const OBJECTIFS = ["Augmenter mes revenus", "Réduire la vacance", "Déléguer l'exploitation", "Améliorer la qualité de gestion", "Développer un portefeuille"] as const;
 
+export const CRENEAUX = ["Le matin", "L'après-midi", "En fin de journée"] as const;
+
 export const ETAPES = ["Ville", "Quartier", "Le bien", "Situation", "Objectif", "Contact", "Confirmation"] as const;
 
 const choix = <T extends readonly [string, ...string[]]>(valeurs: T, message: string) => z.enum(valeurs, { error: message });
@@ -54,6 +56,7 @@ export const schemaSituation = z.discriminatedUnion("situation", [
     tauxOccupation: z.union([z.literal(""), z.coerce.number().min(0, "Entre 0 et 100 %.").max(100, "Entre 0 et 100 %.")]).optional(),
     gestionActuelle: choix(GESTION_ACTUELLE, "Indiquez votre mode de gestion actuel."),
     defi: choix(DEFIS, "Choisissez votre principal défi."),
+    lienAnnonce: z.union([z.literal(""), z.string().trim().url("Lien invalide (il doit commencer par https://).").max(300)]).optional(),
   }),
   z.object({
     situation: z.literal("vacant"),
@@ -74,6 +77,9 @@ export const schemaContact = z.object({
     .regex(/^\+?[0-9 ().-]{8,20}$/, "Numéro de téléphone invalide."),
   email: z.string().trim().email("Adresse e-mail invalide.").max(120),
   consentement: z.literal(true, { error: "Votre accord est nécessaire pour être recontacté." }),
+  // Prise de rendez-vous : le propriétaire peut demander à être appelé, sur le créneau de son choix
+  rendezVous: z.boolean().default(false),
+  creneau: z.union([z.literal(""), z.enum(CRENEAUX)]).optional(),
 });
 
 /** Ce que le navigateur envoie à l'API */

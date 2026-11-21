@@ -16,7 +16,7 @@ await db.exec(`
   grant usage on schema public to authenticated;
   grant usage on schema auth to authenticated;
 `);
-const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql", "0008_taches.sql", "0009_crm_marketing.sql", "0010_strategie_rh.sql", "0011_versements_sejour.sql", "0012_menage_encaisse_par.sql", "0013_estimateur.sql"];
+const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql", "0008_taches.sql", "0009_crm_marketing.sql", "0010_strategie_rh.sql", "0011_versements_sejour.sql", "0012_menage_encaisse_par.sql", "0013_estimateur.sql", "0014_creative_intelligence.sql"];
 for (let passe = 0; passe < 2; passe++) {
   for (const f of FICHIERS) await db.exec(readFileSync(R + f, "utf8")); // la 2e passe vérifie que les scripts sont relançables
   if (passe === 0) await db.exec(`grant select, insert, update, delete on all tables in schema public to authenticated;`);
@@ -517,5 +517,78 @@ assert.equal((await comme("abdel", `delete from public.estimations where id=$1`,
 await echoue("amine", `insert into public.estimations (prenom, quartier, type_bien, standing, brut_bas, brut_haut, net_bas, net_haut) values ('X','Maarif','chateau','premium',1,2,1,2)`, [], "type de bien inconnu");
 await echoue("amine", `insert into public.estimations (prenom, quartier, type_bien, standing, brut_bas, brut_haut, net_bas, net_haut) values ('X','Maarif','2ch','premium',1,2,5,2)`, [], "fourchette nette inversée");
 console.log("✔ estimateur : réservé au droit « Estimateur », suppression par un administrateur seulement");
+
+// ============================ Creative Intelligence ============================
+// « marketeur » a le droit Marketing ; Abdelkarim ne l'a pas ; le prestataire n'y accède jamais.
+const ang = (await comme("marketeur", `insert into public.ci_angles (nom, segment, hook) values ('Vacance locative','longue','Votre loyer dort ?') returning id, code`)).rows[0];
+assert.match(ang.code, /^ANG-\d{3}$/);
+const ang2 = (await comme("marketeur", `insert into public.ci_angles (nom) values ('Temps perdu') returning code`)).rows[0];
+assert.notEqual(ang.code, ang2.code);
+assert.equal((await comme("abdel", `select * from public.ci_angles`)).rows.length, 0);
+await echoue("abdel", `insert into public.ci_angles (nom) values ('Interdit')`, [], "angle sans droit marketing");
+await echoue("marketeur", `insert into public.ci_angles (nom, statut) values ('X','gagnant')`, [], "statut d'angle inconnu");
+console.log("✔ angles : code automatique, réservés au droit Marketing");
+
+const cre = `insert into public.ci_creatives (code, angle_id, type_image, version, meta_ad_id) values ($1,$2,$3,$4,$5) returning id`;
+await comme("marketeur", cre, [`${ang.code}-DATA-V1`, ang.id, "data", 1, "120210000000000001"]);
+await echoue("marketeur", cre, [`${ang.code}-DATA-V1b`, ang.id, "data", 1, null], "même angle, même type, même version");
+await echoue("marketeur", cre, [`${ang.code}-PHOTO-V1`, ang.id, "photo", 1, "120210000000000001"], "identifiant Meta déjà utilisé par une autre image");
+await echoue("marketeur", cre, [`${ang.code}-VID-V1`, ang.id, "video", 1, null], "type vidéo refusé : images statiques uniquement");
+await echoue("marketeur", cre, [`${ang.code}-HOOK-V1`, ang.id, "bold_hook", 1, "abc"], "identifiant Meta non numérique");
+await echoue("marketeur", `delete from public.ci_angles where id=$1`, [ang.id], "angle qui a encore des images");
+console.log("✔ images : version unique par angle et type, identifiant Meta unique, pas de vidéo");
+
+const perf = `insert into public.ci_performances (meta_ad_id, date_debut, date_fin, depenses, impressions, clics, leads) values ($1,$2,$3,$4,$5,$6,$7)`;
+await comme("marketeur", perf, ["120210000000000001", "2026-11-01", "2026-11-01", 12.5, 1240, 18, 2]);
+await echoue("marketeur", perf, ["120210000000000001", "2026-11-01", "2026-11-01", 1, 1, 1, 1], "même annonce, même jour : doublon");
+await echoue("marketeur", perf, ["120210000000000001", "2026-11-03", "2026-11-02", 1, 1, 1, 1], "période inversée");
+await echoue("marketeur", perf, ["120210000000000001", "2026-11-04", "2026-11-04", -1, 1, 1, 1], "dépense négative");
+// Une annonce sans image associée est conservée telle quelle : elle n'est rattachée à rien
+await comme("marketeur", perf, ["120210000000000099", "2026-11-01", "2026-11-01", 4, 300, 2, 0]);
+const liees = (await comme("marketeur", `select c.code from public.ci_performances p join public.ci_creatives c on c.meta_ad_id = p.meta_ad_id`)).rows;
+assert.equal(liees.length, 1);
+assert.equal((await comme("abdel", `select * from public.ci_performances`)).rows.length, 0);
+console.log("✔ performances : pas de doublon, annonces non associées conservées sans rattachement");
+
+// ---- Chaîne complète : fichier CSV Meta -> import -> réimport -> totaux par image -> recommandation
+const { analyserMeta, sortDeLaLigne, totaliser, indicateurs, recommander, REGLAGES_DEPART } = await import("../../src/lib/creative.ts");
+const csvMeta = [
+  "Jour;Nom de la publicité;ID de la publicité;Montant dépensé (EUR);Impressions;Clics sur un lien;Prospects",
+  "02/11/2026;ANG Data V1;120210000000000001;9,50;1 500;22;1",
+  "03/11/2026;ANG Data V1;120210000000000001;8,00;1 400;19;1",
+  "02/11/2026;Inconnue;120210000000000077;3,00;200;1;0",
+  ";Total;;20,50;3 100;42;2",
+].join("\n");
+const importerCsv = async () => {
+  const a = analyserMeta(csvMeta);
+  assert.ok(a.ok);
+  const deja = (await comme("marketeur", `select meta_ad_id, date_debut::text d, date_fin::text f from public.ci_performances`)).rows.map((r) => ({ adId: r.meta_ad_id, debut: r.d, fin: r.f }));
+  const sorts = a.lignes.map((l) => sortDeLaLigne(l, deja));
+  for (const l of a.lignes) {
+    await comme(
+      "marketeur",
+      `insert into public.ci_performances (meta_ad_id, nom_annonce, date_debut, date_fin, depenses, impressions, clics, leads) values ($1,$2,$3,$4,$5,$6,$7,$8)
+       on conflict (meta_ad_id, date_debut, date_fin) do update set depenses = excluded.depenses, impressions = excluded.impressions, clics = excluded.clics, leads = excluded.leads`,
+      [l.adId, l.nom, l.debut, l.fin, l.depenses, l.impressions, l.clics, l.leads],
+    );
+  }
+  return sorts;
+};
+assert.deepEqual(await importerCsv(), ["nouvelle", "nouvelle", "nouvelle"]);
+const apresUn = (await comme("marketeur", `select count(*)::int n from public.ci_performances`)).rows[0].n;
+assert.deepEqual(await importerCsv(), ["mise_a_jour", "mise_a_jour", "mise_a_jour"]);
+assert.equal((await comme("marketeur", `select count(*)::int n from public.ci_performances`)).rows[0].n, apresUn); // aucun doublon
+const parImage = (await comme("marketeur", `select c.code, p.depenses::float8 depenses, p.impressions, p.clics, p.leads from public.ci_performances p join public.ci_creatives c on c.meta_ad_id = p.meta_ad_id order by p.date_debut`)).rows;
+const tot = indicateurs(totaliser(parImage));
+assert.deepEqual([tot.depenses, tot.impressions, tot.clics, tot.leads, tot.cpl], [30, 4140, 59, 4, 7.5]); // 12,50 + 9,50 + 8,00 sur 4 leads
+assert.equal(recommander(tot, { ...REGLAGES_DEPART, cplConfirme: true }).statut, "CONTINUE");
+const orphelines = (await comme("marketeur", `select distinct p.meta_ad_id from public.ci_performances p left join public.ci_creatives c on c.meta_ad_id = p.meta_ad_id where c.id is null order by 1`)).rows.map((r) => r.meta_ad_id);
+assert.deepEqual(orphelines, ["120210000000000077", "120210000000000099"]);
+console.log("✔ chaîne complète : CSV Meta importé, réimporté sans doublon, totaux et recommandation par image, annonces inconnues laissées de côté");
+
+assert.equal((await comme("marketeur", `select cpl_cible, cpl_confirme from public.ci_reglages`)).rows[0].cpl_confirme, false);
+await echoue("marketeur", `insert into public.ci_reglages (id) values (false)`, [], "une seule ligne de réglages");
+assert.equal((await comme("abdel", `update public.ci_reglages set cpl_cible = 1 returning id`)).rowCount, 0);
+console.log("✔ réglages : une seule ligne, modifiable avec le droit Marketing seulement");
 
 console.log("\nTOUS LES CONTRÔLES SQL SONT OK");
