@@ -2,12 +2,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Phone } from "lucide-react";
 import { Badge, Card, Notice } from "@/components/ui";
-import { exigerAcces, peutModifier } from "@/lib/auth";
+import { exigerAcces, peutModifier, peutVoir } from "@/lib/auth";
 import { ETAPES_CRM, lienAppel, libelleResultat, libelleSource } from "@/lib/crm";
 import { formatDateHeure } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { lireResponsables } from "../../operations/donnees";
 import { FormulaireLead } from "../formulaire-lead";
+import { SectionsEstimation } from "./estimations-lead";
 import { BoutonOnboarding, PanneauAppels, PanneauEtape, SupprimerLead } from "./panneaux-lead";
 
 export const metadata = { title: "Fiche lead" };
@@ -74,6 +75,8 @@ export default async function PageLead({ params, searchParams }: { params: Promi
           appels={(appels ?? []).map((a) => ({ id: a.id, date: formatDateHeure(a.date_appel), resultat: a.resultat, libelle: libelleResultat(a.resultat), note: a.note, auteur: a.auteur_id ? (noms.get(a.auteur_id) ?? "—") : "—" }))}
         />
       </Card>
+
+      <SectionsEstimation leadId={l.id} voirEstimations={peutVoir(u, "estimateur")} creerEstimation={peutModifier(u, "estimateur")} />
 
       <Card className="p-5 md:p-7">
         <h3 className="mb-5 font-display text-lg font-semibold tracking-tight">Informations</h3>

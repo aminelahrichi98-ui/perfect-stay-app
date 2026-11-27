@@ -1,5 +1,6 @@
 import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
+import { bienDepuisSite } from "@/lib/estimation/site";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -100,6 +101,12 @@ export async function POST(request: NextRequest) {
   if (error) {
     await journaliser("erreur", error.message);
     return NextResponse.json({ erreur: "Le prospect n'a pas pu être enregistré." }, { status: 500 });
+  }
+  // Logement décrit dans le formulaire : fiche logement du CRM (sans bloquer le prospect si la table n'existe pas encore)
+  const bien = bienDepuisSite({ ville, quartier: texte(c.quartier?.quartier, 120), bien: c.bien, situation: c.situation });
+  if (bien) {
+    const { error: errBien } = await createAdminClient().from("crm_biens").insert({ ...bien, lead_id: data.id });
+    if (errBien) await journaliser("erreur", `Logement non enregistré : ${errBien.message}`);
   }
   await journaliser("cree", nom);
   return NextResponse.json({ ok: true, id: data.id });
