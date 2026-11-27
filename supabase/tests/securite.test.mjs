@@ -12,11 +12,11 @@ await db.exec(`
   create table auth.users (id uuid primary key default gen_random_uuid(), email text, raw_user_meta_data jsonb default '{}');
   create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
   create schema storage;
-  create table storage.buckets (id text primary key, name text, public boolean);
+  create table storage.buckets (id text primary key, name text, public boolean, file_size_limit bigint, allowed_mime_types text[]);
   grant usage on schema public to authenticated;
   grant usage on schema auth to authenticated;
 `);
-const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql", "0008_taches.sql", "0009_crm_marketing.sql", "0010_strategie_rh.sql", "0011_versements_sejour.sql", "0012_menage_encaisse_par.sql", "0013_estimateur.sql", "0014_creative_intelligence.sql"];
+const FICHIERS = ["0001_fondations.sql", "0002_logements.sql", "0003_calendrier.sql", "0005_comptabilite.sql", "0007_operations.sql", "0008_taches.sql", "0009_crm_marketing.sql", "0010_strategie_rh.sql", "0011_versements_sejour.sql", "0012_menage_encaisse_par.sql", "0013_estimateur.sql", "0014_creative_intelligence.sql", "0015_estimateur_v2.sql"];
 for (let passe = 0; passe < 2; passe++) {
   for (const f of FICHIERS) await db.exec(readFileSync(R + f, "utf8")); // la 2e passe vérifie que les scripts sont relançables
   if (passe === 0) await db.exec(`grant select, insert, update, delete on all tables in schema public to authenticated;`);
@@ -590,5 +590,89 @@ assert.equal((await comme("marketeur", `select cpl_cible, cpl_confirme from publ
 await echoue("marketeur", `insert into public.ci_reglages (id) values (false)`, [], "une seule ligne de réglages");
 assert.equal((await comme("abdel", `update public.ci_reglages set cpl_cible = 1 returning id`)).rowCount, 0);
 console.log("✔ réglages : une seule ligne, modifiable avec le droit Marketing seulement");
+
+// ============================ Estimateur v2 : base marché, versions, estimations liées au CRM ============================
+// Les estimations existantes ne changent pas : modèle v1, statut « validee »
+assert.deepEqual((await comme("amine", `select statut, modele_document, numero_version from public.estimations where id=$1`, [idEst])).rows[0], { statut: "validee", modele_document: "v1", numero_version: 1 });
+
+// Paramètres : lus avec le droit Estimateur, modifiés par un administrateur seulement
+assert.equal(Number((await comme("abdel", `select taux_commission from public.estimateur_parametres`)).rows[0].taux_commission), 0.2);
+assert.equal((await comme("abdel", `update public.estimateur_parametres set taux_commission = 0.1 returning id`)).rowCount, 0);
+await echoue("abdel", `insert into public.estimateur_offres (titre, actif) values ('Offre pirate', true)`, [], "offre créée sans être administrateur");
+assert.equal((await comme("amine", `update public.estimateur_parametres set taux_commission = 0.2 returning id`)).rowCount, 1);
+await echoue("amine", `update public.estimateur_parametres set fraicheur_recente_jours = 100, fraicheur_alerte_jours = 90`, [], "seuils de fraîcheur inversés");
+assert.equal((await comme("amine", `select actif from public.estimateur_offres`)).rows[0].actif, false); // offre de bienvenue désactivée tant qu'elle n'est pas confirmée
+console.log("✔ estimateur v2 : paramètres réservés à l'administrateur, offre de bienvenue désactivée par défaut");
+
+// Logements des prospects : mêmes droits que le CRM
+const leadV2 = (await comme("amine", `insert into public.crm_leads (nom, telephone, ville) values ('Salma Bennani','0612345678','Casablanca') returning id`)).rows[0].id;
+const bienV2 = (await comme("amine", `insert into public.crm_biens (lead_id, ville, quartier, type_logement, chambres, surface, loyer_longue_duree) values ($1,'Casablanca','Ferme Bretonne','appartement',1,62,6500) returning id`, [leadV2])).rows[0].id;
+assert.equal((await comme("abdel", `select * from public.crm_biens`)).rows.length, 0);
+await echoue("amine", `insert into public.crm_biens (lead_id, chambres) values ($1, 45)`, [leadV2], "nombre de chambres impossible");
+console.log("✔ logements des prospects : invisibles sans le droit CRM, valeurs contrôlées");
+
+// Quartiers et alias : un alias ne désigne qu'un seul quartier d'une ville
+const qFB = (await comme("amine", `insert into public.marche_quartiers (ville, ville_cle, nom, cle) values ('Casablanca','casablanca','Ferme Bretonne','ferme bretonne') returning id`)).rows[0].id;
+const qCFC = (await comme("amine", `insert into public.marche_quartiers (ville, ville_cle, nom, cle) values ('Casablanca','casablanca','Casa Finance City','casa finance city') returning id`)).rows[0].id;
+await comme("amine", `insert into public.marche_alias (quartier_id, ville_cle, alias, cle) values ($1,'casablanca','CFC','cfc')`, [qCFC]);
+await echoue("amine", `insert into public.marche_alias (quartier_id, ville_cle, alias, cle) values ($1,'casablanca','Cfc','cfc')`, [qFB], "alias déjà attribué à un autre quartier");
+await echoue("abdel", `insert into public.marche_quartiers (ville, ville_cle, nom, cle) values ('Rabat','rabat','Agdal','agdal')`, [], "quartier ajouté avec un droit en lecture seule");
+console.log("✔ quartiers : alias uniques par ville, écriture réservée au droit « Estimateur – modifier »");
+
+// Segments : un studio n'est pas un appartement d'une chambre
+const seg = `insert into public.marche_segments (quartier_id, type_logement, chambres, standing) values ($1,$2,$3,$4) returning id`;
+const segFB1 = (await comme("amine", seg, [qFB, "appartement", 1, null])).rows[0].id;
+const segFB0 = (await comme("amine", seg, [qFB, "studio", 0, null])).rows[0].id;
+assert.notEqual(segFB1, segFB0);
+await echoue("amine", seg, [qFB, "appartement", 1, null], "segment en double");
+await echoue("amine", seg, [qFB, "studio", 1, null], "studio avec une chambre");
+console.log("✔ segments : studio et 1 chambre distincts, pas de doublon");
+
+// Versions : une seule active, chiffres figés après validation
+const ver = `insert into public.marche_versions (segment_id, numero, active, revenu_annuel_bas, revenu_annuel_haut, devise) values ($1,$2,$3,$4,$5,'MAD') returning id`;
+const v1 = (await comme("amine", ver, [segFB1, 1, true, 139076, 174509])).rows[0].id;
+await echoue("amine", ver, [segFB1, 2, true, 150000, 190000], "deux versions actives");
+await echoue("amine", `update public.marche_versions set revenu_annuel_bas = 1 where id=$1`, [v1], "modifier une version validée");
+await comme("amine", `update public.marche_versions set notes = 'Vérifiée avec la capture' where id=$1`, [v1]);
+await comme("amine", `insert into public.marche_comparables (version_id, nom, revenu_annuel_bas, revenu_annuel_haut, url) values ($1,'Studio lumineux',120000,150000,'https://www.airbnb.com/rooms/1')`, [v1]);
+await echoue("amine", `insert into public.marche_comparables (version_id, nom, url) values ($1,'Lien suspect','javascript:alert(1)')`, [v1], "lien de comparable non https");
+console.log("✔ versions : une seule active par segment, chiffres non modifiables, liens https uniquement");
+
+// Estimation v2 liée au lead : modifiable en brouillon, figée une fois validée
+const estV2 = (await comme("amine", `insert into public.estimations (prenom, quartier, type_bien, statut, modele_document, lead_id, bien_id, segment_version_id, snapshot, brut_bas, brut_haut, net_bas, net_haut)
+  values ('Salma','Ferme Bretonne','studio_1ch','brouillon','v2',$1,$2,$3,'{"revenu":139076}',139076,174509,91234,114478) returning id`, [leadV2, bienV2, v1])).rows[0].id;
+await comme("amine", `update public.estimations set snapshot = '{"revenu":139076,"loyer":6500}' where id=$1`, [estV2]);
+await comme("amine", `update public.estimations set statut = 'validee', validee_le = now() where id=$1`, [estV2]);
+await echoue("amine", `update public.estimations set net_bas = 120000 where id=$1`, [estV2], "modifier une estimation validée");
+await echoue("amine", `update public.estimations set snapshot = '{}' where id=$1`, [estV2], "réécrire les données d'une estimation validée");
+await echoue("amine", `update public.estimations set statut = 'brouillon' where id=$1`, [estV2], "remettre une estimation validée en brouillon");
+await comme("amine", `update public.estimations set statut = 'envoyee', envoyee_le = now() where id=$1`, [estV2]);
+assert.equal((await comme("abdel", `update public.estimations set statut = 'archivee' where id=$1 returning id`, [estV2])).rowCount, 0); // droit en lecture seule
+assert.equal((await comme("amine", `delete from public.estimations where id=$1 returning id`, [estV2])).rowCount, 0); // même un administrateur ne supprime pas une estimation envoyée
+assert.equal((await comme("amine", `delete from public.estimations where id=$1 returning id`, [idEst])).rowCount, 0); // ni une estimation v1 (historique)
+console.log("✔ estimations v2 : brouillon modifiable, chiffres figés après validation, envoi enregistré");
+
+// Actualisation de la base marché : l'estimation déjà faite garde ses chiffres (test 8)
+await comme("amine", `update public.marche_versions set active = false, statut = 'remplacee' where id=$1`, [v1]);
+await comme("amine", ver, [segFB1, 2, true, 150000, 190000]);
+const garde = (await comme("amine", `select e.snapshot, e.net_bas::float8 net_bas, v.revenu_annuel_bas::float8 bas from public.estimations e join public.marche_versions v on v.id = e.segment_version_id where e.id=$1`, [estV2])).rows[0];
+assert.deepEqual([garde.snapshot.revenu, garde.net_bas, garde.bas], [139076, 91234, 139076]);
+console.log("✔ versioning : une nouvelle version de marché ne modifie pas une estimation existante");
+
+// Événements : ajoutés, jamais modifiés ni supprimés
+await comme("amine", `insert into public.estimation_evenements (estimation_id, lead_id, type) values ($1,$2,'envoyee')`, [estV2, leadV2]);
+assert.equal((await comme("amine", `update public.estimation_evenements set type='validee' returning id`)).rowCount, 0);
+assert.equal((await comme("amine", `delete from public.estimation_evenements returning id`)).rowCount, 0);
+await echoue("amine", `insert into public.estimation_evenements (estimation_id, type) values ($1,'pdf_ouvert')`, [estV2], "événement inventé (ouverture de PDF non suivie)");
+console.log("✔ événements : historique en ajout seul");
+
+// Imports : un import validé ne se supprime pas
+const impOk = (await comme("amine", `insert into public.marche_imports (statut) values ('valide') returning id`)).rows[0].id;
+const impBr = (await comme("amine", `insert into public.marche_imports (statut) values ('brouillon') returning id`)).rows[0].id;
+assert.equal((await comme("amine", `delete from public.marche_imports where id=$1 returning id`, [impOk])).rowCount, 0);
+assert.equal((await comme("amine", `delete from public.marche_imports where id=$1 returning id`, [impBr])).rowCount, 1);
+await echoue("amine", `insert into public.marche_captures (import_id, chemin, type_mime, taille) values ($1,'x.gif','image/gif',10)`, [impOk], "format de capture refusé");
+assert.deepEqual((await db.query(`select public, file_size_limit::int taille, allowed_mime_types types from storage.buckets where id='marche'`)).rows[0], { public: false, taille: 15728640, types: ["image/png", "image/jpeg", "image/webp"] });
+console.log("✔ imports : brouillons supprimables, imports validés conservés, formats contrôlés (aussi dans le stockage privé)");
 
 console.log("\nTOUS LES CONTRÔLES SQL SONT OK");
